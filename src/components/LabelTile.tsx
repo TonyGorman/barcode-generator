@@ -1,13 +1,10 @@
 import * as React from 'react';
-import styles from './LabelTile.module.css';
 import { DEFAULT_LABEL_PRINT_MODE, getLabelLayoutStrategy } from '../config/labelLayoutStrategies';
 import { LabelPrintMode } from '../models/ILabelLayoutStrategy';
 import { DEFAULT_MINI_COMPOSITION_VARIANT_ID } from '../domain/labelCodeDomain';
 import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant';
-import { useMiniLabelTileComposition } from '../hooks/useMiniLabelTileComposition';
-import MiniLabelTileContent from './MiniLabelTileContent';
-import LargeLabelTileContent from './LargeLabelTileContent';
-import BarcodeBlock from './BarcodeBlock';
+import MiniLabelTile from './MiniLabelTile';
+import LargeLabelTile from './LargeLabelTile';
 export { getMiniPrimaryFontSizeMm } from './miniPrimaryTextMeasurement';
 
 interface ILabelTileProps {
@@ -25,46 +22,12 @@ const LabelTile: React.FC<ILabelTileProps> = ({
 }) => {
   const layoutStrategy = getLabelLayoutStrategy(layoutMode);
   const isLargeVariant = layoutStrategy.renderVariant === 'large';
-  const {
-    composedMiniLabel,
-    miniGeometry,
-    fittedMiniTypography,
-    primaryFontSizeMm,
-    primaryCenterFromContentTopMm,
-    labelValue,
-    isThreeRowMini,
-  } = useMiniLabelTileComposition({
-    code,
-    miniVariantId,
-    layoutStrategy,
-  });
 
-  return (
-    <div className={isLargeVariant ? styles.labelBoxLargeSel : styles.labelBox}>
-      <div className={isLargeVariant ? styles.largeSelLabelTextArea : styles.labelText}>
-        {isLargeVariant ? (
-          <LargeLabelTileContent
-            code={code}
-          />
-        ) : (
-          <MiniLabelTileContent
-            composedMiniLabel={composedMiniLabel}
-            miniGeometry={miniGeometry}
-            fittedMiniTypography={fittedMiniTypography}
-            primaryFontSizeMm={primaryFontSizeMm}
-            primaryCenterFromContentTopMm={primaryCenterFromContentTopMm}
-            isThreeRowMini={isThreeRowMini}
-          />
-        )}
-      </div>
-      <BarcodeBlock
-        labelValue={labelValue}
-        isLargeVariant={isLargeVariant}
-        barcodeModuleThicknessMm={layoutStrategy.typography.barcodeModuleThicknessMm}
-        barcodeHeightMm={layoutStrategy.typography.barcodeHeightMm}
-      />
-    </div>
-  );
+  if (isLargeVariant) {
+    return <LargeLabelTile code={code} layoutMode={layoutMode} />;
+  }
+
+  return <MiniLabelTile code={code} layoutMode={layoutMode} miniVariantId={miniVariantId} />;
 };
 
 export default LabelTile;
