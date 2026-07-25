@@ -3,7 +3,12 @@ import './App.css'
 
 function App() {
   return (
-    <LabelApp />
+    <>
+      <a className="skipLink" href="#main-content">Skip to main content</a>
+      <main id="main-content">
+        <LabelApp />
+      </main>
+    </>
   )
 }
 

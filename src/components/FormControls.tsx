@@ -138,15 +138,26 @@ export interface ShelfSelectProps {
   value: string;
   onChange: (letter: string) => void;
   className?: string;
+  'aria-describedby'?: string;
+  'aria-invalid'?: boolean;
 }
 
-export const ShelfSelect: React.FC<ShelfSelectProps> = ({ id, value, onChange, className }) => {
+export const ShelfSelect: React.FC<ShelfSelectProps> = ({
+  id,
+  value,
+  onChange,
+  className,
+  'aria-describedby': ariaDescribedBy,
+  'aria-invalid': ariaInvalid,
+}) => {
   return (
     <select
       id={id}
       className={joinClasses(styles.input, className)}
       value={value}
       onChange={(e) => onChange(e.target.value)}
+      aria-describedby={ariaDescribedBy}
+      aria-invalid={ariaInvalid}
     >
       <option value="">— select —</option>
       {SHELF_LETTERS.map((letter) => (

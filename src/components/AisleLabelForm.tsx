@@ -21,6 +21,15 @@ import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant';
 import { useResetOnVariantChange } from '../hooks/useResetOnVariantChange';
 import { useLabelPrintMode } from '../hooks/useLabelPrintMode';
 import { useAisleLabelForm } from '../hooks/useAisleLabelForm';
+import { useAccessibleGenerateAction } from '../hooks/useAccessibleGenerateAction';
+import {
+    getAisleSideRange,
+    getAisleValidationError,
+    getFirstInvalidAisleFieldId,
+    isAisleRangeFieldInvalid,
+    isAisleShelfFieldInvalid,
+    isAisleSideFieldInvalid,
+} from './aisleFormAccessibilityService';
 
 interface AisleLabelFormProps {
     miniVariantId?: MiniCompositionVariantId;
@@ -63,8 +72,24 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
 
     useResetOnVariantChange(miniVariantId, resetGeneratedLabels);
     const { labelPrintMode, printModeOptions, handleModeChange } = useLabelPrintMode(resetGeneratedLabels);
+    const errorId = `${idPrefix}-aisle-error`;
+    const showFieldErrors = errorMessage !== null;
+    const validationError = React.useMemo(() => getAisleValidationError(formInput), [formInput]);
+    const aisleFieldInvalid = isAisleRangeFieldInvalid(validationError);
+    const shelfFieldInvalid = isAisleShelfFieldInvalid(validationError);
 
     const sideRows = AISLE_SIDE_METADATA;
+    const handleGenerateLabel = useAccessibleGenerateAction({
+        errorMessage,
+        generatedLabels,
+        onGenerate: generateLabel,
+        getFirstInvalidFieldId: React.useCallback(() => getFirstInvalidAisleFieldId({
+            validationError,
+            formInput,
+            idPrefix,
+            sideRows,
+        }), [validationError, formInput, idPrefix, sideRows]),
+    });
 
     return (
         <div className={shellStyles.panel}>
@@ -82,6 +107,8 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
                                 id={`${idPrefix}-aisle-start`}
                                 value={formInput.aisleStart?.toString() ?? ''}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange(e, 'aisleStart')}
+                                aria-invalid={showFieldErrors && aisleFieldInvalid}
+                                aria-describedby={showFieldErrors && aisleFieldInvalid ? errorId : undefined}
                             />
                         </div>
                         <div className={formLayoutStyles.fieldGroup}>
@@ -90,6 +117,8 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
                                 id={`${idPrefix}-aisle-end`}
                                 value={formInput.aisleEnd?.toString() ?? ''}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange(e, 'aisleEnd')}
+                                aria-invalid={showFieldErrors && aisleFieldInvalid}
+                                aria-describedby={showFieldErrors && aisleFieldInvalid ? errorId : undefined}
                             />
                         </div>
                     </div>
@@ -97,29 +126,36 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
 
                 <FormSection title={`Bay Configuration (${bayRangeText})`}>
                     <div className={styles.sideGrid}>
-                        {sideRows.map((side) => (
-                            <div key={side.side} className={styles.sideRow}>
-                                <div className={styles.sideLabel}>{side.label}</div>
-                                <div className={styles.sideInputGroup}>
-                                    <div className={formLayoutStyles.fieldGroup}>
-                                        <label className={shellStyles.fieldLabel} htmlFor={`${idPrefix}-${side.side}-start`}>From</label>
-                                        <TextField
-                                            id={`${idPrefix}-${side.side}-start`}
-                                            value={formInput.sideRanges[side.side].start?.toString() ?? ''}
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => onSideRangeInputChange(e, side.side, 'start')}
-                                        />
-                                    </div>
-                                    <div className={formLayoutStyles.fieldGroup}>
-                                        <label className={shellStyles.fieldLabel} htmlFor={`${idPrefix}-${side.side}-end`}>To</label>
-                                        <TextField
-                                            id={`${idPrefix}-${side.side}-end`}
-                                            value={formInput.sideRanges[side.side].end?.toString() ?? ''}
-                                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => onSideRangeInputChange(e, side.side, 'end')}
-                                        />
+                        {sideRows.map((side) => {
+                            const sideInvalid = showFieldErrors && isAisleSideFieldInvalid(validationError, getAisleSideRange(formInput, side.side));
+                            return (
+                                <div key={side.side} className={styles.sideRow}>
+                                    <div className={styles.sideLabel}>{side.label}</div>
+                                    <div className={styles.sideInputGroup}>
+                                        <div className={formLayoutStyles.fieldGroup}>
+                                            <label className={shellStyles.fieldLabel} htmlFor={`${idPrefix}-${side.side}-start`}>From</label>
+                                            <TextField
+                                                id={`${idPrefix}-${side.side}-start`}
+                                                value={formInput.sideRanges[side.side].start?.toString() ?? ''}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onSideRangeInputChange(e, side.side, 'start')}
+                                                aria-invalid={sideInvalid}
+                                                aria-describedby={sideInvalid ? errorId : undefined}
+                                            />
+                                        </div>
+                                        <div className={formLayoutStyles.fieldGroup}>
+                                            <label className={shellStyles.fieldLabel} htmlFor={`${idPrefix}-${side.side}-end`}>To</label>
+                                            <TextField
+                                                id={`${idPrefix}-${side.side}-end`}
+                                                value={formInput.sideRanges[side.side].end?.toString() ?? ''}
+                                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onSideRangeInputChange(e, side.side, 'end')}
+                                                aria-invalid={sideInvalid}
+                                                aria-describedby={sideInvalid ? errorId : undefined}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </FormSection>
 
@@ -131,6 +167,8 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
                                 id={`${idPrefix}-shelf-start`}
                                 value={formInput.shelfStart ?? ''}
                                 onChange={onShelfStartChange}
+                                aria-invalid={showFieldErrors && shelfFieldInvalid}
+                                aria-describedby={showFieldErrors && shelfFieldInvalid ? errorId : undefined}
                             />
                         </div>
                         <div className={formLayoutStyles.fieldGroup}>
@@ -139,6 +177,8 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
                                 id={`${idPrefix}-shelf-end`}
                                 value={formInput.shelfEnd ?? ''}
                                 onChange={onShelfEndChange}
+                                aria-invalid={showFieldErrors && shelfFieldInvalid}
+                                aria-describedby={showFieldErrors && shelfFieldInvalid ? errorId : undefined}
                             />
                         </div>
                     </div>
@@ -176,10 +216,10 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
                 </FormSection>
             </div>
 
-            <FormFeedback errorMessage={errorMessage} warningMessage={warningMessage} />
+            <FormFeedback errorMessage={errorMessage} warningMessage={warningMessage} errorId={errorId} />
 
             <div className={formLayoutStyles.actionsRow}>
-                <GenerateLabelsButton className={formLayoutStyles.generateButton} onClick={generateLabel} />
+                <GenerateLabelsButton className={formLayoutStyles.generateButton} onClick={handleGenerateLabel} />
             </div>
 
             {generatedLabels && (

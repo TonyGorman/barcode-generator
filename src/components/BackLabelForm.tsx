@@ -19,6 +19,13 @@ import { RadioGroup, ShelfSelect, TextField } from './FormControls';
 import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant';
 import { useResetOnVariantChange } from '../hooks/useResetOnVariantChange';
 import { useShortLabelForm } from '../hooks/useShortLabelForm';
+import { useAccessibleGenerateAction } from '../hooks/useAccessibleGenerateAction';
+import {
+    getFirstInvalidShortFieldId,
+    getShortValidationError,
+    isShortBayFieldInvalid,
+    isShortShelfFieldInvalid,
+} from './backFormAccessibilityService';
 
 interface BackLabelFormProps {
     miniVariantId?: MiniCompositionVariantId;
@@ -60,6 +67,28 @@ const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
         resetGeneratedLabels,
     } = actions;
     useResetOnVariantChange(miniVariantId, resetGeneratedLabels);
+    const errorId = `${idPrefix}-short-error`;
+    const showFieldErrors = errorMessage !== null;
+    const validationError = React.useMemo(() => getShortValidationError({
+        ...formInput,
+        prefix: selectedShortCodePrefix,
+    }), [formInput, selectedShortCodePrefix]);
+    const bayFieldInvalid = isShortBayFieldInvalid(validationError);
+    const shelfFieldInvalid = isShortShelfFieldInvalid(validationError);
+
+    const handleGenerateLabel = useAccessibleGenerateAction({
+        errorMessage,
+        generatedLabels,
+        onGenerate: generateLabel,
+        getFirstInvalidFieldId: React.useCallback(() => getFirstInvalidShortFieldId({
+            validationError,
+            formInput: {
+                ...formInput,
+                prefix: selectedShortCodePrefix,
+            },
+            idPrefix,
+        }), [validationError, formInput, selectedShortCodePrefix, idPrefix]),
+    });
 
     return (
         <div className={shellStyles.panel}>
@@ -86,6 +115,8 @@ const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
                                 id={`${idPrefix}-bay-start`}
                                 value={formInput.bayStart?.toString() ?? ''}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange(e, 'bayStart')}
+                                aria-invalid={showFieldErrors && bayFieldInvalid}
+                                aria-describedby={showFieldErrors && bayFieldInvalid ? errorId : undefined}
                             />
                         </div>
                         <div className={formLayoutStyles.fieldGroup}>
@@ -94,6 +125,8 @@ const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
                                 id={`${idPrefix}-bay-end`}
                                 value={formInput.bayEnd?.toString() ?? ''}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange(e, 'bayEnd')}
+                                aria-invalid={showFieldErrors && bayFieldInvalid}
+                                aria-describedby={showFieldErrors && bayFieldInvalid ? errorId : undefined}
                             />
                         </div>
                     </div>
@@ -107,6 +140,8 @@ const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
                                 id={`${idPrefix}-shelf-start`}
                                 value={formInput.shelfStart ?? ''}
                                 onChange={onShelfStartChange}
+                                aria-invalid={showFieldErrors && shelfFieldInvalid}
+                                aria-describedby={showFieldErrors && shelfFieldInvalid ? errorId : undefined}
                             />
                         </div>
                         <div className={formLayoutStyles.fieldGroup}>
@@ -115,16 +150,18 @@ const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
                                 id={`${idPrefix}-shelf-end`}
                                 value={formInput.shelfEnd ?? ''}
                                 onChange={onShelfEndChange}
+                                aria-invalid={showFieldErrors && shelfFieldInvalid}
+                                aria-describedby={showFieldErrors && shelfFieldInvalid ? errorId : undefined}
                             />
                         </div>
                     </div>
                 </FormSection>
             </div>
 
-            <FormFeedback errorMessage={errorMessage} warningMessage={warningMessage} />
+            <FormFeedback errorMessage={errorMessage} warningMessage={warningMessage} errorId={errorId} />
 
             <div className={formLayoutStyles.actionsRow}>
-                <GenerateLabelsButton className={formLayoutStyles.generateButton} onClick={generateLabel} />
+                <GenerateLabelsButton className={formLayoutStyles.generateButton} onClick={handleGenerateLabel} />
             </div>
 
             {generatedLabels && (

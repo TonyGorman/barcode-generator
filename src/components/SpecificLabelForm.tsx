@@ -13,18 +13,30 @@ import { RadioGroup, TextField } from './FormControls';
 import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant';
 import { useResetOnVariantChange } from '../hooks/useResetOnVariantChange';
 import { useSpecificLabelForm } from '../hooks/useSpecificLabelForm';
+import { useAccessibleGenerateAction } from '../hooks/useAccessibleGenerateAction';
 
 interface SpecificLabelFormProps {
     miniVariantId?: MiniCompositionVariantId;
 }
 
 const SpecificLabelForm: React.FC<SpecificLabelFormProps> = ({ miniVariantId }) => {
+    const idPrefix = React.useId();
     const { content, state, actions } = useSpecificLabelForm();
     const { bayRangeText, shelfRangeText, namedAisleExamples, aislePrefixedExamples } = content;
     const { labelText, generatedLabels, errorMessage, warningMessage, labelPrintMode, printModeOptions } = state;
     const { onInputChange, handleModeChange, generateLabel, resetGeneratedLabels } = actions;
+    const errorId = `${idPrefix}-specific-error`;
+    const inputId = `${idPrefix}-specific-input`;
+    const hasError = errorMessage !== null;
 
     useResetOnVariantChange(miniVariantId, resetGeneratedLabels);
+
+    const handleGenerateLabel = useAccessibleGenerateAction({
+        errorMessage,
+        generatedLabels,
+        onGenerate: generateLabel,
+        getFirstInvalidFieldId: React.useCallback(() => inputId, [inputId]),
+    });
 
     return (
         <div className={shellStyles.panel}>
@@ -36,10 +48,14 @@ const SpecificLabelForm: React.FC<SpecificLabelFormProps> = ({ miniVariantId }) 
 
             <FormSection title="Label Input">
                 <div className={styles.formStack}>
+                    <label className={shellStyles.fieldLabel} htmlFor={inputId}>Labels</label>
                     <TextField
+                        id={inputId}
                         value={labelText}
                         placeholder="Enter labels"
                         onChange={onInputChange}
+                        aria-invalid={hasError}
+                        aria-describedby={hasError ? errorId : undefined}
                     />
                     <p>Bay values must be {bayRangeText} and shelves must be {shelfRangeText}.</p>
                 </div>
@@ -54,10 +70,10 @@ const SpecificLabelForm: React.FC<SpecificLabelFormProps> = ({ miniVariantId }) 
                 />
             </FormSection>
 
-            <FormFeedback errorMessage={errorMessage} warningMessage={warningMessage} />
+            <FormFeedback errorMessage={errorMessage} warningMessage={warningMessage} errorId={errorId} />
 
             <div className={styles.actionsRow}>
-                <GenerateLabelsButton className={styles.generateButton} onClick={generateLabel} />
+                <GenerateLabelsButton className={styles.generateButton} onClick={handleGenerateLabel} />
             </div>
 
             {generatedLabels && (
