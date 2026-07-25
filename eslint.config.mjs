@@ -20,6 +20,7 @@ export default [
       'react-hooks': reactHooksPlugin,
     },
     rules: {
+      complexity: ['error', 10],
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
     },

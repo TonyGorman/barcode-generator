@@ -88,6 +88,73 @@ const getAisleValidationError = (
     : 'invalid-aisle-range';
 };
 
+type SupportedParsedLabelCode = Extract<ParsedLabelCode, { kind: 'special' | 'aisle' | 'short' }>;
+
+const getBayOrShelfValidationError = (
+  bay: string,
+  shelf: string,
+  options: Pick<ISpecificLabelValidationOptions, 'maxBayValue' | 'maxShelfLetter'>,
+): Extract<SpecificLabelValidationErrorReason, 'invalid-bay-range' | 'invalid-shelf-range'> | null => {
+  if (!isBoundedNumericToken(bay, options.maxBayValue)) {
+    return 'invalid-bay-range';
+  }
+
+  if (!isShelfTokenValid(shelf, options.maxShelfLetter)) {
+    return 'invalid-shelf-range';
+  }
+
+  return null;
+};
+
+const validateAisleParsedLabel = (
+  parsed: Extract<SupportedParsedLabelCode, { kind: 'aisle' }>,
+  options: ISpecificLabelValidationOptions,
+): SpecificLabelValidationResult => {
+  const { aisle, bay, shelf } = parsed.parts;
+  const aisleValidationError = getAisleValidationError(aisle, options);
+
+  if (aisleValidationError) {
+    return { ok: false, reason: aisleValidationError };
+  }
+
+  const bayOrShelfValidationError = getBayOrShelfValidationError(bay, shelf, options);
+  if (bayOrShelfValidationError) {
+    return { ok: false, reason: bayOrShelfValidationError };
+  }
+
+  return { ok: true, parsed };
+};
+
+const validateShortParsedLabel = (
+  parsed: Extract<SupportedParsedLabelCode, { kind: 'short' }>,
+  options: Pick<ISpecificLabelValidationOptions, 'maxBayValue' | 'maxShelfLetter'>,
+): SpecificLabelValidationResult => {
+  const { bay, shelf } = parsed.parts;
+  const bayOrShelfValidationError = getBayOrShelfValidationError(bay, shelf, options);
+
+  if (bayOrShelfValidationError) {
+    return { ok: false, reason: bayOrShelfValidationError };
+  }
+
+  return { ok: true, parsed };
+};
+
+const validateParsedLabel = (
+  parsed: SupportedParsedLabelCode,
+  options: ISpecificLabelValidationOptions,
+): SpecificLabelValidationResult => {
+  switch (parsed.kind) {
+    case 'special':
+      return { ok: true, parsed };
+    case 'aisle':
+      return validateAisleParsedLabel(parsed, options);
+    case 'short':
+      return validateShortParsedLabel(parsed, options);
+    default:
+      return { ok: false, reason: 'unsupported-kind' };
+  }
+};
+
 export const validateSpecificLabelCode = (
   code: string,
   options: ISpecificLabelValidationOptions,
@@ -106,41 +173,5 @@ export const validateSpecificLabelCode = (
     return { ok: false, reason: 'unparseable' };
   }
 
-  if (parsed.kind === 'special') {
-    return { ok: true, parsed };
-  }
-
-  if (parsed.kind === 'aisle') {
-    const { aisle, bay, shelf } = parsed.parts;
-
-    const aisleValidationError = getAisleValidationError(aisle, options);
-    if (aisleValidationError) {
-      return { ok: false, reason: aisleValidationError };
-    }
-
-    if (!isBoundedNumericToken(bay, options.maxBayValue)) {
-      return { ok: false, reason: 'invalid-bay-range' };
-    }
-
-    if (!isShelfTokenValid(shelf, options.maxShelfLetter)) {
-      return { ok: false, reason: 'invalid-shelf-range' };
-    }
-
-    return { ok: true, parsed };
-  }
-
-  if (parsed.kind === 'short') {
-    const { bay, shelf } = parsed.parts;
-    if (!isBoundedNumericToken(bay, options.maxBayValue)) {
-      return { ok: false, reason: 'invalid-bay-range' };
-    }
-
-    if (!isShelfTokenValid(shelf, options.maxShelfLetter)) {
-      return { ok: false, reason: 'invalid-shelf-range' };
-    }
-
-    return { ok: true, parsed };
-  }
-
-  return { ok: false, reason: 'unsupported-kind' };
+  return validateParsedLabel(parsed, options);
 };

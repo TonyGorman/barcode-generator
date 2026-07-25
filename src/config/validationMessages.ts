@@ -29,35 +29,36 @@ export type LabelValidationErrorCode =
   | { code: 'SHORT_ORDER' }
   | { code: 'SHORT_BAY_RANGE'; minBayValue: number; maxBayValue: number };
 
+type StaticLabelValidationErrorCode = Exclude<
+  LabelValidationErrorCode['code'],
+  'AISLE_RANGE' | 'SIDE_BAY_RANGE' | 'SHORT_BAY_RANGE'
+>;
+
+const STATIC_LABEL_VALIDATION_MESSAGES: Record<StaticLabelValidationErrorCode, string> = {
+  AISLE_REQUIRED: VALIDATION_MESSAGES.aisleRequired,
+  AISLE_ORDER: VALIDATION_MESSAGES.aisleOrder,
+  SHELF_ORDER: VALIDATION_MESSAGES.shelfOrder,
+  SIDE_RANGE_INCOMPLETE: VALIDATION_MESSAGES.sideRangeIncomplete,
+  SIDE_RANGE_REQUIRED: VALIDATION_MESSAGES.sideRangeRequired,
+  SIDE_RANGE_ORDER: VALIDATION_MESSAGES.sideRangeOrder,
+  SHORT_REQUIRED: VALIDATION_MESSAGES.shortRequired,
+  SHORT_ORDER: VALIDATION_MESSAGES.shortOrder,
+};
+
 export const getValidationErrorMessage = (error: LabelValidationErrorCode): string => {
-  switch (error.code) {
-    case 'AISLE_REQUIRED':
-      return VALIDATION_MESSAGES.aisleRequired;
-    case 'AISLE_RANGE':
-      return getAisleRangeValidationMessage(error.minAisleValue, error.maxAisleValue);
-    case 'AISLE_ORDER':
-      return VALIDATION_MESSAGES.aisleOrder;
-    case 'SHELF_ORDER':
-      return VALIDATION_MESSAGES.shelfOrder;
-    case 'SIDE_RANGE_INCOMPLETE':
-      return VALIDATION_MESSAGES.sideRangeIncomplete;
-    case 'SIDE_RANGE_REQUIRED':
-      return VALIDATION_MESSAGES.sideRangeRequired;
-    case 'SIDE_RANGE_ORDER':
-      return VALIDATION_MESSAGES.sideRangeOrder;
-    case 'SIDE_BAY_RANGE':
-      return getSideBayRangeValidationMessage(error.minBayValue, error.maxBayValue);
-    case 'SHORT_REQUIRED':
-      return VALIDATION_MESSAGES.shortRequired;
-    case 'SHORT_ORDER':
-      return VALIDATION_MESSAGES.shortOrder;
-    case 'SHORT_BAY_RANGE':
-      return getShortBayRangeValidationMessage(error.minBayValue, error.maxBayValue);
-    default: {
-      const exhaustiveCheck: never = error;
-      return exhaustiveCheck;
-    }
+  if (error.code === 'AISLE_RANGE') {
+    return getAisleRangeValidationMessage(error.minAisleValue, error.maxAisleValue);
   }
+
+  if (error.code === 'SIDE_BAY_RANGE') {
+    return getSideBayRangeValidationMessage(error.minBayValue, error.maxBayValue);
+  }
+
+  if (error.code === 'SHORT_BAY_RANGE') {
+    return getShortBayRangeValidationMessage(error.minBayValue, error.maxBayValue);
+  }
+
+  return STATIC_LABEL_VALIDATION_MESSAGES[error.code];
 };
 
 export const getAisleRangeValidationMessage = (minAisleValue: number, maxAisleValue: number): string => {

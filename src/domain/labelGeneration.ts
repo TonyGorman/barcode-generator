@@ -38,6 +38,8 @@ interface IAisleValidationLimits {
   maxBayValue: number;
 }
 
+type AisleSideRangeTuple = readonly [number | null, number | null];
+
 const getAisleSideRanges = (
   input: IAisleLabelInput,
 ): Array<{ side: AisleSide; start: number | null; end: number | null }> => {
@@ -93,54 +95,127 @@ export const parseNumericInput = (value: string): number | null => {
   return Number(trimmed);
 };
 
-export const validateAisleLabelInput = (
-  input: IAisleLabelInput,
-  limits: IAisleValidationLimits,
-): LabelValidationErrorCode | null => {
-  const { minAisleValue, maxAisleValue, maxBayValue } = limits;
-
+const getAisleRequiredError = (input: IAisleLabelInput): LabelValidationErrorCode | null => {
   if (!hasValue(input.aisleStart) || !hasValue(input.aisleEnd) || !input.shelfEnd) {
     return { code: 'AISLE_REQUIRED' };
   }
 
-  if (
-    input.aisleStart < minAisleValue ||
-    input.aisleEnd < minAisleValue ||
-    input.aisleEnd > maxAisleValue
-  ) {
-    return { code: 'AISLE_RANGE', minAisleValue, maxAisleValue };
+  return null;
+};
+
+const getAisleRangeError = (
+  input: IAisleLabelInput,
+  limits: Pick<IAisleValidationLimits, 'minAisleValue' | 'maxAisleValue'>,
+): LabelValidationErrorCode | null => {
+  if (!hasValue(input.aisleStart) || !hasValue(input.aisleEnd)) {
+    return null;
   }
 
-  if (input.aisleStart > input.aisleEnd) {
+  if (
+    input.aisleStart < limits.minAisleValue
+    || input.aisleEnd < limits.minAisleValue
+    || input.aisleEnd > limits.maxAisleValue
+  ) {
+    return {
+      code: 'AISLE_RANGE',
+      minAisleValue: limits.minAisleValue,
+      maxAisleValue: limits.maxAisleValue,
+    };
+  }
+
+  return null;
+};
+
+const getAisleOrderError = (input: IAisleLabelInput): LabelValidationErrorCode | null => {
+  if (hasValue(input.aisleStart) && hasValue(input.aisleEnd) && input.aisleStart > input.aisleEnd) {
     return { code: 'AISLE_ORDER' };
   }
 
-  if (input.shelfStart && input.shelfStart > input.shelfEnd) {
+  return null;
+};
+
+const getShelfOrderError = (input: IAisleLabelInput): LabelValidationErrorCode | null => {
+  if (input.shelfStart && input.shelfEnd && input.shelfStart > input.shelfEnd) {
     return { code: 'SHELF_ORDER' };
   }
 
-  const sideRanges = getAisleSideRanges(input).map((range) => [range.start, range.end] as const);
+  return null;
+};
+
+const getSideRangeTuples = (input: IAisleLabelInput): AisleSideRangeTuple[] => {
+  return getAisleSideRanges(input).map((range) => [range.start, range.end] as const);
+};
+
+const isCompleteSideRange = (range: AisleSideRangeTuple): range is readonly [number, number] => {
+  return hasValue(range[0]) && hasValue(range[1]);
+};
+
+const getSideRangePresenceError = (sideRanges: readonly AisleSideRangeTuple[]): LabelValidationErrorCode | null => {
   const hasIncompleteRange = sideRanges.some(([start, end]) => hasValue(start) !== hasValue(end));
   if (hasIncompleteRange) {
     return { code: 'SIDE_RANGE_INCOMPLETE' };
   }
 
-  const completeRanges = sideRanges.filter(([start, end]) => hasValue(start) && hasValue(end));
-  if (completeRanges.length === 0) {
+  const hasCompleteRange = sideRanges.some((range) => isCompleteSideRange(range));
+  if (!hasCompleteRange) {
     return { code: 'SIDE_RANGE_REQUIRED' };
   }
 
+  return null;
+};
+
+const getSideRangeValueError = (
+  sideRanges: readonly AisleSideRangeTuple[],
+  maxBayValue: number,
+): LabelValidationErrorCode | null => {
   for (const [start, end] of sideRanges) {
-    if (hasValue(start) && hasValue(end) && start > end) {
+    if (!hasValue(start) || !hasValue(end)) {
+      continue;
+    }
+
+    if (start > end) {
       return { code: 'SIDE_RANGE_ORDER' };
     }
 
-    if (hasValue(start) && hasValue(end) && (start < 1 || end < 1 || end > maxBayValue)) {
+    if (start < 1 || end < 1 || end > maxBayValue) {
       return { code: 'SIDE_BAY_RANGE', minBayValue: 1, maxBayValue };
     }
   }
 
   return null;
+};
+
+export const validateAisleLabelInput = (
+  input: IAisleLabelInput,
+  limits: IAisleValidationLimits,
+): LabelValidationErrorCode | null => {
+  const requiredError = getAisleRequiredError(input);
+  if (requiredError) {
+    return requiredError;
+  }
+
+  const rangeError = getAisleRangeError(input, limits);
+  if (rangeError) {
+    return rangeError;
+  }
+
+  const orderError = getAisleOrderError(input);
+  if (orderError) {
+    return orderError;
+  }
+
+  const shelfOrderError = getShelfOrderError(input);
+  if (shelfOrderError) {
+    return shelfOrderError;
+  }
+
+  const sideRanges = getSideRangeTuples(input);
+  const sideRangePresenceError = getSideRangePresenceError(sideRanges);
+  if (sideRangePresenceError) {
+    return sideRangePresenceError;
+  }
+
+  return getSideRangeValueError(sideRanges, limits.maxBayValue);
 };
 
 export const generateAisleLabelCodes = (
