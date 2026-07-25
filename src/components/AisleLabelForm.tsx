@@ -2,11 +2,10 @@ import * as React from 'react';
 import styles from './AisleLabelForm.module.css';
 import formLayoutStyles from './FormLayout.module.css';
 import shellStyles from './FormShell.module.css';
-import LabelGenerator from './LabelGenerator';
 import FormFeedback from './FormFeedback';
 import InlineFieldError from './InlineFieldError';
-import GenerateLabelsButton from './GenerateLabelsButton';
 import FormSection from './FormSection';
+import FormGenerateAndPreview from './FormGenerateAndPreview';
 import {
     MIN_AISLE_VALUE,
     MAX_AISLE_VALUE,
@@ -229,13 +228,14 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
                 </FormSection>
             </div>
 
-            <div className={formLayoutStyles.actionsRow}>
-                <GenerateLabelsButton className={formLayoutStyles.generateButton} onClick={validationUi.handleGenerate} />
-            </div>
-
-            {generatedLabels && (
-                <LabelGenerator labelCodes={generatedLabels} layoutMode={labelPrintMode} miniVariantId={miniVariantId} />
-            )}
+            <FormGenerateAndPreview
+                generatedLabels={generatedLabels}
+                layoutMode={labelPrintMode}
+                onGenerate={validationUi.handleGenerate}
+                miniVariantId={miniVariantId}
+                actionsRowClassName={formLayoutStyles.actionsRow}
+                buttonClassName={formLayoutStyles.generateButton}
+            />
         </div>
     );
 };

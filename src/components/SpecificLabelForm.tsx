@@ -1,10 +1,10 @@
 import * as React from 'react';
 import styles from './SpecificLabelForm.module.css';
+import formLayoutStyles from './FormLayout.module.css';
 import shellStyles from './FormShell.module.css';
-import LabelGenerator from './LabelGenerator';
 import FormFeedback from './FormFeedback';
-import GenerateLabelsButton from './GenerateLabelsButton';
 import FormSection from './FormSection';
+import FormGenerateAndPreview from './FormGenerateAndPreview';
 import {
     SHORT_CODE_PREFIXES,
     SPECIAL_AISLE_VALUES,
@@ -42,7 +42,7 @@ const SpecificLabelForm: React.FC<SpecificLabelFormProps> = ({ miniVariantId }) 
     return (
         <div className={shellStyles.panel}>
             <h1 className={shellStyles.panelTitle}>Generate Specific Labels</h1>
-            <p className={styles.sectionIntro}>Enter one label or a comma-separated list (for example: 01L01A, {aislePrefixedExamples}, {SHORT_CODE_PREFIXES[0]}01A, {SHORT_CODE_PREFIXES[1]}01A, {SPECIAL_AISLE_VALUES[0]}).
+            <p className={formLayoutStyles.sectionIntro}>Enter one label or a comma-separated list (for example: 01L01A, {aislePrefixedExamples}, {SHORT_CODE_PREFIXES[0]}01A, {SHORT_CODE_PREFIXES[1]}01A, {SPECIAL_AISLE_VALUES[0]}).
                 <br/>Labels must have no spaces or dashes.
                 <br/>Named aisle values without bay/shelf are supported: {namedAisleExamples}.
             </p>
@@ -72,13 +72,14 @@ const SpecificLabelForm: React.FC<SpecificLabelFormProps> = ({ miniVariantId }) 
                 />
             </FormSection>
 
-            <div className={styles.actionsRow}>
-                <GenerateLabelsButton className={styles.generateButton} onClick={validationUi.handleGenerate} />
-            </div>
-
-            {generatedLabels && (
-                <LabelGenerator labelCodes={generatedLabels} layoutMode={labelPrintMode} miniVariantId={miniVariantId} />
-            )}
+            <FormGenerateAndPreview
+                generatedLabels={generatedLabels}
+                layoutMode={labelPrintMode}
+                onGenerate={validationUi.handleGenerate}
+                miniVariantId={miniVariantId}
+                actionsRowClassName={formLayoutStyles.actionsRow}
+                buttonClassName={formLayoutStyles.generateButton}
+            />
         </div>
     );
 };

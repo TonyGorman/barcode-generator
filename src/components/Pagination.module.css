@@ -1,6 +1,5 @@
-.pagenum {
-  background-color: #fff;
-  color: #f06c00;
+.pagenum,
+.activePage {
   width: 30px;
   height: 30px;
   border: 1px solid #f06c00;
@@ -8,20 +7,18 @@
   padding: 7px;
   font-size: 14px;
   margin-right: 10px;
-  cursor: pointer;
   margin-bottom: 0;
+}
+
+.pagenum {
+  background-color: #fff;
+  color: #f06c00;
+  cursor: pointer;
 }
 
 .activePage {
   background-color: #f06c00;
   color: #fff;
-  width: 30px;
-  height: 30px;
-  border: 1px solid #f06c00;
-  border-radius: 2px;
-  padding: 7px;
-  font-size: 14px;
-  margin-right: 10px;
   margin-bottom: 0;
 }
 
