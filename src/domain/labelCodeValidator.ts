@@ -1,15 +1,11 @@
 import type { ParsedLabelCode } from './labelCodeParser';
 import { parseLabelCode } from './labelCodeParser';
 import { AISLE_PREFIXES, isAislePrefix, normalizePrefix } from '../config/labelConfig';
+import type { SpecificLabelValidationErrorReason } from '../config/validationMessages';
 
-export type SpecificLabelValidationErrorReason =
-  | 'not-compact'
-  | 'unparseable'
-  | 'unsupported-kind'
-  | 'invalid-aisle-prefix'
-  | 'invalid-aisle-range'
-  | 'invalid-bay-range'
-  | 'invalid-shelf-range';
+// Re-exported for consumers (and the domain barrel) that import this alongside
+// the other specific-label validation types from this module.
+export type { SpecificLabelValidationErrorReason };
 
 export type SpecificLabelValidationResult =
   | {

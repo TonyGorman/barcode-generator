@@ -9,6 +9,7 @@ import {
   getSpecificInvalidLabelMessage,
 } from '../config/validationMessages';
 import { normalizeSpecificInputCodes } from '../domain/labelGeneration';
+import type { SpecificLabelValidationResult } from '../domain/labelCodeDomain';
 import { LabelPrintMode } from '../models/ILabelLayoutStrategy';
 import { getLabelBatchLimitsResult } from './labelBatchLimits';
 
@@ -22,11 +23,11 @@ interface SpecificContentTokens {
 interface SpecificLabelValidationArgs {
   labelText: string;
   labelPrintMode: LabelPrintMode;
-  isValidSpecificCode: (code: string) => boolean;
+  validateSpecificCode: (code: string) => SpecificLabelValidationResult;
   contentTokens: SpecificContentTokens;
 }
 
-interface SpecificLabelValidationResult {
+interface SpecificLabelValidationOutcome {
   labels: string[];
   errorMessage: string | null;
   warningMessage: string | null;
@@ -35,9 +36,9 @@ interface SpecificLabelValidationResult {
 export const getSpecificLabelValidationResult = ({
   labelText,
   labelPrintMode,
-  isValidSpecificCode,
+  validateSpecificCode,
   contentTokens,
-}: SpecificLabelValidationArgs): SpecificLabelValidationResult => {
+}: SpecificLabelValidationArgs): SpecificLabelValidationOutcome => {
   const labels = normalizeSpecificInputCodes(labelText);
 
   if (labels.length === 0) {
@@ -57,10 +58,16 @@ export const getSpecificLabelValidationResult = ({
     };
   }
 
-  if (labels.some((code) => !isValidSpecificCode(code))) {
+  const firstInvalidLabel = labels
+    .map((code) => ({ code, result: validateSpecificCode(code) }))
+    .find((entry): entry is { code: string; result: Extract<SpecificLabelValidationResult, { ok: false }> } => entry.result.ok === false);
+
+  if (firstInvalidLabel) {
     return {
       labels: [],
       errorMessage: getSpecificInvalidLabelMessage({
+        invalidCode: firstInvalidLabel.code,
+        reason: firstInvalidLabel.result.reason,
         aislePrefixedExamples: contentTokens.aislePrefixedExamples,
         backPrefix: SHORT_CODE_PREFIXES[0],
         frontPrefix: SHORT_CODE_PREFIXES[1],

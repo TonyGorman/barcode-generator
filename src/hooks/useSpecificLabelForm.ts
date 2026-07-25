@@ -62,8 +62,8 @@ export const useSpecificLabelForm = (): UseSpecificLabelFormResult => {
     setLabelText(e.target.value);
   }, []);
 
-  const isValidSpecificCode = React.useCallback((code: string): boolean => {
-    const result = validateSpecificLabelCode(code, {
+  const validateSpecificCode = React.useCallback((code: string) => {
+    return validateSpecificLabelCode(code, {
       aislePrefixes: AISLE_PREFIXES,
       shortCodePrefixes: SHORT_CODE_PREFIXES,
       minAisleValue: MIN_AISLE_VALUE,
@@ -71,15 +71,13 @@ export const useSpecificLabelForm = (): UseSpecificLabelFormResult => {
       maxBayValue: MAX_BAY_VALUE,
       maxShelfLetter: MAX_SHELF_LETTER,
     });
-
-    return result.ok;
   }, []);
 
   const generateLabel = React.useCallback((): void => {
     const validationResult = getSpecificLabelValidationResult({
       labelText,
       labelPrintMode,
-      isValidSpecificCode,
+      validateSpecificCode,
       contentTokens: {
         bayRangeText,
         shelfRangeText,
@@ -97,7 +95,7 @@ export const useSpecificLabelForm = (): UseSpecificLabelFormResult => {
   }, [
     aislePrefixedExamples,
     bayRangeText,
-    isValidSpecificCode,
+    validateSpecificCode,
     labelPrintMode,
     labelText,
     namedAisleExamples,

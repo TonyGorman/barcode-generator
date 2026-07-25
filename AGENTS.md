@@ -119,6 +119,13 @@ After feature implementation passes all validation gates (`npm run validate:ci` 
 
 **Action**: Before handing off completed features, proactively identify DRY/maintainability wins and propose extraction or consolidation — do not wait for user feedback to surface duplication.
 
+## Validation Architecture: Domain Error Code Boundary
+
+- Domain validation functions never return message strings directly. They return a typed value (a discriminated union `{ code: ... }` for aisle/short, or a `reason` string literal for specific labels), and `src/config/validationMessages.ts` owns mapping that typed value to display text (`getValidationErrorMessage`, `getSpecificInvalidLabelMessage`). This keeps domain logic pure/testable and centralizes UI copy (and future i18n) in one place.
+- `LabelValidationErrorCode` (aisle/short) and `SpecificLabelValidationErrorReason` (specific labels) are both **owned by `validationMessages.ts`**, not by the domain files that use them — `src/domain/labelGeneration.ts` and `src/domain/labelCodeValidator.ts` import the type back from config. This is intentionally symmetric across all three label forms.
+- The specific-label error message names the actual offending code (e.g. `Label 'F0S01A' is not a recognized label format...`) rather than a generic "invalid input" message, so a typo in a multi-code batch is identifiable. `src/components/specificLabelGeneration.ts` finds the first invalid `{code, reason}` pair and passes both to `getSpecificInvalidLabelMessage`.
+- Do not add a *new* parallel error-code type when extending validation elsewhere — reuse this existing boundary (typed value from domain, text mapping in `validationMessages.ts`) rather than introducing message strings composed ad hoc in components/hooks.
+
 ## React / TypeScript Approach
 
 - Prefer function components with typed props interfaces; keep public prop contracts explicit and stable.
@@ -154,6 +161,18 @@ After feature implementation passes all validation gates (`npm run validate:ci` 
 - **Pattern**: Centralizes domain imports; allows components to `import { parseLabelCode, getMiniThreeRowDisplayParts, ... } from '../domain/labelCodeDomain'`.
 - **Non-refactorable**: Renaming to `index.ts` requires updating 5 import statements. Kept as-is due to low churn benefit.
 - **Consistency note**: `LabelTile.tsx` also re-exports a subset for convenience (`normalizeLabelCode`, `getEncodedLabelCode`, `getLargeSelDisplayParts`). This is acceptable to avoid bloating test imports in `LabelTile.test.tsx`.
+
+### Label Print Mode Selector Presence
+
+- `BackLabelForm.tsx` hardcodes `layoutMode="mini-sel"` on its `<LabelGenerator>` call and has no size selector, unlike `AisleLabelForm`/`SpecificLabelForm` (which use `useLabelPrintMode`). This is intentional, not an oversight — do not flag as a bug in reviews.
+- `SpecificLabelForm` may similarly become hardcoded to a single layout mode (losing its size selector) once it has been user-reviewed/finalized. If seen without a size selector in the future, treat as likely intentional rather than a defect — confirm before "fixing" it.
+
+### Hooks Location (`src/hooks/`)
+
+- Custom hooks (`useAisleLabelForm`, `useLabelGenerationFeedback`, `useLabelPrintMode`, `usePaginatedLabels`, `usePrintPortal`, `useResetOnVariantChange`, `useShortLabelForm`, `useSpecificLabelForm`) live in `src/hooks/`, a sibling of `src/config`, `src/domain`, and `src/models` (same depth as `src/components`).
+- Non-hook helpers (`formStateUpdaters.ts`, `labelBatchLimits.ts`, `labelGenerationPipelines.ts`, `labelLayoutGeometry.ts`, `specificLabelGeneration.ts`) intentionally remain in `src/components/`. A full components/hooks/utils split was evaluated and deemed not worth the churn for a purely organizational change.
+- New hooks importing `../config/*`, `../domain/*`, or `../models/*` need no path adjustment from `src/hooks/`; only imports reaching back into `src/components/` need the `../components/*` prefix.
+- Coverage config (`vite.config.ts` `test.coverage.include`) must include `src/hooks/**/*.ts` and `src/hooks/**/*.tsx`, or moved/added hooks silently drop out of coverage.
 
 ## Testing Expectations For React Changes
 

@@ -8,12 +8,14 @@ const contentTokens = {
   aislePrefixedExamples: 'BR1L01A, BL2L02B',
 };
 
+const alwaysValid = () => ({ ok: true as const, parsed: { kind: 'special' as const, parts: { value: 'KIOSK' } } });
+
 describe('getSpecificLabelValidationResult', () => {
   it('returns empty error when no labels are provided', () => {
     const result = getSpecificLabelValidationResult({
       labelText: '   ',
       labelPrintMode: 'mini-sel',
-      isValidSpecificCode: () => true,
+      validateSpecificCode: alwaysValid,
       contentTokens,
     });
 
@@ -22,24 +24,39 @@ describe('getSpecificLabelValidationResult', () => {
     expect(result.warningMessage).toBeNull();
   });
 
-  it('returns invalid error when any label is invalid', () => {
+  it('returns invalid error naming the specific offending code', () => {
     const result = getSpecificLabelValidationResult({
       labelText: '01L01A,ZZZ',
       labelPrintMode: 'mini-sel',
-      isValidSpecificCode: (code) => code !== 'ZZZ',
+      validateSpecificCode: (code) =>
+        code === 'ZZZ' ? { ok: false, reason: 'unparseable' } : alwaysValid(),
       contentTokens,
     });
 
     expect(result.labels).toEqual([]);
-    expect(result.errorMessage).toContain('Use valid label codes only');
+    expect(result.errorMessage).toContain("Label 'ZZZ' is not a recognized label format");
     expect(result.warningMessage).toBeNull();
+  });
+
+  it('reports the first invalid code out of several, not a generic message', () => {
+    const result = getSpecificLabelValidationResult({
+      labelText: '01L01A,FOS01A,F0S01A',
+      labelPrintMode: 'mini-sel',
+      validateSpecificCode: (code) =>
+        code === 'F0S01A' ? { ok: false, reason: 'unparseable' } : alwaysValid(),
+      contentTokens,
+    });
+
+    expect(result.labels).toEqual([]);
+    expect(result.errorMessage).toContain("Label 'F0S01A'");
+    expect(result.errorMessage).not.toContain("Label 'FOS01A'");
   });
 
   it('blocks special values in large mode', () => {
     const result = getSpecificLabelValidationResult({
       labelText: 'KIOSK',
       labelPrintMode: 'large-sel',
-      isValidSpecificCode: () => true,
+      validateSpecificCode: alwaysValid,
       contentTokens,
     });
 
@@ -52,7 +69,7 @@ describe('getSpecificLabelValidationResult', () => {
     const result = getSpecificLabelValidationResult({
       labelText: '01l01a, bak01a',
       labelPrintMode: 'mini-sel',
-      isValidSpecificCode: () => true,
+      validateSpecificCode: alwaysValid,
       contentTokens,
     });
 

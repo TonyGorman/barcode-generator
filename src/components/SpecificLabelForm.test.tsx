@@ -28,12 +28,12 @@ describe('SpecificLabelForm', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Enter at least one label value.');
   });
 
-  it('shows error for invalid label values', () => {
+  it('shows error for invalid label values, naming the offending code', () => {
     render(<SpecificLabelForm />);
 
     submitLabels('ZZZ');
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Use valid label codes only.');
+    expect(screen.getByRole('alert')).toHaveTextContent("Label 'ZZZ' is not a recognized label format");
   });
 
   it('accepts aisle 00 values in compact form', () => {
@@ -59,7 +59,7 @@ describe('SpecificLabelForm', () => {
 
     submitLabels('PR1L01A');
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Use valid label codes only.');
+    expect(screen.getByRole('alert')).toHaveTextContent("Label 'PR1L01A' is not a recognized label format");
   });
 
   it('accepts named aisle values without bay or shelf', () => {
@@ -76,7 +76,7 @@ describe('SpecificLabelForm', () => {
 
     submitLabels('PRODUCE');
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Use valid label codes only.');
+    expect(screen.getByRole('alert')).toHaveTextContent("Label 'PRODUCE' is not a recognized label format");
   });
 
   it('normalizes valid compact values to uppercase and trims whitespace', () => {
@@ -93,7 +93,7 @@ describe('SpecificLabelForm', () => {
 
     submitLabels('01-L01-A');
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Use valid label codes only.');
+    expect(screen.getByRole('alert')).toHaveTextContent("Label '01-L01-A' must not contain spaces or dashes");
   });
 
   it('rejects spaced input (spaces not allowed)', () => {
@@ -101,7 +101,7 @@ describe('SpecificLabelForm', () => {
 
     submitLabels('01 L01 A');
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Use valid label codes only.');
+    expect(screen.getByRole('alert')).toHaveTextContent("Label '01 L01 A' must not contain spaces or dashes");
   });
 
   it('rejects separated short code input (dashes not allowed)', () => {
@@ -109,7 +109,7 @@ describe('SpecificLabelForm', () => {
 
     submitLabels(`${SHORT_CODE_PREFIXES[0]} 01 A`);
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Use valid label codes only.');
+    expect(screen.getByRole('alert')).toHaveTextContent(`Label '${SHORT_CODE_PREFIXES[0]} 01 A' must not contain spaces or dashes`);
   });
 
   it('accepts compact short code values and renders generated list', () => {
@@ -126,7 +126,7 @@ describe('SpecificLabelForm', () => {
 
     submitLabels('01L01AA');
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Use valid label codes only.');
+    expect(screen.getByRole('alert')).toHaveTextContent("Label '01L01AA' is not a recognized label format");
   });
 
   it('accepts Front Of Store compact values in compact form', () => {
@@ -143,7 +143,15 @@ describe('SpecificLabelForm', () => {
 
     submitLabels(`${SHORT_CODE_PREFIXES[1]}-01-A`);
 
-    expect(screen.getByRole('alert')).toHaveTextContent('Use valid label codes only.');
+    expect(screen.getByRole('alert')).toHaveTextContent(`Label '${SHORT_CODE_PREFIXES[1]}-01-A' must not contain spaces or dashes`);
+  });
+
+  it('names the specific invalid code out of a valid batch (e.g. a typo like F0S01A vs FOS01A)', () => {
+    render(<SpecificLabelForm />);
+
+    submitLabels(`${SHORT_CODE_PREFIXES[0]}01A,F0S01A`);
+
+    expect(screen.getByRole('alert')).toHaveTextContent("Label 'F0S01A' is not a recognized label format");
   });
 
   it('accepts both Back and Front wall values in the same submission', () => {

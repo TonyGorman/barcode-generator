@@ -81,6 +81,8 @@ export const getLabelSoftLimitMessage = (softLimit: number): string => {
 };
 
 interface ISpecificInvalidLabelMessageArgs {
+  invalidCode: string;
+  reason: SpecificLabelValidationErrorReason;
   aislePrefixedExamples: string;
   backPrefix: string;
   frontPrefix: string;
@@ -89,7 +91,33 @@ interface ISpecificInvalidLabelMessageArgs {
   shelfRangeText: string;
 }
 
+/**
+ * Typed error reasons returned by `validateSpecificLabelCode` in `labelCodeValidator.ts`.
+ * Mirrors the `LabelValidationErrorCode` pattern above: the domain layer returns a typed
+ * reason, and this config layer owns mapping it to display text (and future i18n).
+ */
+export type SpecificLabelValidationErrorReason =
+  | 'not-compact'
+  | 'unparseable'
+  | 'unsupported-kind'
+  | 'invalid-aisle-prefix'
+  | 'invalid-aisle-range'
+  | 'invalid-bay-range'
+  | 'invalid-shelf-range';
+
+const SPECIFIC_LABEL_REASON_MESSAGES: Record<SpecificLabelValidationErrorReason, string> = {
+  'not-compact': 'must not contain spaces or dashes',
+  'unparseable': 'is not a recognized label format',
+  'unsupported-kind': 'is not a supported label type',
+  'invalid-aisle-prefix': 'has an unrecognized aisle prefix',
+  'invalid-aisle-range': 'has an aisle number out of range',
+  'invalid-bay-range': 'has a bay number out of range',
+  'invalid-shelf-range': 'has a shelf letter out of range',
+};
+
 export const getSpecificInvalidLabelMessage = ({
+  invalidCode,
+  reason,
   aislePrefixedExamples,
   backPrefix,
   frontPrefix,
@@ -97,5 +125,5 @@ export const getSpecificInvalidLabelMessage = ({
   bayRangeText,
   shelfRangeText,
 }: ISpecificInvalidLabelMessageArgs): string => {
-  return `Use valid label codes only. Supported formats: 01L01A, ${aislePrefixedExamples}, ${backPrefix}01A, ${frontPrefix}01A, or named aisle values (${namedAisleExamples}) with no bay or shelf. Bay must be ${bayRangeText} and shelf must be ${shelfRangeText}`;
+  return `Label '${invalidCode}' ${SPECIFIC_LABEL_REASON_MESSAGES[reason]}. Supported formats: 01L01A, ${aislePrefixedExamples}, ${backPrefix}01A, ${frontPrefix}01A, or named aisle values (${namedAisleExamples}) with no bay or shelf. Bay must be ${bayRangeText} and shelf must be ${shelfRangeText}`;
 };
