@@ -124,7 +124,7 @@ test.describe('Label Generator regressions - Specific Labels flow', () => {
     await expect(previewPage.getByText('01L36A', { exact: true }).first()).toBeVisible();
   });
 
-  test('Specific Labels focuses invalid input and links it to inline error text', async ({ page }) => {
+  test('Specific Labels focuses invalid input and links it to summary error text', async ({ page }) => {
     await page.goto('/');
     await page.getByRole('tab', { name: 'Specific Labels' }).click();
     await page.getByRole('button', { name: 'Generate Labels' }).click();

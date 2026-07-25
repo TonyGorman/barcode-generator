@@ -3,7 +3,6 @@ import styles from './SpecificLabelForm.module.css';
 import shellStyles from './FormShell.module.css';
 import LabelGenerator from './LabelGenerator';
 import FormFeedback from './FormFeedback';
-import InlineFieldError from './InlineFieldError';
 import GenerateLabelsButton from './GenerateLabelsButton';
 import FormSection from './FormSection';
 import {
@@ -57,11 +56,8 @@ const SpecificLabelForm: React.FC<SpecificLabelFormProps> = ({ miniVariantId }) 
                         value={labelText}
                         placeholder="Enter labels"
                         onChange={onInputChange}
-                        {...validationUi.getFieldA11yProps('input', validationUi.showFieldErrors)}
-                    />
-                    <InlineFieldError
-                        id={validationUi.getInlineErrorId('input')}
-                        message={validationUi.getInlineErrorMessage(validationUi.showFieldErrors)}
+                        aria-invalid={validationUi.showFieldErrors}
+                        aria-describedby={validationUi.showFieldErrors ? validationUi.summaryErrorId : undefined}
                     />
                     <p>Bay values must be {bayRangeText} and shelves must be {shelfRangeText}.</p>
                 </div>
