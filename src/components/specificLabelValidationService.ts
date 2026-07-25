@@ -11,9 +11,10 @@ import {
 import { normalizeSpecificInputCodes } from '../domain/labelGeneration';
 import type { SpecificLabelValidationResult } from '../domain/labelCodeDomain';
 import { LabelPrintMode } from '../models/ILabelLayoutStrategy';
-import { getLabelBatchLimitsResult } from './labelBatchLimits';
+import { ILabelGenerationResult } from '../models/ILabelGenerationResult';
+import { evaluateLabelBatchLimits } from './labelBatchLimitService';
 
-interface SpecificContentTokens {
+interface SpecificLabelValidationContent {
   bayRangeText: string;
   shelfRangeText: string;
   namedAisleExamples: string;
@@ -24,21 +25,15 @@ interface SpecificLabelValidationArgs {
   labelText: string;
   labelPrintMode: LabelPrintMode;
   validateSpecificCode: (code: string) => SpecificLabelValidationResult;
-  contentTokens: SpecificContentTokens;
+  contentTokens: SpecificLabelValidationContent;
 }
 
-interface SpecificLabelValidationOutcome {
-  labels: string[];
-  errorMessage: string | null;
-  warningMessage: string | null;
-}
-
-export const getSpecificLabelValidationResult = ({
+export const validateSpecificLabels = ({
   labelText,
   labelPrintMode,
   validateSpecificCode,
   contentTokens,
-}: SpecificLabelValidationArgs): SpecificLabelValidationOutcome => {
+}: SpecificLabelValidationArgs): ILabelGenerationResult => {
   const labels = normalizeSpecificInputCodes(labelText);
 
   if (labels.length === 0) {
@@ -49,7 +44,7 @@ export const getSpecificLabelValidationResult = ({
     };
   }
 
-  const batchLimits = getLabelBatchLimitsResult(labels.length, LABEL_SOFT_LIMIT, LABEL_HARD_LIMIT);
+  const batchLimits = evaluateLabelBatchLimits(labels.length, LABEL_SOFT_LIMIT, LABEL_HARD_LIMIT);
   if (batchLimits.hardLimitError) {
     return {
       labels: [],

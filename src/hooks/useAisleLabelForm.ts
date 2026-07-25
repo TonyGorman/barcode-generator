@@ -7,12 +7,12 @@ import {
 } from '../domain/labelGeneration';
 import { hasValue } from '../domain/numericGuard';
 import { AisleSide } from '../models/IAisleCodeParts';
-import { getAisleGenerationPipelineResult } from '../components/labelGenerationPipelines';
+import { generateAisleLabels } from '../components/labelGenerationService';
 import {
   setParsedNumericField,
   updateParsedNumericField,
   updateOptionalLetterField,
-} from '../components/formStateUpdaters';
+} from '../components/formStateService';
 import { useLabelGenerationFeedback } from './useLabelGenerationFeedback';
 
 type NumericAisleInputKey = 'aisleStart' | 'aisleEnd';
@@ -166,7 +166,7 @@ export const useAisleLabelForm = ({
     : 0;
 
   const generateLabel = React.useCallback((): void => {
-    const generationResult = getAisleGenerationPipelineResult({
+    const generationResult = generateAisleLabels({
       formInput,
       minAisleValue,
       maxAisleValue,

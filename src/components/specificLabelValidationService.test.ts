@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getSpecificLabelValidationResult } from './specificLabelGeneration';
+import { validateSpecificLabels } from './specificLabelValidationService';
 
 const contentTokens = {
   bayRangeText: '01-99',
@@ -10,9 +10,9 @@ const contentTokens = {
 
 const alwaysValid = () => ({ ok: true as const, parsed: { kind: 'special' as const, parts: { value: 'KIOSK' } } });
 
-describe('getSpecificLabelValidationResult', () => {
+describe('specificLabelValidationService', () => {
   it('returns empty error when no labels are provided', () => {
-    const result = getSpecificLabelValidationResult({
+    const result = validateSpecificLabels({
       labelText: '   ',
       labelPrintMode: 'mini-sel',
       validateSpecificCode: alwaysValid,
@@ -25,7 +25,7 @@ describe('getSpecificLabelValidationResult', () => {
   });
 
   it('returns invalid error naming the specific offending code', () => {
-    const result = getSpecificLabelValidationResult({
+    const result = validateSpecificLabels({
       labelText: '01L01A,ZZZ',
       labelPrintMode: 'mini-sel',
       validateSpecificCode: (code) =>
@@ -39,7 +39,7 @@ describe('getSpecificLabelValidationResult', () => {
   });
 
   it('reports the first invalid code out of several, not a generic message', () => {
-    const result = getSpecificLabelValidationResult({
+    const result = validateSpecificLabels({
       labelText: '01L01A,FOS01A,F0S01A',
       labelPrintMode: 'mini-sel',
       validateSpecificCode: (code) =>
@@ -53,7 +53,7 @@ describe('getSpecificLabelValidationResult', () => {
   });
 
   it('blocks special values in large mode', () => {
-    const result = getSpecificLabelValidationResult({
+    const result = validateSpecificLabels({
       labelText: 'KIOSK',
       labelPrintMode: 'large-sel',
       validateSpecificCode: alwaysValid,
@@ -66,7 +66,7 @@ describe('getSpecificLabelValidationResult', () => {
   });
 
   it('returns normalized labels and no warning for valid small batches', () => {
-    const result = getSpecificLabelValidationResult({
+    const result = validateSpecificLabels({
       labelText: '01l01a, bak01a',
       labelPrintMode: 'mini-sel',
       validateSpecificCode: alwaysValid,

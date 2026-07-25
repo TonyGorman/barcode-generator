@@ -123,7 +123,7 @@ After feature implementation passes all validation gates (`npm run validate:ci` 
 
 - Domain validation functions never return message strings directly. They return a typed value (a discriminated union `{ code: ... }` for aisle/short, or a `reason` string literal for specific labels), and `src/config/validationMessages.ts` owns mapping that typed value to display text (`getValidationErrorMessage`, `getSpecificInvalidLabelMessage`). This keeps domain logic pure/testable and centralizes UI copy (and future i18n) in one place.
 - `LabelValidationErrorCode` (aisle/short) and `SpecificLabelValidationErrorReason` (specific labels) are both **owned by `validationMessages.ts`**, not by the domain files that use them — `src/domain/labelGeneration.ts` and `src/domain/labelCodeValidator.ts` import the type back from config. This is intentionally symmetric across all three label forms.
-- The specific-label error message names the actual offending code (e.g. `Label 'F0S01A' is not a recognized label format...`) rather than a generic "invalid input" message, so a typo in a multi-code batch is identifiable. `src/components/specificLabelGeneration.ts` finds the first invalid `{code, reason}` pair and passes both to `getSpecificInvalidLabelMessage`.
+- The specific-label error message names the actual offending code (e.g. `Label 'F0S01A' is not a recognized label format...`) rather than a generic "invalid input" message, so a typo in a multi-code batch is identifiable. `src/components/specificLabelValidationService.ts` finds the first invalid `{code, reason}` pair and passes both to `getSpecificInvalidLabelMessage`.
 - Do not add a *new* parallel error-code type when extending validation elsewhere — reuse this existing boundary (typed value from domain, text mapping in `validationMessages.ts`) rather than introducing message strings composed ad hoc in components/hooks.
 
 ## React / TypeScript Approach
@@ -162,6 +162,14 @@ After feature implementation passes all validation gates (`npm run validate:ci` 
 - **Non-refactorable**: Renaming to `index.ts` requires updating 5 import statements. Kept as-is due to low churn benefit.
 - **Consistency note**: `LabelTile.tsx` also re-exports a subset for convenience (`normalizeLabelCode`, `getEncodedLabelCode`, `getLargeSelDisplayParts`). This is acceptable to avoid bloating test imports in `LabelTile.test.tsx`.
 
+### LabelTile Responsibility Split
+
+- Keep `LabelTile.tsx` as an orchestrator only (layout strategy selection + composing child render blocks).
+- Mini text/layout rendering lives in `MiniLabelTileContent.tsx`.
+- Large heading rendering lives in `LargeLabelTileContent.tsx`.
+- Barcode block rendering lives in `BarcodeBlock.tsx`.
+- Composition and typography fitting logic stays in `useMiniLabelTileComposition` and measurement helpers (`miniPrimaryTextMeasurement.ts`), not inline in `LabelTile.tsx`.
+
 ### Label Print Mode Selector Presence
 
 - `BackLabelForm.tsx` hardcodes `layoutMode="mini-sel"` on its `<LabelGenerator>` call and has no size selector, unlike `AisleLabelForm`/`SpecificLabelForm` (which use `useLabelPrintMode`). This is intentional, not an oversight — do not flag as a bug in reviews.
@@ -170,9 +178,17 @@ After feature implementation passes all validation gates (`npm run validate:ci` 
 ### Hooks Location (`src/hooks/`)
 
 - Custom hooks (`useAisleLabelForm`, `useLabelGenerationFeedback`, `useLabelPrintMode`, `usePaginatedLabels`, `usePrintPortal`, `useResetOnVariantChange`, `useShortLabelForm`, `useSpecificLabelForm`) live in `src/hooks/`, a sibling of `src/config`, `src/domain`, and `src/models` (same depth as `src/components`).
-- Non-hook helpers (`formStateUpdaters.ts`, `labelBatchLimits.ts`, `labelGenerationPipelines.ts`, `labelLayoutGeometry.ts`, `specificLabelGeneration.ts`) intentionally remain in `src/components/`. A full components/hooks/utils split was evaluated and deemed not worth the churn for a purely organizational change.
+- Non-hook helpers (`formStateService.ts`, `labelBatchLimitService.ts`, `labelGenerationService.ts`, `labelLayoutGeometry.ts`, `specificLabelValidationService.ts`) intentionally remain in `src/components/`. A full components/hooks/utils split was evaluated and deemed not worth the churn for a purely organizational change.
 - New hooks importing `../config/*`, `../domain/*`, or `../models/*` need no path adjustment from `src/hooks/`; only imports reaching back into `src/components/` need the `../components/*` prefix.
 - Coverage config (`vite.config.ts` `test.coverage.include`) must include `src/hooks/**/*.ts` and `src/hooks/**/*.tsx`, or moved/added hooks silently drop out of coverage.
+
+### Naming Convention: Application Services
+
+- Use **noun-oriented file names** for app-level orchestration modules: `*Service.ts` (for example `labelGenerationService.ts`, `specificLabelValidationService.ts`).
+- Use **verb-oriented export names** from those modules that describe business actions (for example `generateAisleLabels`, `generateShortLabels`, `validateSpecificLabels`).
+- Avoid `*Pipeline*` naming in this repo for application logic to reduce confusion with CI/CD pipelines.
+- Prefer domain-natural verbs (`generate`, `validate`, `resolve`, `normalize`) over vague `get*Result` names for orchestration/service functions.
+- Apply this convention incrementally when touching nearby code; do not perform broad rename-only churn without functional benefit.
 
 ## Testing Expectations For React Changes
 

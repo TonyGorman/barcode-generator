@@ -3,8 +3,8 @@ import {
   getShelfRangeCount,
   IShortLabelInput,
 } from '../domain/labelGeneration';
-import { updateOptionalLetterField, updateParsedNumericField } from '../components/formStateUpdaters';
-import { getShortGenerationPipelineResult } from '../components/labelGenerationPipelines';
+import { updateOptionalLetterField, updateParsedNumericField } from '../components/formStateService';
+import { generateShortLabels } from '../components/labelGenerationService';
 import { useLabelGenerationFeedback } from './useLabelGenerationFeedback';
 
 type ShortInputWithoutPrefix = Omit<IShortLabelInput, 'prefix'>;
@@ -95,7 +95,7 @@ export const useShortLabelForm = ({
   }, [formInput, selectedShortCodePrefix]);
 
   const generateLabel = React.useCallback((): void => {
-    const generationResult = getShortGenerationPipelineResult({
+    const generationResult = generateShortLabels({
       formInput: shortLabelInput,
       minBayValue,
       maxBayValue,

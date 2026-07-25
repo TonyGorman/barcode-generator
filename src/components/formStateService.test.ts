@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { setOptionalLetterField, setParsedNumericField } from './formStateUpdaters';
+import { setOptionalLetterField, setParsedNumericField } from './formStateService';
 
-describe('formStateUpdaters', () => {
+describe('formStateService', () => {
   it('sets parsed numeric values for valid digit input', () => {
     const prev = { bayStart: null as number | null, shelfStart: null as string | null };
 

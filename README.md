@@ -64,9 +64,17 @@ flowchart TD
   A --> AF[AisleLabelForm]
   A --> BF[BackLabelForm]
 
-  SF --> DG[Domain: labelCodeDomain + labelGeneration]
-  AF --> DG
-  BF --> DG
+  SF --> SH[Hook: useSpecificLabelForm]
+  AF --> AH[Hook: useAisleLabelForm]
+  BF --> BH[Hook: useShortLabelForm]
+
+  SH --> SVS[Service: specificLabelValidationService]
+  AH --> LGS[Service: labelGenerationService]
+  BH --> LGS
+
+  SH --> DG[Domain: labelCodeDomain + labelGeneration]
+  AH --> DG
+  BH --> DG
 
   SF --> LG[LabelGenerator]
   AF --> LG
@@ -77,15 +85,19 @@ flowchart TD
 
   PL --> LT[LabelTile]
   PR --> LT
-    LT --> MR[Mini variant registry]
-    LG --> MP[Mini variant preference resolver]
-    MP --> ST[Mini variant storage]
-   MP --> MR
-   MVU --> MP
-   MR --> M3[mini-three-row compose/geometry/fit]
-   MR --> MS[mini-shelf-emphasis compose/geometry/fit]
-    LT --> DH[Display helpers: getLargeSelDisplayParts]
-    LT --> D2[Parser / encoding: getEncodedLabelCode]
+  LT --> MLC[MiniLabelTileContent]
+  LT --> LLC[LargeLabelTileContent]
+  LT --> BBC[BarcodeBlock]
+  LT --> MCH[Hook: useMiniLabelTileComposition]
+  MCH --> MR[Mini variant registry]
+  LG --> MP[Mini variant preference resolver]
+  MP --> ST[Mini variant storage]
+  MP --> MR
+  MVU --> MP
+  MR --> M3[mini-three-row compose/geometry/fit]
+  MR --> MS[mini-shelf-emphasis compose/geometry/fit]
+  LLC --> DH[Display helpers: getLargeSelDisplayParts]
+  BBC --> D2[Parser / encoding: getEncodedLabelCode]
 ```
 
 ## Domain Model
@@ -95,6 +107,18 @@ The domain layer for sel codes is split across three files:
 - **`labelCodeParser.ts`**: Parses compact input into a `ParsedLabelCode` domain object.
 - **`labelCodeDisplay.ts`**: Converts parsed codes to display and encoding formats.
 - **`labelCodeValidator.ts`**: Validates label codes.
+
+## Layer Intent
+
+- **`src/domain/*`**: Pure parsing, validation, generation, and formatting rules.
+- **`src/components/*Service.ts`**: Application orchestration for label workflows (validation + limits + generation).
+- **`src/hooks/*`**: UI state and event orchestration for forms and preview/print behavior.
+- **`src/components/*` (render components)**: Presentation and layout rendering only.
+
+Naming convention:
+
+- Use noun-oriented module names for orchestration modules (`*Service.ts`).
+- Use verb-oriented exports (`generateAisleLabels`, `generateShortLabels`, `validateSpecificLabels`, `evaluateLabelBatchLimits`).
 
 ## Layout Strategies
 

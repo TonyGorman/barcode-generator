@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
-  getAisleGenerationPipelineResult,
-  getShortGenerationPipelineResult,
-} from './labelGenerationPipelines';
+  generateAisleLabels,
+  generateShortLabels,
+} from './labelGenerationService';
 
 const formatTwoDigits = (value: number): string => value.toString().padStart(2, '0');
 
-describe('labelGenerationPipelines', () => {
+describe('labelGenerationService', () => {
   it('returns aisle validation errors before generation', () => {
-    const result = getAisleGenerationPipelineResult({
+    const result = generateAisleLabels({
       formInput: {
         aisleStart: null,
         aisleEnd: null,
@@ -36,7 +36,7 @@ describe('labelGenerationPipelines', () => {
   });
 
   it('returns short hard-limit error before generation', () => {
-    const result = getShortGenerationPipelineResult({
+    const result = generateShortLabels({
       formInput: {
         bayStart: 1,
         bayEnd: 1,
@@ -58,7 +58,7 @@ describe('labelGenerationPipelines', () => {
   });
 
   it('returns generated labels and warning for short soft-limit batches', () => {
-    const result = getShortGenerationPipelineResult({
+    const result = generateShortLabels({
       formInput: {
         bayStart: 1,
         bayEnd: 1,

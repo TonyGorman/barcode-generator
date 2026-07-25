@@ -5,7 +5,7 @@ interface LabelBatchLimitsResult {
   warningMessage: string | null;
 }
 
-export const getLabelBatchLimitsResult = (
+export const evaluateLabelBatchLimits = (
   labelCount: number,
   softLimit: number,
   hardLimit: number,

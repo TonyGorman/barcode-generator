@@ -7,15 +7,10 @@ import {
   validateShortLabelInput,
 } from '../domain/labelGeneration';
 import { getValidationErrorMessage } from '../config/validationMessages';
-import { getLabelBatchLimitsResult } from './labelBatchLimits';
+import { ILabelGenerationResult } from '../models/ILabelGenerationResult';
+import { evaluateLabelBatchLimits } from './labelBatchLimitService';
 
-interface GenerationPipelineResult {
-  errorMessage: string | null;
-  warningMessage: string | null;
-  labels: string[];
-}
-
-interface AislePipelineArgs {
+interface AisleLabelGenerationArgs {
   formInput: IAisleLabelInput;
   minAisleValue: number;
   maxAisleValue: number;
@@ -26,7 +21,7 @@ interface AislePipelineArgs {
   formatTwoDigitValue: (value: number) => string;
 }
 
-interface ShortPipelineArgs {
+interface ShortLabelGenerationArgs {
   formInput: IShortLabelInput;
   minBayValue: number;
   maxBayValue: number;
@@ -36,7 +31,7 @@ interface ShortPipelineArgs {
   formatTwoDigitValue: (value: number) => string;
 }
 
-export const getAisleGenerationPipelineResult = ({
+export const generateAisleLabels = ({
   formInput,
   minAisleValue,
   maxAisleValue,
@@ -45,7 +40,7 @@ export const getAisleGenerationPipelineResult = ({
   hardLimit,
   totalLabels,
   formatTwoDigitValue,
-}: AislePipelineArgs): GenerationPipelineResult => {
+}: AisleLabelGenerationArgs): ILabelGenerationResult => {
   const validationError = validateAisleLabelInput(formInput, {
     minAisleValue,
     maxAisleValue,
@@ -59,7 +54,7 @@ export const getAisleGenerationPipelineResult = ({
     };
   }
 
-  const batchLimits = getLabelBatchLimitsResult(totalLabels, softLimit, hardLimit);
+  const batchLimits = evaluateLabelBatchLimits(totalLabels, softLimit, hardLimit);
   if (batchLimits.hardLimitError) {
     return {
       errorMessage: batchLimits.hardLimitError,
@@ -75,7 +70,7 @@ export const getAisleGenerationPipelineResult = ({
   };
 };
 
-export const getShortGenerationPipelineResult = ({
+export const generateShortLabels = ({
   formInput,
   minBayValue,
   maxBayValue,
@@ -83,7 +78,7 @@ export const getShortGenerationPipelineResult = ({
   hardLimit,
   totalLabels,
   formatTwoDigitValue,
-}: ShortPipelineArgs): GenerationPipelineResult => {
+}: ShortLabelGenerationArgs): ILabelGenerationResult => {
   const validationError = validateShortLabelInput(formInput, minBayValue, maxBayValue);
   if (validationError) {
     return {
@@ -93,7 +88,7 @@ export const getShortGenerationPipelineResult = ({
     };
   }
 
-  const batchLimits = getLabelBatchLimitsResult(totalLabels, softLimit, hardLimit);
+  const batchLimits = evaluateLabelBatchLimits(totalLabels, softLimit, hardLimit);
   if (batchLimits.hardLimitError) {
     return {
       errorMessage: batchLimits.hardLimitError,

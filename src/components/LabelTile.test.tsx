@@ -119,12 +119,16 @@ describe('LabelTile helpers', () => {
 describe('LabelTile', () => {
   it('renders stacked mini rows for aisle label value', () => {
     render(<LabelTile code="01L01A" />);
+    const miniTypography = getLabelLayoutStrategy('mini-sel').typography;
 
     expect(screen.getByText('01', { exact: true })).toBeInTheDocument();
     expect(screen.getByText('L01', { exact: true })).toBeInTheDocument();
     expect(screen.getByText('A', { exact: true })).toBeInTheDocument();
     expect(screen.queryByText('01 L01 A', { exact: true })).toBeNull();
-    expect(screen.getByTestId('label-value')).toHaveTextContent('01L01A');
+    const label = screen.getByTestId('label-value');
+    expect(label).toHaveTextContent('01L01A');
+    expect(label).toHaveAttribute('data-width', String(mmToPx(miniTypography.barcodeModuleThicknessMm)));
+    expect(label).toHaveAttribute('data-height', String(mmToPx(miniTypography.barcodeHeightMm)));
     expect(screen.getAllByText('01L01A')).toHaveLength(2);
   });
 

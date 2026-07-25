@@ -12,7 +12,7 @@ import { validateSpecificLabelCode } from '../domain/labelCodeDomain';
 import { LabelPrintMode } from '../models/ILabelLayoutStrategy';
 import { useLabelPrintMode } from './useLabelPrintMode';
 import { useLabelGenerationFeedback } from './useLabelGenerationFeedback';
-import { getSpecificLabelValidationResult } from '../components/specificLabelGeneration';
+import { validateSpecificLabels } from '../components/specificLabelValidationService';
 
 interface UseSpecificLabelFormResult {
   content: {
@@ -74,7 +74,7 @@ export const useSpecificLabelForm = (): UseSpecificLabelFormResult => {
   }, []);
 
   const generateLabel = React.useCallback((): void => {
-    const validationResult = getSpecificLabelValidationResult({
+    const validationResult = validateSpecificLabels({
       labelText,
       labelPrintMode,
       validateSpecificCode,
