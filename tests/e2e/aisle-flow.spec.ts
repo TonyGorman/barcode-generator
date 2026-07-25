@@ -183,4 +183,17 @@ test.describe('Label Generator regressions - Aisle Labels flow', () => {
     await expect(aislePanel.getByText('02L01A', { exact: true }).first()).toBeVisible();
     await expect(aislePanel.getByText('BAK01A', { exact: true })).toHaveCount(0);
   });
+
+  test('Aisle Labels focuses first invalid field and links it to inline error text', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('tab', { name: 'Aisle Labels' }).click();
+    await page.getByRole('button', { name: 'Generate Labels' }).click();
+
+    const firstInput = page.getByRole('textbox').first();
+    await expect(firstInput).toBeFocused();
+    const describedBy = await firstInput.getAttribute('aria-describedby');
+    expect(describedBy).toBeTruthy();
+    await expect(page.locator(`#${describedBy}`)).toBeVisible();
+    await expect(page.getByRole('alert')).toContainText('Please enter aisle start, aisle end, and select a shelf.');
+  });
 });

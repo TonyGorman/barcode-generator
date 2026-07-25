@@ -13,19 +13,25 @@ const FormFeedback: React.FC<FormFeedbackProps> = ({
   warningMessage,
   errorId,
   warningId,
-}) => (
-  <>
-    {errorMessage && (
-      <div id={errorId} role="alert" aria-live="assertive" aria-atomic="true" className={alertStyles.alertError}>
-        <div><span>{errorMessage}</span></div>
-      </div>
-    )}
-    {warningMessage && (
-      <div id={warningId} role="status" aria-live="polite" aria-atomic="true" className={alertStyles.alertWarning}>
-        <div><span>{warningMessage}</span></div>
-      </div>
-    )}
-  </>
-);
+}) => {
+  if (!errorMessage && !warningMessage) {
+    return null;
+  }
+
+  return (
+    <div className={alertStyles.feedbackStack}>
+      {errorMessage && (
+        <div id={errorId} role="alert" aria-live="assertive" aria-atomic="true" className={alertStyles.alertError}>
+          <div><span>{errorMessage}</span></div>
+        </div>
+      )}
+      {warningMessage && (
+        <div id={warningId} role="status" aria-live="polite" aria-atomic="true" className={alertStyles.alertWarning}>
+          <div><span>{warningMessage}</span></div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default FormFeedback;

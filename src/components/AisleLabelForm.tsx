@@ -4,6 +4,7 @@ import formLayoutStyles from './FormLayout.module.css';
 import shellStyles from './FormShell.module.css';
 import LabelGenerator from './LabelGenerator';
 import FormFeedback from './FormFeedback';
+import InlineFieldError from './InlineFieldError';
 import GenerateLabelsButton from './GenerateLabelsButton';
 import FormSection from './FormSection';
 import {
@@ -21,11 +22,13 @@ import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant';
 import { useResetOnVariantChange } from '../hooks/useResetOnVariantChange';
 import { useLabelPrintMode } from '../hooks/useLabelPrintMode';
 import { useAisleLabelForm } from '../hooks/useAisleLabelForm';
-import { useAccessibleGenerateAction } from '../hooks/useAccessibleGenerateAction';
+import { useFormValidationUi } from '../hooks/useFormValidationUi';
 import {
     getAisleSideRange,
     getAisleValidationError,
     getFirstInvalidAisleFieldId,
+    isAisleRequiredAisleFieldMissing,
+    isAisleRequiredShelfFieldMissing,
     isAisleRangeFieldInvalid,
     isAisleShelfFieldInvalid,
     isAisleSideFieldInvalid,
@@ -72,15 +75,16 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
 
     useResetOnVariantChange(miniVariantId, resetGeneratedLabels);
     const { labelPrintMode, printModeOptions, handleModeChange } = useLabelPrintMode(resetGeneratedLabels);
-    const errorId = `${idPrefix}-aisle-error`;
-    const showFieldErrors = errorMessage !== null;
     const validationError = React.useMemo(() => getAisleValidationError(formInput), [formInput]);
-    const aisleFieldInvalid = isAisleRangeFieldInvalid(validationError);
-    const shelfFieldInvalid = isAisleShelfFieldInvalid(validationError);
+    const aisleFieldInvalid = isAisleRangeFieldInvalid(validationError) || isAisleRequiredAisleFieldMissing(validationError, formInput);
+    const shelfFieldInvalid = isAisleShelfFieldInvalid(validationError) || isAisleRequiredShelfFieldMissing(validationError, formInput);
 
     const sideRows = AISLE_SIDE_METADATA;
-    const handleGenerateLabel = useAccessibleGenerateAction({
+    const validationUi = useFormValidationUi({
+        idPrefix,
+        errorScope: 'aisle',
         errorMessage,
+        warningMessage,
         generatedLabels,
         onGenerate: generateLabel,
         getFirstInvalidFieldId: React.useCallback(() => getFirstInvalidAisleFieldId({
@@ -98,6 +102,7 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
                 <p><strong>Enter values for:</strong> aisles from {MIN_AISLE_VALUE} to {MAX_AISLE_VALUE}, Sides ({sideNamesText}), Bays from 1 to {MAX_BAY_VALUE} and Shelves (alphabetical only) within {shelfRangeText}.</p>
                 <p>The barcode will <strong>always</strong> be encoded <strong>without</strong> spaces or dashes.</p>
             </div>
+            <FormFeedback {...validationUi.feedbackProps} />
             <div className={styles.configLayout}>
                 <FormSection title={`Aisle Range (${aisleRangeText})`}>
                     <div className={formLayoutStyles.twoFieldGrid}>
@@ -107,8 +112,7 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
                                 id={`${idPrefix}-aisle-start`}
                                 value={formInput.aisleStart?.toString() ?? ''}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange(e, 'aisleStart')}
-                                aria-invalid={showFieldErrors && aisleFieldInvalid}
-                                aria-describedby={showFieldErrors && aisleFieldInvalid ? errorId : undefined}
+                                {...validationUi.getFieldA11yProps('range', aisleFieldInvalid)}
                             />
                         </div>
                         <div className={formLayoutStyles.fieldGroup}>
@@ -117,17 +121,20 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
                                 id={`${idPrefix}-aisle-end`}
                                 value={formInput.aisleEnd?.toString() ?? ''}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange(e, 'aisleEnd')}
-                                aria-invalid={showFieldErrors && aisleFieldInvalid}
-                                aria-describedby={showFieldErrors && aisleFieldInvalid ? errorId : undefined}
+                                {...validationUi.getFieldA11yProps('range', aisleFieldInvalid)}
                             />
                         </div>
                     </div>
+                    <InlineFieldError
+                        id={validationUi.getInlineErrorId('range')}
+                        message={validationUi.getInlineErrorMessage(aisleFieldInvalid)}
+                    />
                 </FormSection>
 
                 <FormSection title={`Bay Configuration (${bayRangeText})`}>
                     <div className={styles.sideGrid}>
                         {sideRows.map((side) => {
-                            const sideInvalid = showFieldErrors && isAisleSideFieldInvalid(validationError, getAisleSideRange(formInput, side.side));
+                            const sideInvalid = isAisleSideFieldInvalid(validationError, getAisleSideRange(formInput, side.side));
                             return (
                                 <div key={side.side} className={styles.sideRow}>
                                     <div className={styles.sideLabel}>{side.label}</div>
@@ -138,8 +145,7 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
                                                 id={`${idPrefix}-${side.side}-start`}
                                                 value={formInput.sideRanges[side.side].start?.toString() ?? ''}
                                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => onSideRangeInputChange(e, side.side, 'start')}
-                                                aria-invalid={sideInvalid}
-                                                aria-describedby={sideInvalid ? errorId : undefined}
+                                                {...validationUi.getFieldA11yProps('side', sideInvalid)}
                                             />
                                         </div>
                                         <div className={formLayoutStyles.fieldGroup}>
@@ -148,8 +154,7 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
                                                 id={`${idPrefix}-${side.side}-end`}
                                                 value={formInput.sideRanges[side.side].end?.toString() ?? ''}
                                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => onSideRangeInputChange(e, side.side, 'end')}
-                                                aria-invalid={sideInvalid}
-                                                aria-describedby={sideInvalid ? errorId : undefined}
+                                                {...validationUi.getFieldA11yProps('side', sideInvalid)}
                                             />
                                         </div>
                                     </div>
@@ -157,6 +162,12 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
                             );
                         })}
                     </div>
+                    <InlineFieldError
+                        id={validationUi.getInlineErrorId('side')}
+                        message={validationUi.getInlineErrorMessage(
+                            sideRows.some((side) => isAisleSideFieldInvalid(validationError, getAisleSideRange(formInput, side.side))),
+                        )}
+                    />
                 </FormSection>
 
                 <FormSection title={`Shelf Range (${shelfRangeText})`}>
@@ -167,8 +178,7 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
                                 id={`${idPrefix}-shelf-start`}
                                 value={formInput.shelfStart ?? ''}
                                 onChange={onShelfStartChange}
-                                aria-invalid={showFieldErrors && shelfFieldInvalid}
-                                aria-describedby={showFieldErrors && shelfFieldInvalid ? errorId : undefined}
+                                {...validationUi.getFieldA11yProps('shelf', shelfFieldInvalid)}
                             />
                         </div>
                         <div className={formLayoutStyles.fieldGroup}>
@@ -177,11 +187,14 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
                                 id={`${idPrefix}-shelf-end`}
                                 value={formInput.shelfEnd ?? ''}
                                 onChange={onShelfEndChange}
-                                aria-invalid={showFieldErrors && shelfFieldInvalid}
-                                aria-describedby={showFieldErrors && shelfFieldInvalid ? errorId : undefined}
+                                {...validationUi.getFieldA11yProps('shelf', shelfFieldInvalid)}
                             />
                         </div>
                     </div>
+                    <InlineFieldError
+                        id={validationUi.getInlineErrorId('shelf')}
+                        message={validationUi.getInlineErrorMessage(shelfFieldInvalid)}
+                    />
                 </FormSection>
 
                 <FormSection title="Label Size">
@@ -216,10 +229,8 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
                 </FormSection>
             </div>
 
-            <FormFeedback errorMessage={errorMessage} warningMessage={warningMessage} errorId={errorId} />
-
             <div className={formLayoutStyles.actionsRow}>
-                <GenerateLabelsButton className={formLayoutStyles.generateButton} onClick={handleGenerateLabel} />
+                <GenerateLabelsButton className={formLayoutStyles.generateButton} onClick={validationUi.handleGenerate} />
             </div>
 
             {generatedLabels && (

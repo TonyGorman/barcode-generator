@@ -1,4 +1,5 @@
 export type Styles = {
+  'fieldErrorMessage': string;
   'fieldLabel': string;
   'panel': string;
   'panelTitle': string;

@@ -1,3 +1,9 @@
+.feedbackStack {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 20px;
+}
+
 .alertError {
   background-color: #a50000;
   color: white;

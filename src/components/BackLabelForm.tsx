@@ -4,6 +4,7 @@ import formLayoutStyles from './FormLayout.module.css';
 import shellStyles from './FormShell.module.css';
 import LabelGenerator from './LabelGenerator';
 import FormFeedback from './FormFeedback';
+import InlineFieldError from './InlineFieldError';
 import GenerateLabelsButton from './GenerateLabelsButton';
 import FormSection from './FormSection';
 import {
@@ -19,10 +20,12 @@ import { RadioGroup, ShelfSelect, TextField } from './FormControls';
 import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant';
 import { useResetOnVariantChange } from '../hooks/useResetOnVariantChange';
 import { useShortLabelForm } from '../hooks/useShortLabelForm';
-import { useAccessibleGenerateAction } from '../hooks/useAccessibleGenerateAction';
+import { useFormValidationUi } from '../hooks/useFormValidationUi';
 import {
     getFirstInvalidShortFieldId,
     getShortValidationError,
+    isShortRequiredBayFieldMissing,
+    isShortRequiredShelfFieldMissing,
     isShortBayFieldInvalid,
     isShortShelfFieldInvalid,
 } from './backFormAccessibilityService';
@@ -67,27 +70,26 @@ const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
         resetGeneratedLabels,
     } = actions;
     useResetOnVariantChange(miniVariantId, resetGeneratedLabels);
-    const errorId = `${idPrefix}-short-error`;
-    const showFieldErrors = errorMessage !== null;
-    const validationError = React.useMemo(() => getShortValidationError({
+    const shortFormInput = React.useMemo(() => ({
         ...formInput,
         prefix: selectedShortCodePrefix,
     }), [formInput, selectedShortCodePrefix]);
-    const bayFieldInvalid = isShortBayFieldInvalid(validationError);
-    const shelfFieldInvalid = isShortShelfFieldInvalid(validationError);
+    const validationError = React.useMemo(() => getShortValidationError(shortFormInput), [shortFormInput]);
+    const bayFieldInvalid = isShortBayFieldInvalid(validationError) || isShortRequiredBayFieldMissing(validationError, shortFormInput);
+    const shelfFieldInvalid = isShortShelfFieldInvalid(validationError) || isShortRequiredShelfFieldMissing(validationError, shortFormInput);
 
-    const handleGenerateLabel = useAccessibleGenerateAction({
+    const validationUi = useFormValidationUi({
+        idPrefix,
+        errorScope: 'back',
         errorMessage,
+        warningMessage,
         generatedLabels,
         onGenerate: generateLabel,
         getFirstInvalidFieldId: React.useCallback(() => getFirstInvalidShortFieldId({
             validationError,
-            formInput: {
-                ...formInput,
-                prefix: selectedShortCodePrefix,
-            },
+            formInput: shortFormInput,
             idPrefix,
-        }), [validationError, formInput, selectedShortCodePrefix, idPrefix]),
+        }), [validationError, shortFormInput, idPrefix]),
     });
 
     return (
@@ -97,6 +99,7 @@ const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
                 <br/>Set the start bay, end bay, start shelf, and end shelf required.
                 <br/>The barcode will <strong>always</strong> be encoded <strong>without</strong> spaces or dashes.
                 </p>
+            <FormFeedback {...validationUi.feedbackProps} />
             <div className={styles.stackedSections}>
                 <FormSection title="Prefix">
                     <RadioGroup
@@ -115,8 +118,7 @@ const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
                                 id={`${idPrefix}-bay-start`}
                                 value={formInput.bayStart?.toString() ?? ''}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange(e, 'bayStart')}
-                                aria-invalid={showFieldErrors && bayFieldInvalid}
-                                aria-describedby={showFieldErrors && bayFieldInvalid ? errorId : undefined}
+                                {...validationUi.getFieldA11yProps('bay', bayFieldInvalid)}
                             />
                         </div>
                         <div className={formLayoutStyles.fieldGroup}>
@@ -125,11 +127,14 @@ const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
                                 id={`${idPrefix}-bay-end`}
                                 value={formInput.bayEnd?.toString() ?? ''}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange(e, 'bayEnd')}
-                                aria-invalid={showFieldErrors && bayFieldInvalid}
-                                aria-describedby={showFieldErrors && bayFieldInvalid ? errorId : undefined}
+                                {...validationUi.getFieldA11yProps('bay', bayFieldInvalid)}
                             />
                         </div>
                     </div>
+                    <InlineFieldError
+                        id={validationUi.getInlineErrorId('bay')}
+                        message={validationUi.getInlineErrorMessage(bayFieldInvalid)}
+                    />
                 </FormSection>
 
                 <FormSection title={`Shelf Range (${shelfRangeText})`}>
@@ -140,8 +145,7 @@ const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
                                 id={`${idPrefix}-shelf-start`}
                                 value={formInput.shelfStart ?? ''}
                                 onChange={onShelfStartChange}
-                                aria-invalid={showFieldErrors && shelfFieldInvalid}
-                                aria-describedby={showFieldErrors && shelfFieldInvalid ? errorId : undefined}
+                                {...validationUi.getFieldA11yProps('shelf', shelfFieldInvalid)}
                             />
                         </div>
                         <div className={formLayoutStyles.fieldGroup}>
@@ -150,18 +154,19 @@ const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
                                 id={`${idPrefix}-shelf-end`}
                                 value={formInput.shelfEnd ?? ''}
                                 onChange={onShelfEndChange}
-                                aria-invalid={showFieldErrors && shelfFieldInvalid}
-                                aria-describedby={showFieldErrors && shelfFieldInvalid ? errorId : undefined}
+                                {...validationUi.getFieldA11yProps('shelf', shelfFieldInvalid)}
                             />
                         </div>
                     </div>
+                    <InlineFieldError
+                        id={validationUi.getInlineErrorId('shelf')}
+                        message={validationUi.getInlineErrorMessage(shelfFieldInvalid)}
+                    />
                 </FormSection>
             </div>
 
-            <FormFeedback errorMessage={errorMessage} warningMessage={warningMessage} errorId={errorId} />
-
             <div className={formLayoutStyles.actionsRow}>
-                <GenerateLabelsButton className={formLayoutStyles.generateButton} onClick={handleGenerateLabel} />
+                <GenerateLabelsButton className={formLayoutStyles.generateButton} onClick={validationUi.handleGenerate} />
             </div>
 
             {generatedLabels && (

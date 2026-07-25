@@ -31,6 +31,13 @@
   color: #6b7280;
 }
 
+.fieldErrorMessage {
+  margin: 8px 0 0;
+  color: #a50000;
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
 @media (max-width: 768px) {
   .panelTitle {
     font-size: 1.6rem;

@@ -3,6 +3,7 @@ import styles from './SpecificLabelForm.module.css';
 import shellStyles from './FormShell.module.css';
 import LabelGenerator from './LabelGenerator';
 import FormFeedback from './FormFeedback';
+import InlineFieldError from './InlineFieldError';
 import GenerateLabelsButton from './GenerateLabelsButton';
 import FormSection from './FormSection';
 import {
@@ -13,7 +14,7 @@ import { RadioGroup, TextField } from './FormControls';
 import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant';
 import { useResetOnVariantChange } from '../hooks/useResetOnVariantChange';
 import { useSpecificLabelForm } from '../hooks/useSpecificLabelForm';
-import { useAccessibleGenerateAction } from '../hooks/useAccessibleGenerateAction';
+import { useFormValidationUi } from '../hooks/useFormValidationUi';
 
 interface SpecificLabelFormProps {
     miniVariantId?: MiniCompositionVariantId;
@@ -25,14 +26,15 @@ const SpecificLabelForm: React.FC<SpecificLabelFormProps> = ({ miniVariantId }) 
     const { bayRangeText, shelfRangeText, namedAisleExamples, aislePrefixedExamples } = content;
     const { labelText, generatedLabels, errorMessage, warningMessage, labelPrintMode, printModeOptions } = state;
     const { onInputChange, handleModeChange, generateLabel, resetGeneratedLabels } = actions;
-    const errorId = `${idPrefix}-specific-error`;
     const inputId = `${idPrefix}-specific-input`;
-    const hasError = errorMessage !== null;
 
     useResetOnVariantChange(miniVariantId, resetGeneratedLabels);
 
-    const handleGenerateLabel = useAccessibleGenerateAction({
+    const validationUi = useFormValidationUi({
+        idPrefix,
+        errorScope: 'specific',
         errorMessage,
+        warningMessage,
         generatedLabels,
         onGenerate: generateLabel,
         getFirstInvalidFieldId: React.useCallback(() => inputId, [inputId]),
@@ -45,6 +47,7 @@ const SpecificLabelForm: React.FC<SpecificLabelFormProps> = ({ miniVariantId }) 
                 <br/>Labels must have no spaces or dashes.
                 <br/>Named aisle values without bay/shelf are supported: {namedAisleExamples}.
             </p>
+            <FormFeedback {...validationUi.feedbackProps} />
 
             <FormSection title="Label Input">
                 <div className={styles.formStack}>
@@ -54,8 +57,11 @@ const SpecificLabelForm: React.FC<SpecificLabelFormProps> = ({ miniVariantId }) 
                         value={labelText}
                         placeholder="Enter labels"
                         onChange={onInputChange}
-                        aria-invalid={hasError}
-                        aria-describedby={hasError ? errorId : undefined}
+                        {...validationUi.getFieldA11yProps('input', validationUi.showFieldErrors)}
+                    />
+                    <InlineFieldError
+                        id={validationUi.getInlineErrorId('input')}
+                        message={validationUi.getInlineErrorMessage(validationUi.showFieldErrors)}
                     />
                     <p>Bay values must be {bayRangeText} and shelves must be {shelfRangeText}.</p>
                 </div>
@@ -70,10 +76,8 @@ const SpecificLabelForm: React.FC<SpecificLabelFormProps> = ({ miniVariantId }) 
                 />
             </FormSection>
 
-            <FormFeedback errorMessage={errorMessage} warningMessage={warningMessage} errorId={errorId} />
-
             <div className={styles.actionsRow}>
-                <GenerateLabelsButton className={styles.generateButton} onClick={handleGenerateLabel} />
+                <GenerateLabelsButton className={styles.generateButton} onClick={validationUi.handleGenerate} />
             </div>
 
             {generatedLabels && (

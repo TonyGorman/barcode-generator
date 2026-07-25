@@ -6,11 +6,25 @@ export const getShortValidationError = (formInput: IShortLabelInput) => {
 };
 
 export const isShortBayFieldInvalid = (validationError: ReturnType<typeof getShortValidationError>): boolean => {
-  return validationError !== null && ['SHORT_REQUIRED', 'SHORT_ORDER', 'SHORT_BAY_RANGE'].includes(validationError.code);
+  return validationError !== null && ['SHORT_ORDER', 'SHORT_BAY_RANGE'].includes(validationError.code);
 };
 
 export const isShortShelfFieldInvalid = (validationError: ReturnType<typeof getShortValidationError>): boolean => {
-  return validationError !== null && ['SHORT_REQUIRED', 'SHELF_ORDER'].includes(validationError.code);
+  return validationError !== null && ['SHELF_ORDER'].includes(validationError.code);
+};
+
+export const isShortRequiredBayFieldMissing = (
+  validationError: ReturnType<typeof getShortValidationError>,
+  formInput: IShortLabelInput,
+): boolean => {
+  return validationError?.code === 'SHORT_REQUIRED' && (formInput.bayStart === null || formInput.bayEnd === null);
+};
+
+export const isShortRequiredShelfFieldMissing = (
+  validationError: ReturnType<typeof getShortValidationError>,
+  formInput: IShortLabelInput,
+): boolean => {
+  return validationError?.code === 'SHORT_REQUIRED' && formInput.shelfEnd === null;
 };
 
 interface FirstInvalidShortFieldArgs {

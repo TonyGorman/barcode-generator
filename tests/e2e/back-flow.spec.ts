@@ -63,4 +63,17 @@ test.describe('Label Generator regressions - Back/FOS Labels flow', () => {
     await expect(page.getByText('BAK01B', { exact: true }).first()).toBeVisible();
     await expect(page.getByText('BAK01C', { exact: true }).first()).toBeVisible();
   });
+
+  test('Back/FOS focuses first invalid field and links it to inline error text', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('tab', { name: 'FOS/Bak Labels' }).click();
+    await page.getByRole('button', { name: 'Generate Labels' }).click();
+
+    const firstInput = page.getByRole('textbox').first();
+    await expect(firstInput).toBeFocused();
+    const describedBy = await firstInput.getAttribute('aria-describedby');
+    expect(describedBy).toBeTruthy();
+    await expect(page.locator(`#${describedBy}`)).toBeVisible();
+    await expect(page.getByRole('alert')).toContainText('Please enter start bay, end bay, and select an end shelf.');
+  });
 });

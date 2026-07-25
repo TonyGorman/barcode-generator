@@ -13,11 +13,13 @@ export const getAisleValidationError = (formInput: IAisleLabelInput) => {
 };
 
 export const isAisleRangeFieldInvalid = (validationError: ReturnType<typeof getAisleValidationError>): boolean => {
-  return validationError !== null && ['AISLE_REQUIRED', 'AISLE_RANGE', 'AISLE_ORDER'].includes(validationError.code);
+  return validationError !== null && ['AISLE_RANGE', 'AISLE_ORDER'].includes(validationError.code);
 };
 
-export const isAisleShelfFieldInvalid = (validationError: ReturnType<typeof getAisleValidationError>): boolean => {
-  return validationError !== null && ['AISLE_REQUIRED', 'SHELF_ORDER'].includes(validationError.code);
+export const isAisleShelfFieldInvalid = (
+  validationError: ReturnType<typeof getAisleValidationError>,
+): boolean => {
+  return validationError !== null && ['SHELF_ORDER'].includes(validationError.code);
 };
 
 export const isAisleSideFieldInvalid = (
@@ -48,6 +50,20 @@ export const isAisleSideFieldInvalid = (
     default:
       return false;
   }
+};
+
+export const isAisleRequiredAisleFieldMissing = (
+  validationError: ReturnType<typeof getAisleValidationError>,
+  formInput: IAisleLabelInput,
+): boolean => {
+  return validationError?.code === 'AISLE_REQUIRED' && (!hasValue(formInput.aisleStart) || !hasValue(formInput.aisleEnd));
+};
+
+export const isAisleRequiredShelfFieldMissing = (
+  validationError: ReturnType<typeof getAisleValidationError>,
+  formInput: IAisleLabelInput,
+): boolean => {
+  return validationError?.code === 'AISLE_REQUIRED' && !formInput.shelfEnd;
 };
 
 interface FirstInvalidAisleFieldArgs {

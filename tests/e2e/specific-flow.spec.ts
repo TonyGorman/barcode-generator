@@ -123,4 +123,17 @@ test.describe('Label Generator regressions - Specific Labels flow', () => {
     await page.getByRole('button', { name: 'Go to page 2' }).click();
     await expect(previewPage.getByText('01L36A', { exact: true }).first()).toBeVisible();
   });
+
+  test('Specific Labels focuses invalid input and links it to inline error text', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('tab', { name: 'Specific Labels' }).click();
+    await page.getByRole('button', { name: 'Generate Labels' }).click();
+
+    const input = page.getByPlaceholder('Enter labels');
+    await expect(input).toBeFocused();
+    const describedBy = await input.getAttribute('aria-describedby');
+    expect(describedBy).toBeTruthy();
+    await expect(page.locator(`#${describedBy}`)).toBeVisible();
+    await expect(page.getByRole('alert')).toContainText('Enter at least one label value.');
+  });
 });
