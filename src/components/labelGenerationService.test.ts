@@ -57,6 +57,34 @@ describe('labelGenerationService', () => {
     expect(result.labels).toEqual([]);
   });
 
+  it('returns generated aisle labels for a valid aisle/side/shelf range', () => {
+    const result = generateAisleLabels({
+      formInput: {
+        aisleStart: 1,
+        aisleEnd: 1,
+        sideRanges: {
+          L: { start: 1, end: 2 },
+          R: { start: null, end: null },
+          E: { start: null, end: null },
+          F: { start: null, end: null },
+        },
+        shelfStart: 'A',
+        shelfEnd: 'B',
+      },
+      minAisleValue: 0,
+      maxAisleValue: 99,
+      maxBayValue: 99,
+      softLimit: 100,
+      hardLimit: 200,
+      totalLabels: 4,
+      formatTwoDigitValue: formatTwoDigits,
+    });
+
+    expect(result.errorMessage).toBeNull();
+    expect(result.warningMessage).toBeNull();
+    expect(result.labels).toEqual(['01L01A', '01L01B', '01L02A', '01L02B']);
+  });
+
   it('returns generated labels and warning for short soft-limit batches', () => {
     const result = generateShortLabels({
       formInput: {

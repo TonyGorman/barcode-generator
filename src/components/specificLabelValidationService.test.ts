@@ -77,4 +77,17 @@ describe('specificLabelValidationService', () => {
     expect(result.warningMessage).toBeNull();
     expect(result.labels).toEqual(['01L01A', 'BAK01A']);
   });
+
+  it('returns soft-limit warning for valid large batches', () => {
+    const result = validateSpecificLabels({
+      labelText: new Array(1801).fill('01L01A').join(','),
+      labelPrintMode: 'mini-sel',
+      validateSpecificCode: alwaysValid,
+      contentTokens,
+    });
+
+    expect(result.errorMessage).toBeNull();
+    expect(result.warningMessage).toContain('Large batch warning: more than 1800 labels');
+    expect(result.labels).toHaveLength(1801);
+  });
 });
