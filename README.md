@@ -32,7 +32,7 @@ All labels display:
 - A CODE128B barcode (always encoded compactly, without spaces or dashes, for reliable scanning)
 - Encoded barcode value as readable text below the barcode for visual verification
 
-Shelf values are always alphabetical (`A`-`Z`) across generated aisle and short code labels. 
+Shelf values are always alphabetical (`A`-`Z`) across generated aisle and short code labels.
 `Special aisle` values are defined in code via a config entry for values such as `KIOSK` or `FLORAL`. These only display that special aisle value, without side, bay or shelf.
 
 ### Mini SEL Composition Variants
