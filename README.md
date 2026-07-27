@@ -326,6 +326,10 @@ Run all Playwright E2E tests:
 
 `npm run test:e2e`
 
+If all E2E tests fail immediately at browser launch after dependency updates (for example missing Chromium executable), install browsers first:
+
+`npm run test:e2e:install`
+
 Run only one of the focused specs, e.g. the Aisle Labels flow:
 
 `npm run test:e2e -- tests/e2e/aisle-flow.spec.ts`

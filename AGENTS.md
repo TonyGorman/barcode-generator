@@ -62,6 +62,7 @@ This blocking is intentional to avoid complexity in large labels, in the absence
 - GitHub Pages deploy workflow quality gate: `validate:ci` checks plus `npm run audit:prod`
 - Full release validation gate: `npm run validate:release`
 - `validate:release` runs `validate:ci`, `npm run audit:prod`, `npm run test:a11y`, and `npm run test:e2e`
+- If E2E tests all fail at launch after dependency updates (missing Playwright browser executable), run `npm run test:e2e:install` before re-running `npm run test:e2e` or `npm run validate:release`.
 - Coverage remains available when needed: `npm run test:coverage`
 - Visual regressions remain available when needed: `npm run test:visual`
 - Update visual baselines only for intentional UI changes: `npm run test:visual:update`
