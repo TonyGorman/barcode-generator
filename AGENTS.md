@@ -58,13 +58,20 @@ This blocking is intentional to avoid complexity in large labels, in the absence
 ## Validation Gates
 
 - Fast local validation gate: `npm run validate:ci`
-- `validate:ci` runs style typing, style audit, `test:run`, and `build:bundle`
+- `validate:ci` runs style typing, style audit, `lint`, `lint:complexity`, `test:run`, and `build:bundle`
 - GitHub Pages deploy workflow quality gate: `validate:ci` checks plus `npm run audit:prod`
 - Full release validation gate: `npm run validate:release`
 - `validate:release` runs `validate:ci`, `npm run audit:prod`, `npm run test:a11y`, and `npm run test:e2e`
 - Coverage remains available when needed: `npm run test:coverage`
 - Visual regressions remain available when needed: `npm run test:visual`
 - Update visual baselines only for intentional UI changes: `npm run test:visual:update`
+
+## Complexity-First Rule
+
+- Before implementing non-trivial changes, run `npm run lint:complexity` to establish a baseline in files likely to be touched.
+- If a target function is near/over threshold, plan extractions or helper splits before adding new branches.
+- In touched files, complexity should stay flat or improve; avoid adding logic that pushes functions over threshold unless there is a strong reason.
+- When higher complexity is unavoidable, document why and add/adjust tests that cover the new branches.
 
 ## Skills Check Invocation
 
