@@ -1,6 +1,8 @@
 # SEL Generator
 
-Generate Shelf Edge Labels for printing.
+Generate Shelf Edge Labels for printing mini labels (39mm × 39mm) and  large labels (105mm × 73mm) onto special perforated paper. Each size has its ownparticular paper to space the labels correctly.
+
+There are 2 supported "variants" of mini labels reflecting differing use case: stacked and shelf-emphasis. More details below.
 
 ## Features
 
@@ -8,7 +10,7 @@ Generate Shelf Edge Labels for printing.
 
 The app provides three workflows for generating shelf edge labels:
 
-- **Specific Labels**: Enter custom barcode values (one per line, comma-separated) in compact format (for example `01L01A`, `BR10L01A`, `BAK01A`). Spaces and dashes are not accepted. Supports both mini (39mm × 39mm) and large (105mm × 73mm) label sizes.
+- **Specific Labels**: Enter custom barcode values (one per line, comma-separated) in compact format (for example `01L01A`, `BR10L01A`, `BAK01A`). Spaces and dashes are not accepted. Supports both mini large labels.
 - **Aisle Labels**: Generate sequential labels for store aisles, with configurable layout (mini or large SEL format) and optional shelf range selection (e.g., shelves B through D instead of always A through chosen value).
 - **Short Code  Labels**: Generate labels for back wall or front of store items, with custom prefix support.
 
@@ -16,7 +18,7 @@ The app provides three workflows for generating shelf edge labels:
 
 To prevent oversized jobs from degrading browser preview/export performance, generation uses a soft/hard cap:
 
-- **Soft limit:** `1000` labels — generation still succeeds and shows a warning.
+- **Soft limit:** `1800` labels — generation still succeeds and shows a warning.
 - **Hard limit:** `2000` labels — generation is blocked with an error.
 
 These are centrally configured in `src/config/labelConfig.ts` under:
@@ -119,6 +121,8 @@ Naming convention:
 
 - Use noun-oriented module names for orchestration modules (`*Service.ts`).
 - Use verb-oriented exports (`generateAisleLabels`, `generateShortLabels`, `validateSpecificLabels`, `evaluateLabelBatchLimits`).
+- `npm run lint:naming` enforces hook export/file naming as errors and reports boolean-prefix drift as warnings.
+- Naming lint runs as part of `npm run validate:ci`.
 
 ## Layout Strategies
 
@@ -182,6 +186,9 @@ Quality checks run in CI:
 - `npm run audit:prod`
 - `npm run styles:types:check`
 - `npm run styles:audit`
+- `npm run lint`
+- `npm run lint:naming`
+- `npm run lint:complexity`
 - `npm run test:run`
 - `npm run build`
 
@@ -193,6 +200,9 @@ This runs:
 
 - `npm run styles:types:check`
 - `npm run styles:audit`
+- `npm run lint`
+- `npm run lint:naming`
+- `npm run lint:complexity`
 - `npm run test:run` (typecheck + unit tests)
 - `npm run build:bundle`
 

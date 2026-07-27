@@ -58,13 +58,25 @@ This blocking is intentional to avoid complexity in large labels, in the absence
 ## Validation Gates
 
 - Fast local validation gate: `npm run validate:ci`
-- `validate:ci` runs style typing, style audit, `lint`, `lint:complexity`, `test:run`, and `build:bundle`
+- `validate:ci` runs style typing, style audit, `lint`, `lint:naming`, `lint:complexity`, `test:run`, and `build:bundle`
 - GitHub Pages deploy workflow quality gate: `validate:ci` checks plus `npm run audit:prod`
 - Full release validation gate: `npm run validate:release`
 - `validate:release` runs `validate:ci`, `npm run audit:prod`, `npm run test:a11y`, and `npm run test:e2e`
 - Coverage remains available when needed: `npm run test:coverage`
 - Visual regressions remain available when needed: `npm run test:visual`
 - Update visual baselines only for intentional UI changes: `npm run test:visual:update`
+
+## Naming Conventions Standard
+
+- Components use PascalCase symbols and PascalCase file names (for example `AisleLabelForm.tsx`).
+- Hooks use camelCase with a `use` prefix and `use*.ts`/`use*.tsx` file names.
+- Non-component modules (domain/config/services/utils) use camelCase file names.
+- Type aliases, interfaces, and exported model types use PascalCase.
+- Module-level constants use UPPER_SNAKE_CASE; local constants use camelCase.
+- Boolean identifiers should use `is*`, `has*`, `can*`, or `should*` prefixes.
+- Event handlers should use a `handle*` prefix.
+- Naming lint (`npm run lint:naming`) enforces hook export names (`use*`) and file naming rules as errors; violations must be fixed before merge.
+- Boolean-prefix checks are included in `lint:naming` as warnings to surface drift without forcing broad legacy churn.
 
 ## Complexity-First Rule
 
