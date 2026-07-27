@@ -21,6 +21,12 @@ export default [
     },
     rules: {
       complexity: ['error', 10],
+      // Naming enforcement: fail on declaration names outside the agreed conventions.
+      'id-match': ['error', '^(?:_?[a-z][a-zA-Z0-9]*|_?[A-Z][a-zA-Z0-9]*|[A-Z][A-Z0-9_]*)$', {
+        onlyDeclarations: true,
+        properties: false,
+        ignoreDestructuring: true,
+      }],
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
     },
