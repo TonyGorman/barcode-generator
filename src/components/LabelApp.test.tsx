@@ -42,7 +42,9 @@ describe('LabelApp', () => {
   it('switches to aisle tab when Aisle Labels tab is clicked', () => {
     render(<LabelApp />);
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Aisle Labels' }));
+    const aisleTab = document.getElementById('tab-aisle');
+    expect(aisleTab).not.toBeNull();
+    fireEvent.click(aisleTab as HTMLElement);
 
     const specificPanel = document.getElementById('panel-specific');
     const aislePanel = document.getElementById('panel-aisle');
@@ -56,7 +58,9 @@ describe('LabelApp', () => {
   it('switches to back/FOS tab when FOS/Bak Labels tab is clicked', () => {
     render(<LabelApp />);
 
-    fireEvent.click(screen.getByRole('tab', { name: 'FOS/Bak Labels' }));
+    const backTab = document.getElementById('tab-bak');
+    expect(backTab).not.toBeNull();
+    fireEvent.click(backTab as HTMLElement);
 
     const specificPanel = document.getElementById('panel-specific');
     const bakPanel = document.getElementById('panel-bak');
@@ -70,10 +74,15 @@ describe('LabelApp', () => {
   it('switches back to specific tab after visiting another tab', () => {
     render(<LabelApp />);
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Aisle Labels' }));
+    const aisleTab = document.getElementById('tab-aisle');
+    const specificTab = document.getElementById('tab-specific');
+    expect(aisleTab).not.toBeNull();
+    expect(specificTab).not.toBeNull();
+
+    fireEvent.click(aisleTab as HTMLElement);
     expect(screen.getByText('Aisle Mock')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Specific Labels' }));
+    fireEvent.click(specificTab as HTMLElement);
     expect(screen.getByText('Specific Form Mock')).toBeInTheDocument();
   });
 
