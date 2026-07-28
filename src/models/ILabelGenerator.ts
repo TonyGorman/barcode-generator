@@ -1,8 +1,8 @@
-import { LabelPrintMode } from './ILabelLayoutStrategy';
-import { MiniCompositionVariantId } from './IMiniCompositionVariant';
+import { LabelPrintMode } from './ILabelLayoutStrategy'
+import { MiniCompositionVariantId } from './IMiniCompositionVariant'
 
 export interface ILabelGenerator {
-  labelCodes: string[];
-  layoutMode?: LabelPrintMode;
-  miniVariantId?: MiniCompositionVariantId;
+  labelCodes: string[]
+  layoutMode?: LabelPrintMode
+  miniVariantId?: MiniCompositionVariantId
 }

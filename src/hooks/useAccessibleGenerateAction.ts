@@ -1,10 +1,10 @@
-import * as React from 'react';
+import * as React from 'react'
 
 interface UseAccessibleGenerateActionArgs {
-  errorMessage: string | null;
-  generatedLabels: string[] | null;
-  onGenerate: () => void;
-  getFirstInvalidFieldId?: () => string | null;
+  errorMessage: string | null
+  generatedLabels: string[] | null
+  onGenerate: () => void
+  getFirstInvalidFieldId?: () => string | null
 }
 
 export const useAccessibleGenerateAction = ({
@@ -13,33 +13,33 @@ export const useAccessibleGenerateAction = ({
   onGenerate,
   getFirstInvalidFieldId,
 }: UseAccessibleGenerateActionArgs): (() => void) => {
-  const [submitAttempted, setSubmitAttempted] = React.useState(false);
+  const [submitAttempted, setSubmitAttempted] = React.useState(false)
 
   React.useEffect(() => {
     if (!submitAttempted) {
-      return;
+      return
     }
 
     if (errorMessage === null) {
       if (generatedLabels) {
-        setSubmitAttempted(false);
+        setSubmitAttempted(false)
       }
-      return;
+      return
     }
 
-    const firstInvalidFieldId = getFirstInvalidFieldId?.();
+    const firstInvalidFieldId = getFirstInvalidFieldId?.()
     if (firstInvalidFieldId) {
-      const invalidField = document.getElementById(firstInvalidFieldId);
+      const invalidField = document.getElementById(firstInvalidFieldId)
       if (invalidField instanceof HTMLElement) {
-        invalidField.focus();
+        invalidField.focus()
       }
     }
 
-    setSubmitAttempted(false);
-  }, [errorMessage, generatedLabels, getFirstInvalidFieldId, submitAttempted]);
+    setSubmitAttempted(false)
+  }, [errorMessage, generatedLabels, getFirstInvalidFieldId, submitAttempted])
 
   return React.useCallback(() => {
-    setSubmitAttempted(true);
-    onGenerate();
-  }, [onGenerate]);
-};
+    setSubmitAttempted(true)
+    onGenerate()
+  }, [onGenerate])
+}

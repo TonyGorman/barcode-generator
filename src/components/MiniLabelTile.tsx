@@ -1,24 +1,20 @@
-import * as React from 'react';
-import styles from './LabelTile.module.css';
-import { getLabelLayoutStrategy } from '../config/labelLayoutStrategies';
-import { LabelPrintMode } from '../models/ILabelLayoutStrategy';
-import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant';
-import { useMiniLabelTileComposition } from '../hooks/useMiniLabelTileComposition';
-import MiniLabelTileContent from './MiniLabelTileContent';
-import BarcodeBlock from './BarcodeBlock';
+import * as React from 'react'
+import styles from './LabelTile.module.css'
+import { getLabelLayoutStrategy } from '../config/labelLayoutStrategies'
+import { LabelPrintMode } from '../models/ILabelLayoutStrategy'
+import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant'
+import { useMiniLabelTileComposition } from '../hooks/useMiniLabelTileComposition'
+import MiniLabelTileContent from './MiniLabelTileContent'
+import BarcodeBlock from './BarcodeBlock'
 
 interface IMiniLabelTileProps {
-  code: string;
-  layoutMode: LabelPrintMode;
-  miniVariantId: MiniCompositionVariantId;
+  code: string
+  layoutMode: LabelPrintMode
+  miniVariantId: MiniCompositionVariantId
 }
 
-const MiniLabelTile: React.FC<IMiniLabelTileProps> = ({
-  code,
-  layoutMode,
-  miniVariantId,
-}) => {
-  const layoutStrategy = getLabelLayoutStrategy(layoutMode);
+const MiniLabelTile: React.FC<IMiniLabelTileProps> = ({ code, layoutMode, miniVariantId }) => {
+  const layoutStrategy = getLabelLayoutStrategy(layoutMode)
   const {
     composedMiniLabel,
     miniGeometry,
@@ -31,7 +27,7 @@ const MiniLabelTile: React.FC<IMiniLabelTileProps> = ({
     code,
     miniVariantId,
     layoutStrategy,
-  });
+  })
 
   return (
     <div className={styles.labelBox}>
@@ -52,7 +48,7 @@ const MiniLabelTile: React.FC<IMiniLabelTileProps> = ({
         barcodeHeightMm={layoutStrategy.typography.barcodeHeightMm}
       />
     </div>
-  );
-};
+  )
+}
 
-export default MiniLabelTile;
+export default MiniLabelTile

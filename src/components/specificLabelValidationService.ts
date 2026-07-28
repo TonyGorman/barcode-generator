@@ -1,31 +1,23 @@
-import {
-  LABEL_HARD_LIMIT,
-  LABEL_SOFT_LIMIT,
-  SHORT_CODE_PREFIXES,
-  SPECIAL_AISLE_VALUES,
-} from '../config/labelConfig';
-import {
-  VALIDATION_MESSAGES,
-  getSpecificInvalidLabelMessage,
-} from '../config/validationMessages';
-import { normalizeSpecificInputCodes } from '../domain/labelGeneration';
-import type { SpecificLabelValidationResult } from '../domain/labelCodeDomain';
-import { LabelPrintMode } from '../models/ILabelLayoutStrategy';
-import { ILabelGenerationResult } from '../models/ILabelGenerationResult';
-import { evaluateLabelBatchLimits } from './labelBatchLimitService';
+import { LABEL_HARD_LIMIT, LABEL_SOFT_LIMIT, SHORT_CODE_PREFIXES, SPECIAL_AISLE_VALUES } from '../config/labelConfig'
+import { VALIDATION_MESSAGES, getSpecificInvalidLabelMessage } from '../config/validationMessages'
+import { normalizeSpecificInputCodes } from '../domain/labelGeneration'
+import type { SpecificLabelValidationResult } from '../domain/labelCodeDomain'
+import { LabelPrintMode } from '../models/ILabelLayoutStrategy'
+import { ILabelGenerationResult } from '../models/ILabelGenerationResult'
+import { evaluateLabelBatchLimits } from './labelBatchLimitService'
 
 interface SpecificLabelValidationContent {
-  bayRangeText: string;
-  shelfRangeText: string;
-  namedAisleExamples: string;
-  aislePrefixedExamples: string;
+  bayRangeText: string
+  shelfRangeText: string
+  namedAisleExamples: string
+  aislePrefixedExamples: string
 }
 
 interface SpecificLabelValidationArgs {
-  labelText: string;
-  labelPrintMode: LabelPrintMode;
-  validateSpecificCode: (code: string) => SpecificLabelValidationResult;
-  contentTokens: SpecificLabelValidationContent;
+  labelText: string
+  labelPrintMode: LabelPrintMode
+  validateSpecificCode: (code: string) => SpecificLabelValidationResult
+  contentTokens: SpecificLabelValidationContent
 }
 
 export const validateSpecificLabels = ({
@@ -34,28 +26,31 @@ export const validateSpecificLabels = ({
   validateSpecificCode,
   contentTokens,
 }: SpecificLabelValidationArgs): ILabelGenerationResult => {
-  const labels = normalizeSpecificInputCodes(labelText);
+  const labels = normalizeSpecificInputCodes(labelText)
 
   if (labels.length === 0) {
     return {
       labels: [],
       errorMessage: VALIDATION_MESSAGES.specificEmpty,
       warningMessage: null,
-    };
+    }
   }
 
-  const batchLimits = evaluateLabelBatchLimits(labels.length, LABEL_SOFT_LIMIT, LABEL_HARD_LIMIT);
+  const batchLimits = evaluateLabelBatchLimits(labels.length, LABEL_SOFT_LIMIT, LABEL_HARD_LIMIT)
   if (batchLimits.hardLimitError) {
     return {
       labels: [],
       errorMessage: batchLimits.hardLimitError,
       warningMessage: null,
-    };
+    }
   }
 
   const firstInvalidLabel = labels
     .map((code) => ({ code, result: validateSpecificCode(code) }))
-    .find((entry): entry is { code: string; result: Extract<SpecificLabelValidationResult, { ok: false }> } => entry.result.ok === false);
+    .find(
+      (entry): entry is { code: string; result: Extract<SpecificLabelValidationResult, { ok: false }> } =>
+        entry.result.ok === false,
+    )
 
   if (firstInvalidLabel) {
     return {
@@ -71,23 +66,23 @@ export const validateSpecificLabels = ({
         shelfRangeText: contentTokens.shelfRangeText,
       }),
       warningMessage: null,
-    };
+    }
   }
 
   if (
-    labelPrintMode === 'large-sel'
-    && labels.some((code) => (SPECIAL_AISLE_VALUES as ReadonlyArray<string>).includes(code))
+    labelPrintMode === 'large-sel' &&
+    labels.some((code) => (SPECIAL_AISLE_VALUES as ReadonlyArray<string>).includes(code))
   ) {
     return {
       labels: [],
       errorMessage: VALIDATION_MESSAGES.specificLargeSelSpecialCode,
       warningMessage: null,
-    };
+    }
   }
 
   return {
     labels,
     errorMessage: null,
     warningMessage: batchLimits.warningMessage,
-  };
-};
+  }
+}

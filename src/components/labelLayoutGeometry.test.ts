@@ -1,12 +1,12 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest'
 import {
   estimatePrimaryTextWidthMm,
   fitMiniPrimaryFontSizeMm,
   getMiniAisleThreeRowGeometry,
   getMiniBarcodeTopFromTileTopMm,
   getPdfBaselineFromCenterMm,
-} from './labelLayoutGeometry';
-import { ILabelLayoutStrategy } from '../models/ILabelLayoutStrategy';
+} from './labelLayoutGeometry'
+import { ILabelLayoutStrategy } from '../models/ILabelLayoutStrategy'
 
 const createMiniStrategy = (): ILabelLayoutStrategy => ({
   mode: 'mini-sel',
@@ -51,87 +51,88 @@ const createMiniStrategy = (): ILabelLayoutStrategy => ({
     heightMm: 10,
     marginBottomMm: 2,
   },
-});
+})
 
 describe('labelLayoutGeometry', () => {
   it('estimates primary text width and returns 0 for empty text', () => {
-    expect(estimatePrimaryTextWidthMm('', 9, 0.2)).toBe(0);
+    expect(estimatePrimaryTextWidthMm('', 9, 0.2)).toBe(0)
 
-    const expected = 3 * 9 * 0.62 + 2 * 0.2;
-    expect(estimatePrimaryTextWidthMm('ABC', 9, 0.2)).toBeCloseTo(expected, 5);
-  });
+    const expected = 3 * 9 * 0.62 + 2 * 0.2
+    expect(estimatePrimaryTextWidthMm('ABC', 9, 0.2)).toBeCloseTo(expected, 5)
+  })
 
   it('returns max font size when mode is not mini-sel or auto-fit is disabled', () => {
-    const mini = createMiniStrategy();
-    const largeMode = { ...mini, mode: 'large-sel' as const, renderVariant: 'large' as const };
-    expect(fitMiniPrimaryFontSizeMm('LONGTEXT', largeMode)).toBe(mini.typography.primaryTextMaxSizeMm);
+    const mini = createMiniStrategy()
+    const largeMode = { ...mini, mode: 'large-sel' as const, renderVariant: 'large' as const }
+    expect(fitMiniPrimaryFontSizeMm('LONGTEXT', largeMode)).toBe(mini.typography.primaryTextMaxSizeMm)
 
     const noAutoFit = {
       ...mini,
       typography: { ...mini.typography, primaryAutoFitEnabled: false },
-    };
-    expect(fitMiniPrimaryFontSizeMm('LONGTEXT', noAutoFit)).toBe(mini.typography.primaryTextMaxSizeMm);
-  });
+    }
+    expect(fitMiniPrimaryFontSizeMm('LONGTEXT', noAutoFit)).toBe(mini.typography.primaryTextMaxSizeMm)
+  })
 
   it('returns max size when renderVariant is large regardless of primaryAutoFitEnabled', () => {
-    const mini = createMiniStrategy();
+    const mini = createMiniStrategy()
     const largeHeading = {
       ...mini,
       mode: 'large-sel' as const,
       renderVariant: 'large' as const,
       typography: { ...mini.typography, primaryAutoFitEnabled: true },
-    };
-    expect(fitMiniPrimaryFontSizeMm('LONGTEXT', largeHeading)).toBe(mini.typography.primaryTextMaxSizeMm);
-  });
+    }
+    expect(fitMiniPrimaryFontSizeMm('LONGTEXT', largeHeading)).toBe(mini.typography.primaryTextMaxSizeMm)
+  })
 
   it('returns max for empty primary text and min when available width is non-positive', () => {
-    const mini = createMiniStrategy();
-    expect(fitMiniPrimaryFontSizeMm('', mini)).toBe(mini.typography.primaryTextMaxSizeMm);
+    const mini = createMiniStrategy()
+    expect(fitMiniPrimaryFontSizeMm('', mini)).toBe(mini.typography.primaryTextMaxSizeMm)
 
     const noSpace = {
       ...mini,
       page: { ...mini.page, labelWidthMm: 1 },
       typography: { ...mini.typography, tilePaddingHorizontalMm: 1 },
-    };
-    expect(fitMiniPrimaryFontSizeMm('ANY', noSpace)).toBe(mini.typography.primaryTextMinSizeMm);
-  });
+    }
+    expect(fitMiniPrimaryFontSizeMm('ANY', noSpace)).toBe(mini.typography.primaryTextMinSizeMm)
+  })
 
   it('keeps max when text already fits and clamps to min when far too long', () => {
-    const mini = createMiniStrategy();
-    const fitsAtMax = () => 1;
-    expect(fitMiniPrimaryFontSizeMm('SHORT', mini, fitsAtMax)).toBe(mini.typography.primaryTextMaxSizeMm);
+    const mini = createMiniStrategy()
+    const fitsAtMax = () => 1
+    expect(fitMiniPrimaryFontSizeMm('SHORT', mini, fitsAtMax)).toBe(mini.typography.primaryTextMaxSizeMm)
 
-    const hugeMeasure = () => 1_000_000;
-    expect(fitMiniPrimaryFontSizeMm('VERYLONGVALUE', mini, hugeMeasure)).toBe(mini.typography.primaryTextMinSizeMm);
-  });
+    const hugeMeasure = () => 1_000_000
+    expect(fitMiniPrimaryFontSizeMm('VERYLONGVALUE', mini, hugeMeasure)).toBe(mini.typography.primaryTextMinSizeMm)
+  })
 
   it('returns first pass when measured width collapses to zero at first pass', () => {
-    const mini = createMiniStrategy();
-    const measure = (_text: string, fontSizeMm: number) => (fontSizeMm >= mini.typography.primaryTextMaxSizeMm ? 500 : 0);
+    const mini = createMiniStrategy()
+    const measure = (_text: string, fontSizeMm: number) =>
+      fontSizeMm >= mini.typography.primaryTextMaxSizeMm ? 500 : 0
 
-    const result = fitMiniPrimaryFontSizeMm('VALUE', mini, measure);
+    const result = fitMiniPrimaryFontSizeMm('VALUE', mini, measure)
 
-    expect(result).toBeGreaterThanOrEqual(mini.typography.primaryTextMinSizeMm);
-    expect(result).toBeLessThanOrEqual(mini.typography.primaryTextMaxSizeMm);
-  });
+    expect(result).toBeGreaterThanOrEqual(mini.typography.primaryTextMinSizeMm)
+    expect(result).toBeLessThanOrEqual(mini.typography.primaryTextMaxSizeMm)
+  })
 
   it('computes stacked mini and PDF geometry offsets', () => {
-    const mini = createMiniStrategy();
-    const geometry = getMiniAisleThreeRowGeometry(mini);
+    const mini = createMiniStrategy()
+    const geometry = getMiniAisleThreeRowGeometry(mini)
 
-    expect(geometry.topCenterFromContentTopMm).toBeGreaterThan(0);
-    expect(geometry.mainCenterFromContentTopMm).toBeGreaterThan(geometry.topCenterFromContentTopMm);
-    expect(geometry.bottomCenterFromContentTopMm).toBeGreaterThan(geometry.mainCenterFromContentTopMm);
-    expect(geometry.auxTextSizeMm).toBeGreaterThan(0);
-    expect(geometry.mainMaxTextSizeMm).toBeGreaterThan(geometry.auxTextSizeMm);
+    expect(geometry.topCenterFromContentTopMm).toBeGreaterThan(0)
+    expect(geometry.mainCenterFromContentTopMm).toBeGreaterThan(geometry.topCenterFromContentTopMm)
+    expect(geometry.bottomCenterFromContentTopMm).toBeGreaterThan(geometry.mainCenterFromContentTopMm)
+    expect(geometry.auxTextSizeMm).toBeGreaterThan(0)
+    expect(geometry.mainMaxTextSizeMm).toBeGreaterThan(geometry.auxTextSizeMm)
 
     expect(getMiniBarcodeTopFromTileTopMm(mini)).toBe(
       mini.page.labelHeightMm -
         mini.typography.tilePaddingBottomMm -
         mini.barcodeGeometry.marginBottomMm -
         mini.barcodeGeometry.heightMm,
-    );
+    )
 
-    expect(getPdfBaselineFromCenterMm(10, 2, 0.5)).toBe(11);
-  });
-});
+    expect(getPdfBaselineFromCenterMm(10, 2, 0.5)).toBe(11)
+  })
+})

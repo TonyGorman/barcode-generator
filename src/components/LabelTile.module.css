@@ -73,8 +73,7 @@
   width: var(--current-tile-width-mm);
   min-width: 0;
   height: var(--current-tile-height-mm);
-  padding: var(--current-tile-pad-top-mm, 1.5mm)
-    var(--current-tile-pad-horizontal-mm, 1.2mm)
+  padding: var(--current-tile-pad-top-mm, 1.5mm) var(--current-tile-pad-horizontal-mm, 1.2mm)
     var(--current-tile-pad-bottom-mm, 0.8mm);
   box-sizing: border-box;
   border: 0.2mm solid #8c8c8c;
@@ -90,8 +89,7 @@
   width: var(--current-tile-width-mm, 105mm);
   min-width: 0;
   height: var(--current-tile-height-mm, 73mm);
-  padding: var(--current-tile-pad-top-mm, 4mm)
-    var(--current-tile-pad-horizontal-mm, 4mm)
+  padding: var(--current-tile-pad-top-mm, 4mm) var(--current-tile-pad-horizontal-mm, 4mm)
     var(--current-tile-pad-bottom-mm, 2mm);
   box-sizing: border-box;
   border: 0.2mm solid #8c8c8c;

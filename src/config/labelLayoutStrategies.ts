@@ -1,10 +1,10 @@
-import { ILabelLayoutStrategy, LabelPrintMode, RenderVariant } from '../models/ILabelLayoutStrategy';
+import { ILabelLayoutStrategy, LabelPrintMode, RenderVariant } from '../models/ILabelLayoutStrategy'
 
 class MiniSelLayoutStrategy implements ILabelLayoutStrategy {
-  mode: LabelPrintMode = 'mini-sel';
-  renderVariant: RenderVariant = 'small';
+  mode: LabelPrintMode = 'mini-sel'
+  renderVariant: RenderVariant = 'small'
 
-  displayName = 'Mini SEL';
+  displayName = 'Mini SEL'
 
   page = {
     sheetWidthMm: 296,
@@ -18,7 +18,7 @@ class MiniSelLayoutStrategy implements ILabelLayoutStrategy {
     labelHeightMm: 39,
     columns: 7,
     rows: 5,
-  };
+  }
 
   typography = {
     primaryTextSizeMm: 12,
@@ -40,20 +40,20 @@ class MiniSelLayoutStrategy implements ILabelLayoutStrategy {
     largePrefixTextSizeMm: 8,
     largeMainTextSizeMm: 12,
     largeSuffixTextSizeMm: 8,
-  };
+  }
 
   barcodeGeometry = {
     widthMm: 37,
     heightMm: 8,
     marginBottomMm: 4,
-  };
+  }
 }
 
 class LargeSelLayoutStrategy implements ILabelLayoutStrategy {
-  mode: LabelPrintMode = 'large-sel';
-  renderVariant: RenderVariant = 'large';
+  mode: LabelPrintMode = 'large-sel'
+  renderVariant: RenderVariant = 'large'
 
-  displayName = 'Large SEL';
+  displayName = 'Large SEL'
 
   page = {
     sheetWidthMm: 210,
@@ -67,7 +67,7 @@ class LargeSelLayoutStrategy implements ILabelLayoutStrategy {
     labelHeightMm: 73,
     columns: 2,
     rows: 4,
-  };
+  }
 
   typography = {
     primaryTextSizeMm: 12,
@@ -89,25 +89,25 @@ class LargeSelLayoutStrategy implements ILabelLayoutStrategy {
     largePrefixTextSizeMm: 12,
     largeMainTextSizeMm: 24,
     largeSuffixTextSizeMm: 12,
-  };
+  }
 
   barcodeGeometry = {
     widthMm: 37,
     heightMm: 8,
     marginBottomMm: 5,
-  };
+  }
 }
 
-const miniSelLayoutStrategy = new MiniSelLayoutStrategy();
-const largeSelLayoutStrategy = new LargeSelLayoutStrategy();
+const miniSelLayoutStrategy = new MiniSelLayoutStrategy()
+const largeSelLayoutStrategy = new LargeSelLayoutStrategy()
 
 const strategyByMode = new Map<LabelPrintMode, ILabelLayoutStrategy>([
   ['mini-sel', miniSelLayoutStrategy],
   ['large-sel', largeSelLayoutStrategy],
-]);
+])
 
 export const getLabelLayoutStrategy = (mode: LabelPrintMode): ILabelLayoutStrategy => {
-  return strategyByMode.get(mode) ?? miniSelLayoutStrategy;
-};
+  return strategyByMode.get(mode) ?? miniSelLayoutStrategy
+}
 
-export const DEFAULT_LABEL_PRINT_MODE: LabelPrintMode = 'mini-sel';
+export const DEFAULT_LABEL_PRINT_MODE: LabelPrintMode = 'mini-sel'

@@ -1,9 +1,9 @@
-import * as React from 'react';
-import shellStyles from './FormShell.module.css';
+import * as React from 'react'
+import shellStyles from './FormShell.module.css'
 
 interface FormSectionProps {
-  title: string;
-  children: React.ReactNode;
+  title: string
+  children: React.ReactNode
 }
 
 const FormSection: React.FC<FormSectionProps> = ({ title, children }) => (
@@ -11,6 +11,6 @@ const FormSection: React.FC<FormSectionProps> = ({ title, children }) => (
     <h2 className={shellStyles.sectionTitle}>{title}</h2>
     {children}
   </section>
-);
+)
 
-export default FormSection;
+export default FormSection

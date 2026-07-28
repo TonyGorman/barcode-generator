@@ -1,13 +1,13 @@
-import * as React from 'react';
-import Barcode from 'react-barcode';
-import styles from './LabelTile.module.css';
-import { convertMmToPx } from './miniPrimaryTextMeasurement';
+import * as React from 'react'
+import Barcode from 'react-barcode'
+import styles from './LabelTile.module.css'
+import { convertMmToPx } from './miniPrimaryTextMeasurement'
 
 interface IBarcodeBlockProps {
-  labelValue: string;
-  isLargeVariant: boolean;
-  barcodeModuleThicknessMm: number;
-  barcodeHeightMm: number;
+  labelValue: string
+  isLargeVariant: boolean
+  barcodeModuleThicknessMm: number
+  barcodeHeightMm: number
 }
 
 const BarcodeBlock: React.FC<IBarcodeBlockProps> = ({
@@ -28,7 +28,7 @@ const BarcodeBlock: React.FC<IBarcodeBlockProps> = ({
       />
       <div className={isLargeVariant ? styles.encodedValueLargeSel : styles.encodedValue}>{labelValue}</div>
     </div>
-  );
-};
+  )
+}
 
-export default BarcodeBlock;
+export default BarcodeBlock

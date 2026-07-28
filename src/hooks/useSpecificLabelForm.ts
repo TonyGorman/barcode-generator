@@ -1,4 +1,4 @@
-import * as React from 'react';
+import * as React from 'react'
 import {
   AISLE_PREFIXES,
   SHORT_CODE_PREFIXES,
@@ -7,60 +7,52 @@ import {
   MAX_BAY_VALUE,
   MAX_SHELF_LETTER,
   SPECIAL_AISLE_VALUES,
-} from '../config/labelConfig';
-import { validateSpecificLabelCode } from '../domain/labelCodeDomain';
-import { LabelPrintMode } from '../models/ILabelLayoutStrategy';
-import { useLabelPrintMode } from './useLabelPrintMode';
-import { useLabelGenerationFeedback } from './useLabelGenerationFeedback';
-import { validateSpecificLabels } from '../components/specificLabelValidationService';
+} from '../config/labelConfig'
+import { validateSpecificLabelCode } from '../domain/labelCodeDomain'
+import { LabelPrintMode } from '../models/ILabelLayoutStrategy'
+import { useLabelPrintMode } from './useLabelPrintMode'
+import { useLabelGenerationFeedback } from './useLabelGenerationFeedback'
+import { validateSpecificLabels } from '../components/specificLabelValidationService'
 
 interface UseSpecificLabelFormResult {
   content: {
-    bayRangeText: string;
-    shelfRangeText: string;
-    namedAisleExamples: string;
-    aislePrefixedExamples: string;
-  };
+    bayRangeText: string
+    shelfRangeText: string
+    namedAisleExamples: string
+    aislePrefixedExamples: string
+  }
   state: {
-    labelText: string;
-    generatedLabels: string[] | null;
-    errorMessage: string | null;
-    warningMessage: string | null;
-    labelPrintMode: LabelPrintMode;
-    printModeOptions: ReturnType<typeof useLabelPrintMode>['printModeOptions'];
-  };
+    labelText: string
+    generatedLabels: string[] | null
+    errorMessage: string | null
+    warningMessage: string | null
+    labelPrintMode: LabelPrintMode
+    printModeOptions: ReturnType<typeof useLabelPrintMode>['printModeOptions']
+  }
   actions: {
-    onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    handleModeChange: (key: LabelPrintMode) => void;
-    generateLabel: () => void;
-    resetGeneratedLabels: () => void;
-  };
+    onInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+    handleModeChange: (key: LabelPrintMode) => void
+    generateLabel: () => void
+    resetGeneratedLabels: () => void
+  }
 }
 
 export const useSpecificLabelForm = (): UseSpecificLabelFormResult => {
-  const bayRangeText = `01-${MAX_BAY_VALUE.toString().padStart(2, '0')}`;
-  const shelfRangeText = `A-${MAX_SHELF_LETTER}`;
-  const namedAisleExamples = SPECIAL_AISLE_VALUES.join(', ');
-  const aislePrefixedExamples = [`${AISLE_PREFIXES[0]}1L01A`, `${AISLE_PREFIXES[1]}2L02B`].join(', ');
+  const bayRangeText = `01-${MAX_BAY_VALUE.toString().padStart(2, '0')}`
+  const shelfRangeText = `A-${MAX_SHELF_LETTER}`
+  const namedAisleExamples = SPECIAL_AISLE_VALUES.join(', ')
+  const aislePrefixedExamples = [`${AISLE_PREFIXES[0]}1L01A`, `${AISLE_PREFIXES[1]}2L02B`].join(', ')
 
-  const [labelText, setLabelText] = React.useState('');
+  const [labelText, setLabelText] = React.useState('')
   const {
-    state: {
-      generatedLabels,
-      errorMessage,
-      warningMessage,
-    },
-    actions: {
-      resetGeneratedLabels,
-      setFailure,
-      setSuccess,
-    },
-  } = useLabelGenerationFeedback();
-  const { labelPrintMode, printModeOptions, handleModeChange } = useLabelPrintMode(resetGeneratedLabels);
+    state: { generatedLabels, errorMessage, warningMessage },
+    actions: { resetGeneratedLabels, setFailure, setSuccess },
+  } = useLabelGenerationFeedback()
+  const { labelPrintMode, printModeOptions, handleModeChange } = useLabelPrintMode(resetGeneratedLabels)
 
   const onInputChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
-    setLabelText(e.target.value);
-  }, []);
+    setLabelText(e.target.value)
+  }, [])
 
   const validateSpecificCode = React.useCallback((code: string) => {
     return validateSpecificLabelCode(code, {
@@ -70,8 +62,8 @@ export const useSpecificLabelForm = (): UseSpecificLabelFormResult => {
       maxAisleValue: MAX_AISLE_VALUE,
       maxBayValue: MAX_BAY_VALUE,
       maxShelfLetter: MAX_SHELF_LETTER,
-    });
-  }, []);
+    })
+  }, [])
 
   const generateLabel = React.useCallback((): void => {
     const validationResult = validateSpecificLabels({
@@ -84,14 +76,14 @@ export const useSpecificLabelForm = (): UseSpecificLabelFormResult => {
         namedAisleExamples,
         aislePrefixedExamples,
       },
-    });
+    })
 
     if (validationResult.errorMessage) {
-      setFailure(validationResult.errorMessage);
-      return;
+      setFailure(validationResult.errorMessage)
+      return
     }
 
-    setSuccess(validationResult.labels, validationResult.warningMessage);
+    setSuccess(validationResult.labels, validationResult.warningMessage)
   }, [
     aislePrefixedExamples,
     bayRangeText,
@@ -102,7 +94,7 @@ export const useSpecificLabelForm = (): UseSpecificLabelFormResult => {
     setFailure,
     setSuccess,
     shelfRangeText,
-  ]);
+  ])
 
   return {
     content: {
@@ -125,5 +117,5 @@ export const useSpecificLabelForm = (): UseSpecificLabelFormResult => {
       generateLabel,
       resetGeneratedLabels,
     },
-  };
-};
+  }
+}

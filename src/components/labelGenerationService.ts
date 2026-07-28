@@ -5,30 +5,30 @@ import {
   IShortLabelInput,
   validateAisleLabelInput,
   validateShortLabelInput,
-} from '../domain/labelGeneration';
-import { getValidationErrorMessage } from '../config/validationMessages';
-import { ILabelGenerationResult } from '../models/ILabelGenerationResult';
-import { evaluateLabelBatchLimits } from './labelBatchLimitService';
+} from '../domain/labelGeneration'
+import { getValidationErrorMessage } from '../config/validationMessages'
+import { ILabelGenerationResult } from '../models/ILabelGenerationResult'
+import { evaluateLabelBatchLimits } from './labelBatchLimitService'
 
 interface AisleLabelGenerationArgs {
-  formInput: IAisleLabelInput;
-  minAisleValue: number;
-  maxAisleValue: number;
-  maxBayValue: number;
-  softLimit: number;
-  hardLimit: number;
-  totalLabels: number;
-  formatTwoDigitValue: (value: number) => string;
+  formInput: IAisleLabelInput
+  minAisleValue: number
+  maxAisleValue: number
+  maxBayValue: number
+  softLimit: number
+  hardLimit: number
+  totalLabels: number
+  formatTwoDigitValue: (value: number) => string
 }
 
 interface ShortLabelGenerationArgs {
-  formInput: IShortLabelInput;
-  minBayValue: number;
-  maxBayValue: number;
-  softLimit: number;
-  hardLimit: number;
-  totalLabels: number;
-  formatTwoDigitValue: (value: number) => string;
+  formInput: IShortLabelInput
+  minBayValue: number
+  maxBayValue: number
+  softLimit: number
+  hardLimit: number
+  totalLabels: number
+  formatTwoDigitValue: (value: number) => string
 }
 
 export const generateAisleLabels = ({
@@ -45,30 +45,30 @@ export const generateAisleLabels = ({
     minAisleValue,
     maxAisleValue,
     maxBayValue,
-  });
+  })
   if (validationError) {
     return {
       errorMessage: getValidationErrorMessage(validationError),
       warningMessage: null,
       labels: [],
-    };
+    }
   }
 
-  const batchLimits = evaluateLabelBatchLimits(totalLabels, softLimit, hardLimit);
+  const batchLimits = evaluateLabelBatchLimits(totalLabels, softLimit, hardLimit)
   if (batchLimits.hardLimitError) {
     return {
       errorMessage: batchLimits.hardLimitError,
       warningMessage: null,
       labels: [],
-    };
+    }
   }
 
   return {
     errorMessage: null,
     warningMessage: batchLimits.warningMessage,
     labels: generateAisleLabelCodes(formInput, formatTwoDigitValue),
-  };
-};
+  }
+}
 
 export const generateShortLabels = ({
   formInput,
@@ -79,27 +79,27 @@ export const generateShortLabels = ({
   totalLabels,
   formatTwoDigitValue,
 }: ShortLabelGenerationArgs): ILabelGenerationResult => {
-  const validationError = validateShortLabelInput(formInput, minBayValue, maxBayValue);
+  const validationError = validateShortLabelInput(formInput, minBayValue, maxBayValue)
   if (validationError) {
     return {
       errorMessage: getValidationErrorMessage(validationError),
       warningMessage: null,
       labels: [],
-    };
+    }
   }
 
-  const batchLimits = evaluateLabelBatchLimits(totalLabels, softLimit, hardLimit);
+  const batchLimits = evaluateLabelBatchLimits(totalLabels, softLimit, hardLimit)
   if (batchLimits.hardLimitError) {
     return {
       errorMessage: batchLimits.hardLimitError,
       warningMessage: null,
       labels: [],
-    };
+    }
   }
 
   return {
     errorMessage: null,
     warningMessage: batchLimits.warningMessage,
     labels: generateShortLabelCodes(formInput, formatTwoDigitValue),
-  };
-};
+  }
+}

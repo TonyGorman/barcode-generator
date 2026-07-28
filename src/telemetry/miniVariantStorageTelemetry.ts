@@ -1,4 +1,4 @@
-export type MiniVariantStorageOperation = 'read' | 'write' | 'clear';
+export type MiniVariantStorageOperation = 'read' | 'write' | 'clear'
 
 export const reportMiniVariantStorageIssue = (
   operation: MiniVariantStorageOperation,
@@ -10,5 +10,5 @@ export const reportMiniVariantStorageIssue = (
     operation,
     error,
     key,
-  });
-};
+  })
+}

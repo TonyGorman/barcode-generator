@@ -1,64 +1,64 @@
-import * as React from 'react';
+import * as React from 'react'
 import { ICommonTabsProps } from '../models/ICommonTabsProps'
-import styles from './Tabs.module.css';
-import { TabPanelVisibilityContext } from './TabPanelVisibilityContext';
+import styles from './Tabs.module.css'
+import { TabPanelVisibilityContext } from './TabPanelVisibilityContext'
 
 const Tabs: React.FC<ICommonTabsProps> = ({ tabs, selectedKey, onTabClick }) => {
-  const buttonRefs = React.useRef<Array<HTMLButtonElement | null>>([]);
-  const activeKey = selectedKey ?? tabs[0]?.key;
-  const activeTab = tabs.find((tab) => tab.key === activeKey) ?? tabs[0];
+  const buttonRefs = React.useRef<Array<HTMLButtonElement | null>>([])
+  const activeKey = selectedKey ?? tabs[0]?.key
+  const activeTab = tabs.find((tab) => tab.key === activeKey) ?? tabs[0]
 
   const focusTabAtIndex = (index: number): void => {
-    const safeIndex = (index + tabs.length) % tabs.length;
-    const targetTab = tabs[safeIndex];
+    const safeIndex = (index + tabs.length) % tabs.length
+    const targetTab = tabs[safeIndex]
 
     if (!targetTab) {
-      return;
+      return
     }
 
-    onTabClick?.(targetTab.key);
-    buttonRefs.current[safeIndex]?.focus();
-  };
+    onTabClick?.(targetTab.key)
+    buttonRefs.current[safeIndex]?.focus()
+  }
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number): void => {
     switch (event.key) {
       case 'ArrowRight':
       case 'ArrowDown':
-        event.preventDefault();
-        focusTabAtIndex(index + 1);
-        break;
+        event.preventDefault()
+        focusTabAtIndex(index + 1)
+        break
       case 'ArrowLeft':
       case 'ArrowUp':
-        event.preventDefault();
-        focusTabAtIndex(index - 1);
-        break;
+        event.preventDefault()
+        focusTabAtIndex(index - 1)
+        break
       case 'Home':
-        event.preventDefault();
-        focusTabAtIndex(0);
-        break;
+        event.preventDefault()
+        focusTabAtIndex(0)
+        break
       case 'End':
-        event.preventDefault();
-        focusTabAtIndex(tabs.length - 1);
-        break;
+        event.preventDefault()
+        focusTabAtIndex(tabs.length - 1)
+        break
     }
-  };
+  }
 
   if (!activeTab) {
-    return <></>;
+    return <></>
   }
 
   return (
     <>
       <div className={styles.tabList} role="tablist" aria-label="Label views">
         {tabs.map((tab, index) => {
-          const isSelected = tab.key === activeTab.key;
+          const isSelected = tab.key === activeTab.key
 
           return (
             <button
               key={tab.key}
               id={`tab-${tab.key}`}
               ref={(element) => {
-                buttonRefs.current[index] = element;
+                buttonRefs.current[index] = element
               }}
               type="button"
               role="tab"
@@ -71,11 +71,11 @@ const Tabs: React.FC<ICommonTabsProps> = ({ tabs, selectedKey, onTabClick }) => 
             >
               {tab.headerText}
             </button>
-          );
+          )
         })}
       </div>
       {tabs.map((tab) => {
-        const isSelected = tab.key === activeTab.key;
+        const isSelected = tab.key === activeTab.key
 
         return (
           <div
@@ -87,15 +87,13 @@ const Tabs: React.FC<ICommonTabsProps> = ({ tabs, selectedKey, onTabClick }) => 
             hidden={!isSelected}
           >
             <div className={styles.tabPanelContent}>
-              <TabPanelVisibilityContext.Provider value={isSelected}>
-                {tab.content}
-              </TabPanelVisibilityContext.Provider>
+              <TabPanelVisibilityContext.Provider value={isSelected}>{tab.content}</TabPanelVisibilityContext.Provider>
             </div>
           </div>
-        );
+        )
       })}
     </>
-  );
-};
+  )
+}
 
-export default Tabs;
+export default Tabs

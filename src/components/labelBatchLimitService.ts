@@ -1,8 +1,8 @@
-import { getLabelHardLimitMessage, getLabelSoftLimitMessage } from '../config/validationMessages';
+import { getLabelHardLimitMessage, getLabelSoftLimitMessage } from '../config/validationMessages'
 
 interface LabelBatchLimitsResult {
-  hardLimitError: string | null;
-  warningMessage: string | null;
+  hardLimitError: string | null
+  warningMessage: string | null
 }
 
 export const evaluateLabelBatchLimits = (
@@ -14,11 +14,11 @@ export const evaluateLabelBatchLimits = (
     return {
       hardLimitError: getLabelHardLimitMessage(hardLimit),
       warningMessage: null,
-    };
+    }
   }
 
   return {
     hardLimitError: null,
     warningMessage: labelCount > softLimit ? getLabelSoftLimitMessage(softLimit) : null,
-  };
-};
+  }
+}

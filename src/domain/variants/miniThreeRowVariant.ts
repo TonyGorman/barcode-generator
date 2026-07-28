@@ -1,12 +1,21 @@
-import { normalizeLabelCode, getEncodedLabelCode, getMiniThreeRowDisplayParts } from '../labelCodeDisplay';
-import { IComposedMiniLabel, IMiniCompositionVariant, IMiniTypographyFitResult, IMiniVariantGeometry } from '../../models/IMiniCompositionVariant';
-import { ILabelLayoutStrategy } from '../../models/ILabelLayoutStrategy';
-import { fitMiniPrimaryFontSizeMm, getMiniAisleThreeRowGeometry, getMiniBarcodeTopFromTileTopMm } from '../../components/labelLayoutGeometry';
+import { normalizeLabelCode, getEncodedLabelCode, getMiniThreeRowDisplayParts } from '../labelCodeDisplay'
+import {
+  IComposedMiniLabel,
+  IMiniCompositionVariant,
+  IMiniTypographyFitResult,
+  IMiniVariantGeometry,
+} from '../../models/IMiniCompositionVariant'
+import { ILabelLayoutStrategy } from '../../models/ILabelLayoutStrategy'
+import {
+  fitMiniPrimaryFontSizeMm,
+  getMiniAisleThreeRowGeometry,
+  getMiniBarcodeTopFromTileTopMm,
+} from '../../components/labelLayoutGeometry'
 
-const MINI_THREE_ROW_AUX_FONT_WEIGHT = 600;
+const MINI_THREE_ROW_AUX_FONT_WEIGHT = 600
 
 const composeMiniThreeRow = (code: string): IComposedMiniLabel => {
-  const parts = getMiniThreeRowDisplayParts(code);
+  const parts = getMiniThreeRowDisplayParts(code)
 
   return {
     variantId: 'mini-three-row',
@@ -15,11 +24,11 @@ const composeMiniThreeRow = (code: string): IComposedMiniLabel => {
     tertiaryLineText: parts.bottom,
     fullSpacedValue: normalizeLabelCode(code),
     encodedBarcodeValue: getEncodedLabelCode(code),
-  };
-};
+  }
+}
 
 const resolveMiniThreeRowGeometry = (layoutStrategy: ILabelLayoutStrategy): IMiniVariantGeometry => {
-  const threeRow = getMiniAisleThreeRowGeometry(layoutStrategy);
+  const threeRow = getMiniAisleThreeRowGeometry(layoutStrategy)
 
   return {
     primaryCenterFromContentTopMm: threeRow.mainCenterFromContentTopMm,
@@ -29,8 +38,8 @@ const resolveMiniThreeRowGeometry = (layoutStrategy: ILabelLayoutStrategy): IMin
     secondaryMaxTextSizeMm: threeRow.auxTextSizeMm,
     tertiaryTextSizeMm: threeRow.auxTextSizeMm,
     barcodeTopFromTileTopMm: getMiniBarcodeTopFromTileTopMm(layoutStrategy),
-  };
-};
+  }
+}
 
 const fitMiniThreeRowTypography = (
   composedLabel: IComposedMiniLabel,
@@ -41,7 +50,7 @@ const fitMiniThreeRowTypography = (
   const primary = Math.min(
     fitMiniPrimaryFontSizeMm(composedLabel.primaryLineText, layoutStrategy, measureText),
     geometry.primaryMaxTextSizeMm,
-  );
+  )
 
   return {
     primaryTextSizeMm: primary,
@@ -49,8 +58,8 @@ const fitMiniThreeRowTypography = (
     tertiaryTextSizeMm: geometry.tertiaryTextSizeMm,
     primaryFontWeight: 900,
     secondaryFontWeight: MINI_THREE_ROW_AUX_FONT_WEIGHT,
-  };
-};
+  }
+}
 
 export const miniThreeRowVariant: IMiniCompositionVariant = {
   id: 'mini-three-row',
@@ -58,4 +67,4 @@ export const miniThreeRowVariant: IMiniCompositionVariant = {
   composeLabel: composeMiniThreeRow,
   resolveGeometry: resolveMiniThreeRowGeometry,
   fitTypography: fitMiniThreeRowTypography,
-};
+}

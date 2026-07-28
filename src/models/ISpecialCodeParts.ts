@@ -1,3 +1,3 @@
 export interface ISpecialCodeParts {
-  value: string;
+  value: string
 }

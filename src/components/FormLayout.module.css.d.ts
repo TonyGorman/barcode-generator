@@ -1,13 +1,13 @@
 export type Styles = {
-  'actionsRow': string;
-  'fieldGroup': string;
-  'generateButton': string;
-  'sectionIntro': string;
-  'twoFieldGrid': string;
-};
+  actionsRow: string
+  fieldGroup: string
+  generateButton: string
+  sectionIntro: string
+  twoFieldGrid: string
+}
 
-export type ClassNames = keyof Styles;
+export type ClassNames = keyof Styles
 
-declare const styles: Styles;
+declare const styles: Styles
 
-export default styles;
+export default styles

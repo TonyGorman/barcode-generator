@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant';
+import * as React from 'react'
+import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant'
 
 /**
  * Resets generated label output when the mini variant selection changes.
@@ -10,13 +10,13 @@ export const useResetOnVariantChange = (
   miniVariantId: MiniCompositionVariantId | undefined,
   resetFn: () => void,
 ): void => {
-  const isInitialMount = React.useRef(true);
+  const isInitialMount = React.useRef(true)
 
   React.useEffect(() => {
     if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
+      isInitialMount.current = false
+      return
     }
-    resetFn();
-  }, [miniVariantId, resetFn]);
-};
+    resetFn()
+  }, [miniVariantId, resetFn])
+}

@@ -1,5 +1,5 @@
-import { IBaseCodeParts } from './IBaseCodeParts';
+import { IBaseCodeParts } from './IBaseCodeParts'
 
 export interface IShortCodeParts extends IBaseCodeParts {
-  prefix: string;
+  prefix: string
 }

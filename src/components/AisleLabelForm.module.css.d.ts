@@ -1,16 +1,16 @@
 export type Styles = {
-  'configLayout': string;
-  'sideGrid': string;
-  'sideInputGroup': string;
-  'sideLabel': string;
-  'sideRow': string;
-  'summaryBox': string;
-  'summaryRow': string;
-  'summaryTotal': string;
-};
+  configLayout: string
+  sideGrid: string
+  sideInputGroup: string
+  sideLabel: string
+  sideRow: string
+  summaryBox: string
+  summaryRow: string
+  summaryTotal: string
+}
 
-export type ClassNames = keyof Styles;
+export type ClassNames = keyof Styles
 
-declare const styles: Styles;
+declare const styles: Styles
 
-export default styles;
+export default styles

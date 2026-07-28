@@ -1,14 +1,14 @@
 export type Styles = {
-  'fieldErrorMessage': string;
-  'fieldLabel': string;
-  'panel': string;
-  'panelTitle': string;
-  'sectionBox': string;
-  'sectionTitle': string;
-};
+  fieldErrorMessage: string
+  fieldLabel: string
+  panel: string
+  panelTitle: string
+  sectionBox: string
+  sectionTitle: string
+}
 
-export type ClassNames = keyof Styles;
+export type ClassNames = keyof Styles
 
-declare const styles: Styles;
+declare const styles: Styles
 
-export default styles;
+export default styles

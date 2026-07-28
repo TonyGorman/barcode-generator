@@ -1,5 +1,5 @@
 export interface ITabItem {
-    key: string;
-    headerText: string;
-    content: React.ReactNode;
-  }
+  key: string
+  headerText: string
+  content: React.ReactNode
+}

@@ -1,13 +1,13 @@
-import * as React from 'react';
-import styles from './LabelTile.module.css';
-import { getLargeSelDisplayParts } from '../domain/labelCodeDomain';
+import * as React from 'react'
+import styles from './LabelTile.module.css'
+import { getLargeSelDisplayParts } from '../domain/labelCodeDomain'
 
 interface ILargeLabelTileContentProps {
-  code: string;
+  code: string
 }
 
 const LargeLabelTileContent: React.FC<ILargeLabelTileContentProps> = ({ code }) => {
-  const largeDisplayParts = getLargeSelDisplayParts(code);
+  const largeDisplayParts = getLargeSelDisplayParts(code)
 
   return (
     <div className={styles.largeSelHeading}>
@@ -19,7 +19,7 @@ const LargeLabelTileContent: React.FC<ILargeLabelTileContentProps> = ({ code }) 
         </>
       ) : null}
     </div>
-  );
-};
+  )
+}
 
-export default LargeLabelTileContent;
+export default LargeLabelTileContent

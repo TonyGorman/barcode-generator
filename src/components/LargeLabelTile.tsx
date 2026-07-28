@@ -1,19 +1,19 @@
-import * as React from 'react';
-import styles from './LabelTile.module.css';
-import { getLabelLayoutStrategy } from '../config/labelLayoutStrategies';
-import { LabelPrintMode } from '../models/ILabelLayoutStrategy';
-import { getEncodedLabelCode } from '../domain/labelCodeDomain';
-import LargeLabelTileContent from './LargeLabelTileContent';
-import BarcodeBlock from './BarcodeBlock';
+import * as React from 'react'
+import styles from './LabelTile.module.css'
+import { getLabelLayoutStrategy } from '../config/labelLayoutStrategies'
+import { LabelPrintMode } from '../models/ILabelLayoutStrategy'
+import { getEncodedLabelCode } from '../domain/labelCodeDomain'
+import LargeLabelTileContent from './LargeLabelTileContent'
+import BarcodeBlock from './BarcodeBlock'
 
 interface ILargeLabelTileProps {
-  code: string;
-  layoutMode: LabelPrintMode;
+  code: string
+  layoutMode: LabelPrintMode
 }
 
 const LargeLabelTile: React.FC<ILargeLabelTileProps> = ({ code, layoutMode }) => {
-  const layoutStrategy = getLabelLayoutStrategy(layoutMode);
-  const labelValue = getEncodedLabelCode(code);
+  const layoutStrategy = getLabelLayoutStrategy(layoutMode)
+  const labelValue = getEncodedLabelCode(code)
 
   return (
     <div className={styles.labelBoxLargeSel}>
@@ -27,7 +27,7 @@ const LargeLabelTile: React.FC<ILargeLabelTileProps> = ({ code, layoutMode }) =>
         barcodeHeightMm={layoutStrategy.typography.barcodeHeightMm}
       />
     </div>
-  );
-};
+  )
+}
 
-export default LargeLabelTile;
+export default LargeLabelTile

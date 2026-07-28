@@ -1,16 +1,16 @@
-import * as React from 'react';
-import LabelGenerator from './LabelGenerator';
-import GenerateLabelsButton from './GenerateLabelsButton';
-import { LabelPrintMode } from '../models/ILabelLayoutStrategy';
-import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant';
+import * as React from 'react'
+import LabelGenerator from './LabelGenerator'
+import GenerateLabelsButton from './GenerateLabelsButton'
+import { LabelPrintMode } from '../models/ILabelLayoutStrategy'
+import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant'
 
 interface FormGenerateAndPreviewProps {
-  generatedLabels: string[] | null;
-  layoutMode: LabelPrintMode;
-  onGenerate: () => void;
-  miniVariantId?: MiniCompositionVariantId;
-  actionsRowClassName: string;
-  buttonClassName: string;
+  generatedLabels: string[] | null
+  layoutMode: LabelPrintMode
+  onGenerate: () => void
+  miniVariantId?: MiniCompositionVariantId
+  actionsRowClassName: string
+  buttonClassName: string
 }
 
 const FormGenerateAndPreview: React.FC<FormGenerateAndPreviewProps> = ({
@@ -30,6 +30,6 @@ const FormGenerateAndPreview: React.FC<FormGenerateAndPreviewProps> = ({
       <LabelGenerator labelCodes={generatedLabels} layoutMode={layoutMode} miniVariantId={miniVariantId} />
     )}
   </>
-);
+)
 
-export default FormGenerateAndPreview;
+export default FormGenerateAndPreview

@@ -13,7 +13,7 @@
     "lint": "eslint src",
     "lint:complexity": "eslint src --rule 'complexity: [\"error\", 10]'",
     "lint:naming": "node scripts/lint-naming-conventions.mjs",
-    "validate:ci": "npm run styles:types:check && npm run styles:audit && npm run lint && npm run lint:naming && npm run lint:complexity && npm run test:run && npm run build:bundle",
+    "validate:ci": "npm run styles:types:check && npm run styles:audit && npm run prettier:check && npm run lint && npm run lint:naming && npm run lint:complexity && npm run test:run && npm run build:bundle",
     "validate:release": "npm run validate:ci && npm run audit:prod && npm run test:a11y && npm run test:e2e",
     "audit:prod": "npm audit --omit=dev --audit-level=high",
     "preview": "vite preview",
@@ -33,7 +33,9 @@
     "test:visual:update": "playwright test tests/e2e/visual-baselines.spec.ts --update-snapshots=all",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",
-    "test:e2e:install": "playwright install chromium"
+    "test:e2e:install": "playwright install chromium",
+    "prettier": "prettier --write \"./src/**/*.{ts,tsx,css}\"",
+    "prettier:check": "prettier --check \"./src/**/*.{ts,tsx,css}\""
   },
   "dependencies": {
     "react": "^19.2.8",
@@ -56,6 +58,7 @@
     "eslint": "^10.8.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "jsdom": "^30.0.0",
+    "prettier": "^3.9.6",
     "typescript": "^7.0.2",
     "vite": "^8.1.5",
     "vitest": "^4.1.5",

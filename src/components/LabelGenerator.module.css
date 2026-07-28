@@ -8,9 +8,7 @@
   width: var(--current-sheet-width-mm);
   height: var(--current-sheet-height-mm);
   box-sizing: border-box;
-  padding: var(--current-page-pad-top-mm)
-    var(--current-page-pad-right-mm)
-    var(--current-page-pad-bottom-mm)
+  padding: var(--current-page-pad-top-mm) var(--current-page-pad-right-mm) var(--current-page-pad-bottom-mm)
     var(--current-page-pad-left-mm);
   background: #fff;
   overflow: hidden;

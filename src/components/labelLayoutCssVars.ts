@@ -1,10 +1,10 @@
-import { CSSProperties } from 'react';
-import { ILabelLayoutStrategy } from '../models/ILabelLayoutStrategy';
+import { CSSProperties } from 'react'
+import { ILabelLayoutStrategy } from '../models/ILabelLayoutStrategy'
 
-const toMmStyle = (value: number): string => `${value}mm`;
+const toMmStyle = (value: number): string => `${value}mm`
 
 export const buildLayoutCssVars = (layoutStrategy: ILabelLayoutStrategy): CSSProperties => {
-  const { page, typography, barcodeGeometry, mode } = layoutStrategy;
+  const { page, typography, barcodeGeometry, mode } = layoutStrategy
 
   const pageVars: Record<string, string> = {
     '--current-sheet-width-mm': toMmStyle(page.sheetWidthMm),
@@ -31,7 +31,7 @@ export const buildLayoutCssVars = (layoutStrategy: ILabelLayoutStrategy): CSSPro
     [`--${mode}-barcode-width-mm`]: toMmStyle(barcodeGeometry.widthMm),
     [`--${mode}-barcode-height-mm`]: toMmStyle(barcodeGeometry.heightMm),
     [`--${mode}-barcode-margin-bottom-mm`]: toMmStyle(barcodeGeometry.marginBottomMm),
-  };
+  }
 
-  return pageVars as CSSProperties;
-};
+  return pageVars as CSSProperties
+}

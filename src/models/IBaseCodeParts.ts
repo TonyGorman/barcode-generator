@@ -1,4 +1,4 @@
 export interface IBaseCodeParts {
-  bay: string;
-  shelf: string;
+  bay: string
+  shelf: string
 }
