@@ -1,6 +1,6 @@
 # SEL Generator
 
-Generate Shelf Edge Labels for printing mini labels (39mm × 39mm) and  large labels (105mm × 73mm) onto special perforated paper. Each size has its ownparticular paper to space the labels correctly.
+Generate Shelf Edge Labels for printing mini labels (39mm × 39mm) and  large labels (105mm × 73mm) onto special perforated paper. Each size has its own particular paper to space the labels correctly.
 
 There are 2 supported "variants" of mini labels reflecting differing use case: stacked and shelf-emphasis. More details below.
 
