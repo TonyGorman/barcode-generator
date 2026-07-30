@@ -2,7 +2,7 @@ export const LABEL_CONSTRAINTS = {
   aisle: {
     min: 0,
     max: 99,
-    prefixes: ['BR', 'BL', 'FL', 'FR'] as const,
+    prefixes: ['BR', 'BL', 'FL', 'FR', 'PD'] as const,
     specialValues: ['FLORAL', 'KIOSK', 'SEASONAL'] as const,
   },
   side: {

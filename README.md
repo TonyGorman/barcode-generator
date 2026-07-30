@@ -1,6 +1,6 @@
 # SEL Generator
 
-Generate Shelf Edge Labels for printing mini labels (39mm × 39mm) and  large labels (105mm × 73mm) onto special perforated paper. Each size has its own particular paper to space the labels correctly.
+Generate Shelf Edge Labels for printing mini labels (39mm × 39mm) and large labels (105mm × 73mm) onto special perforated paper. Each size has its own particular paper to space the labels correctly.
 
 There are 2 supported "variants" of mini labels reflecting differing use case: stacked and shelf-emphasis. More details below.
 
@@ -12,7 +12,7 @@ The app provides three workflows for generating shelf edge labels:
 
 - **Specific Labels**: Enter custom barcode values (one per line, comma-separated) in compact format (for example `01L01A`, `BR10L01A`, `BAK01A`). Spaces and dashes are not accepted. Supports both mini large labels.
 - **Aisle Labels**: Generate sequential labels for store aisles, with configurable layout (mini or large SEL format) and optional shelf range selection (e.g., shelves B through D instead of always A through chosen value).
-- **Short Code  Labels**: Generate labels for back wall or front of store items, with custom prefix support.
+- **Short Code Labels**: Generate labels for back wall or front of store items, with custom prefix support.
 
 ### Generation Safety Limits
 
@@ -145,7 +145,7 @@ To add a new mini variant:
 3. Register the variant in the registry map in `src/domain/miniCompositionVariants.ts`.
 4. Add/update tests for `LabelTile` and domain variant behavior.
 
-All geometry values *must* remain in millimeters.
+All geometry values _must_ remain in millimeters.
 
 ## Build and Publish
 
@@ -360,11 +360,11 @@ The barcode payload is always stored and encoded in **compact format (no dashes 
 
 Specific Labels accepts compact input only (no spaces/dashes). Parsed valid inputs are encoded/scanned in compact form:
 
-| Input Format | Barcode Payload | Barcode Output (Encoded/Scanned Value) | Display (Specific Labels) | Display (Aisle / Short code Labels) |
-| --- | --- | --- | --- | --- |
-| Compact numeric aisle | `01L01A` | `01L01A` (always compact, no separators) | `01L01A` | `01 L01 A` |
-| Compact prefixed aisle | `BR10L01A` | `BR10L01A` (always compact, no separators) | `BR10L01A` | `BR10 L01 A` |
-| Compact short code | `BAK01A` | `BAK01A` (always compact, no separators) | `BAK01A` | `BAK 01 A` |
+| Input Format           | Barcode Payload | Barcode Output (Encoded/Scanned Value)     | Display (Specific Labels) | Display (Aisle / Short code Labels) |
+| ---------------------- | --------------- | ------------------------------------------ | ------------------------- | ----------------------------------- |
+| Compact numeric aisle  | `01L01A`        | `01L01A` (always compact, no separators)   | `01L01A`                  | `01 L01 A`                          |
+| Compact prefixed aisle | `BR10L01A`      | `BR10L01A` (always compact, no separators) | `BR10L01A`                | `BR10 L01 A`                        |
+| Compact short code     | `BAK01A`        | `BAK01A` (always compact, no separators)   | `BAK01A`                  | `BAK 01 A`                          |
 
 ### Display Impact
 
@@ -375,7 +375,7 @@ Display separators are presentational and do not affect barcode payload:
 - Barcode in every case is always `01L01A`-style compact payload.
 
 Named aisle values are validated against the configured explicit allow-list (default: `KIOSK`, `FLORAL`, `SEASONAL`) rather than inferred from generic alphabetic input.
-Configured compact prefixed aisle inputs are validated against the configured aisle-prefix allow-list (default: `BR`, `BL`, `FL`, `FR`) and aisle numeric min/max bounds.
+Configured compact prefixed aisle inputs are validated against the configured aisle-prefix allow-list (default: `BR`, `BL`, `FL`, `FR`, `PD`) and aisle numeric min/max bounds. These default prefixes represent store sections: `BR` = Back Right, `BL` = Back Left, `FL` = Front Left, `FR` = Front Right, `PD` = Produce.
 
 ### Why Compact Encoding
 
