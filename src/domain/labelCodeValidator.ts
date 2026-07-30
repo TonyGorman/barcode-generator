@@ -36,7 +36,7 @@ const isShelfTokenValid = (token: string, maxShelfLetter: string): boolean => {
   return shelfIndex >= 1 && shelfIndex <= maxShelfIndex
 }
 
-const isBoundedNumericToken = (value: string, max: number, min: number = 1): boolean => {
+const isBoundedNumericToken = (value: string, max: number, min = 1): boolean => {
   if (!/^\d+$/.test(value)) {
     return false
   }

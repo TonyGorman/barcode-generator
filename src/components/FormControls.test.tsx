@@ -33,7 +33,7 @@ describe('FormControls', () => {
     const onInput = vi.fn()
     render(<TextField multiline autoGrow onInput={onInput} placeholder="Multiline" />)
 
-    const textarea = screen.getByPlaceholderText('Multiline') as HTMLTextAreaElement
+    const textarea = screen.getByPlaceholderText('Multiline')
     Object.defineProperty(textarea, 'scrollHeight', { configurable: true, value: 72 })
 
     fireEvent.input(textarea)

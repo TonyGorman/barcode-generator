@@ -26,7 +26,7 @@ interface UseAisleLabelFormArgs {
 interface UseAisleLabelFormResult {
   state: {
     formInput: IAisleLabelInput
-    activeSideRanges: Array<IAisleSideMetadata & { start: number | null; end: number | null }>
+    activeSideRanges: (IAisleSideMetadata & { start: number | null; end: number | null })[]
     errorMessage: string | null
     warningMessage: string | null
     generatedLabels: string[] | null

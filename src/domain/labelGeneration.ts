@@ -40,7 +40,7 @@ type AisleSideRangeTuple = readonly [number | null, number | null]
 
 const getAisleSideRanges = (
   input: IAisleLabelInput,
-): Array<{ side: AisleSide; start: number | null; end: number | null }> => {
+): { side: AisleSide; start: number | null; end: number | null }[] => {
   return AISLE_SIDES.map((side) => ({
     side,
     start: input.sideRanges[side].start,
@@ -230,7 +230,7 @@ export const generateAisleLabelCodes = (
     string[]
   >
   const selectedSideCandidates = getAisleSideRanges(input)
-  const selectedSides: Array<{ side: AisleSide; start: number; end: number }> = selectedSideCandidates.filter(
+  const selectedSides: { side: AisleSide; start: number; end: number }[] = selectedSideCandidates.filter(
     (range): range is { side: AisleSide; start: number; end: number } => {
       return hasValue(range.start) && hasValue(range.end)
     },

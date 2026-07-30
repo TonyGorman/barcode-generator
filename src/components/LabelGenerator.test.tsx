@@ -15,7 +15,12 @@ vi.mock('./LabelTile', () => ({
 
 vi.mock('./Pagination', () => ({
   default: ({ onPageChange }: { onPageChange: (pageNumber: number) => void }) => (
-    <button data-testid="pagination-trigger" onClick={() => onPageChange(2)}>
+    <button
+      data-testid="pagination-trigger"
+      onClick={() => {
+        onPageChange(2)
+      }}
+    >
       Paginate
     </button>
   ),

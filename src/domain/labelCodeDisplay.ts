@@ -19,14 +19,10 @@ export const normalizeLabelCode = (code: string, shortCodePrefix: string = SHORT
   if (parsed) {
     if (parsed.kind === 'special') {
       return parsed.parts.value
-    }
-
-    if (parsed.kind === 'aisle') {
+    } else if (parsed.kind === 'aisle') {
       const { aisle, side, bay, shelf } = parsed.parts
       return `${aisle} ${side}${bay} ${shelf}`
-    }
-
-    if (parsed.kind === 'short') {
+    } else {
       const { prefix, bay, shelf } = parsed.parts
       return `${prefix} ${bay} ${shelf}`
     }
@@ -45,14 +41,10 @@ export const getEncodedLabelCode = (
   if (parsed) {
     if (parsed.kind === 'special') {
       return asCompactLabelCode(parsed.parts.value)
-    }
-
-    if (parsed.kind === 'aisle') {
+    } else if (parsed.kind === 'aisle') {
       const { aisle, side, bay, shelf } = parsed.parts
       return compactAisleCode(aisle, side, bay, shelf)
-    }
-
-    if (parsed.kind === 'short') {
+    } else {
       const { prefix, bay, shelf } = parsed.parts
       return compactBackCode(prefix, bay, shelf)
     }
@@ -121,25 +113,18 @@ export const getMiniThreeRowDisplayParts = (
       main: `${side}${bay}`,
       bottom: shelf,
     }
-  }
-
-  if (parsed.kind === 'short') {
+  } else if (parsed.kind === 'short') {
     const { prefix, bay, shelf } = parsed.parts
     return {
       top: prefix,
       main: bay,
       bottom: shelf,
     }
-  }
-
-  if (parsed.kind === 'special') {
+  } else {
     return {
       top: '',
       main: parsed.parts.value,
       bottom: '',
     }
   }
-
-  const _exhaustiveCheck: never = parsed
-  return _exhaustiveCheck
 }

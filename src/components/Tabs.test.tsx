@@ -26,7 +26,9 @@ describe('Tabs', () => {
               <input
                 aria-label="First Value"
                 value={firstValue}
-                onChange={(event) => setFirstValue(event.target.value)}
+                onChange={(event) => {
+                  setFirstValue(event.target.value)
+                }}
               />
             </label>
           ),

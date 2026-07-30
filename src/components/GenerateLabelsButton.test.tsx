@@ -4,7 +4,7 @@ import GenerateLabelsButton from './GenerateLabelsButton'
 
 describe('GenerateLabelsButton', () => {
   it('renders the generate label text and icon', () => {
-    render(<GenerateLabelsButton onClick={() => {}} />)
+    render(<GenerateLabelsButton onClick={vi.fn()} />)
 
     expect(screen.getByRole('button', { name: 'Generate Labels' })).toBeInTheDocument()
     expect(screen.getByText('Generate Labels')).toBeInTheDocument()

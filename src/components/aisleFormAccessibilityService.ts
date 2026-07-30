@@ -13,15 +13,20 @@ export const getAisleValidationError = (formInput: IAisleLabelInput) => {
 }
 
 export const isAisleRangeFieldInvalid = (validationError: ReturnType<typeof getAisleValidationError>): boolean => {
+  // eslint-disable-next-line sonarjs/argument-type -- .includes() with literal union is valid
   return validationError !== null && ['AISLE_RANGE', 'AISLE_ORDER'].includes(validationError.code)
 }
 
 export const isAisleShelfFieldInvalid = (validationError: ReturnType<typeof getAisleValidationError>): boolean => {
+  // eslint-disable-next-line sonarjs/argument-type -- .includes() with literal union is valid
   return validationError !== null && ['SHELF_ORDER'].includes(validationError.code)
 }
 
 type AisleValidationError = ReturnType<typeof getAisleValidationError>
-type SideRange = { start: number | null; end: number | null }
+interface SideRange {
+  start: number | null
+  end: number | null
+}
 
 const isSideRangeIncomplete = (sideRange: SideRange): boolean => {
   return hasValue(sideRange.start) !== hasValue(sideRange.end)
@@ -95,6 +100,7 @@ const getAisleRequiredFieldId = (formInput: IAisleLabelInput, idPrefix: string):
 
 const getSideRangeRequiredFieldId = (sideRows: readonly IAisleSideMetadata[], idPrefix: string): string | null => {
   const firstSide = sideRows[0]
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- defensive guard for empty sideRows
   return firstSide ? `${idPrefix}-${firstSide.side}-start` : null
 }
 

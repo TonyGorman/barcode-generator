@@ -49,7 +49,7 @@ export const validateSpecificLabels = ({
     .map((code) => ({ code, result: validateSpecificCode(code) }))
     .find(
       (entry): entry is { code: string; result: Extract<SpecificLabelValidationResult, { ok: false }> } =>
-        entry.result.ok === false,
+        !entry.result.ok,
     )
 
   if (firstInvalidLabel) {
@@ -71,7 +71,7 @@ export const validateSpecificLabels = ({
 
   if (
     labelPrintMode === 'large-sel' &&
-    labels.some((code) => (SPECIAL_AISLE_VALUES as ReadonlyArray<string>).includes(code))
+    labels.some((code) => (SPECIAL_AISLE_VALUES as readonly string[]).includes(code))
   ) {
     return {
       labels: [],

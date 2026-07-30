@@ -1,4 +1,4 @@
-type StorageShim = {
+interface StorageShim {
   state: Map<string, string>
   install: () => void
   reset: () => void

@@ -116,7 +116,9 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
               <TextField
                 id={`${idPrefix}-aisle-start`}
                 value={formInput.aisleStart?.toString() ?? ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange(e, 'aisleStart')}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  onInputChange(e, 'aisleStart')
+                }}
                 {...validationUi.getFieldA11yProps('range', aisleFieldInvalid)}
               />
             </div>
@@ -127,7 +129,9 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
               <TextField
                 id={`${idPrefix}-aisle-end`}
                 value={formInput.aisleEnd?.toString() ?? ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange(e, 'aisleEnd')}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  onInputChange(e, 'aisleEnd')
+                }}
                 {...validationUi.getFieldA11yProps('range', aisleFieldInvalid)}
               />
             </div>
@@ -153,9 +157,9 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
                       <TextField
                         id={`${idPrefix}-${side.side}-start`}
                         value={formInput.sideRanges[side.side].start?.toString() ?? ''}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           onSideRangeInputChange(e, side.side, 'start')
-                        }
+                        }}
                         {...validationUi.getFieldA11yProps('side', sideInvalid)}
                       />
                     </div>
@@ -166,9 +170,9 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
                       <TextField
                         id={`${idPrefix}-${side.side}-end`}
                         value={formInput.sideRanges[side.side].end?.toString() ?? ''}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                           onSideRangeInputChange(e, side.side, 'end')
-                        }
+                        }}
                         {...validationUi.getFieldA11yProps('side', sideInvalid)}
                       />
                     </div>

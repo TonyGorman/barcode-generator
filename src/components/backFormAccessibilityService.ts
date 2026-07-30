@@ -6,10 +6,12 @@ export const getShortValidationError = (formInput: IShortLabelInput) => {
 }
 
 export const isShortBayFieldInvalid = (validationError: ReturnType<typeof getShortValidationError>): boolean => {
+  // eslint-disable-next-line sonarjs/argument-type -- .includes() with literal union is valid
   return validationError !== null && ['SHORT_ORDER', 'SHORT_BAY_RANGE'].includes(validationError.code)
 }
 
 export const isShortShelfFieldInvalid = (validationError: ReturnType<typeof getShortValidationError>): boolean => {
+  // eslint-disable-next-line sonarjs/argument-type -- .includes() with literal union is valid
   return validationError !== null && ['SHELF_ORDER'].includes(validationError.code)
 }
 

@@ -4,7 +4,7 @@ import styles from './Tabs.module.css'
 import { TabPanelVisibilityContext } from './TabPanelVisibilityContext'
 
 const Tabs: React.FC<ICommonTabsProps> = ({ tabs, selectedKey, onTabClick }) => {
-  const buttonRefs = React.useRef<Array<HTMLButtonElement | null>>([])
+  const buttonRefs = React.useRef<(HTMLButtonElement | null)[]>([])
   const activeKey = selectedKey ?? tabs[0]?.key
   const activeTab = tabs.find((tab) => tab.key === activeKey) ?? tabs[0]
 
@@ -12,6 +12,7 @@ const Tabs: React.FC<ICommonTabsProps> = ({ tabs, selectedKey, onTabClick }) => 
     const safeIndex = (index + tabs.length) % tabs.length
     const targetTab = tabs[safeIndex]
 
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- defensive guard for empty tabs array
     if (!targetTab) {
       return
     }
@@ -43,6 +44,7 @@ const Tabs: React.FC<ICommonTabsProps> = ({ tabs, selectedKey, onTabClick }) => 
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- defensive guard for empty tabs array
   if (!activeTab) {
     return <></>
   }
@@ -67,7 +69,9 @@ const Tabs: React.FC<ICommonTabsProps> = ({ tabs, selectedKey, onTabClick }) => 
               tabIndex={isSelected ? 0 : -1}
               className={isSelected ? styles.tabButtonActive : styles.tabButton}
               onClick={() => onTabClick?.(tab.key)}
-              onKeyDown={(event) => handleKeyDown(event, index)}
+              onKeyDown={(event) => {
+                handleKeyDown(event, index)
+              }}
             >
               {tab.headerText}
             </button>

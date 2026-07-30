@@ -10,7 +10,7 @@ const variantRegistry = new Map<MiniCompositionVariantId, IMiniCompositionVarian
   ['mini-shelf-emphasis', miniShelfEmphasisVariant],
 ])
 
-export const MINI_VARIANT_OPTIONS: ReadonlyArray<{ id: MiniCompositionVariantId; label: string }> = Array.from(
+export const MINI_VARIANT_OPTIONS: readonly { id: MiniCompositionVariantId; label: string }[] = Array.from(
   variantRegistry.values(),
 ).map((v) => ({ id: v.id, label: v.displayLabel }))
 

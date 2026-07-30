@@ -124,7 +124,9 @@ const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
               <TextField
                 id={`${idPrefix}-bay-start`}
                 value={formInput.bayStart?.toString() ?? ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange(e, 'bayStart')}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  onInputChange(e, 'bayStart')
+                }}
                 {...validationUi.getFieldA11yProps('bay', bayFieldInvalid)}
               />
             </div>
@@ -135,7 +137,9 @@ const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
               <TextField
                 id={`${idPrefix}-bay-end`}
                 value={formInput.bayEnd?.toString() ?? ''}
-                onChange={(e: React.ChangeEvent<HTMLInputElement>) => onInputChange(e, 'bayEnd')}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                  onInputChange(e, 'bayEnd')
+                }}
                 {...validationUi.getFieldA11yProps('bay', bayFieldInvalid)}
               />
             </div>

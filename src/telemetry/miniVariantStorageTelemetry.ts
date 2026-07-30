@@ -6,6 +6,7 @@ export const reportMiniVariantStorageIssue = (
   key: string,
 ): void => {
   // Placeholder telemetry wrapper for storage failures; replace with real telemetry sink later.
+  // eslint-disable-next-line no-console
   console.warn('Mini variant storage operation failed', {
     operation,
     error,

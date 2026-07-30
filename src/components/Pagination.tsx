@@ -31,10 +31,12 @@ const Pagination = (props: IPaginationProps): React.ReactElement => {
   return (
     <nav className={styles.pagination} aria-label="Label pages">
       <span className={styles.pageLabel}>Pages:</span>
-      {[...Array(totalPages)].map((_, i) => (
+      {Array.from({ length: totalPages }).map((_, i) => (
         <button
           key={`page-${i + 1}`}
-          onClick={() => handleClick(i + 1)}
+          onClick={() => {
+            handleClick(i + 1)
+          }}
           className={activePage === i + 1 ? styles.activePage : styles.pagenum}
           aria-label={`Go to page ${i + 1}`}
           aria-current={activePage === i + 1 ? 'page' : undefined}

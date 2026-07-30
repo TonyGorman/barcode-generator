@@ -16,6 +16,10 @@ Protect physical label accuracy and scan reliability before making UI/UX changes
   - Large-label: 73mm x 105mm
   - A4 margins: left 0mm, right 0mm, top 0mm, bottom 5mm
 
+## Dependency Version Constraints
+
+- **TypeScript must stay on 5.x** (`^5.x.x`). `typescript-eslint` (and its dependency `ts-api-utils`, used by `eslint-plugin-sonarjs`) has a hard runtime block on TypeScript 7.0 and does not yet support TypeScript 6.1+. Upgrading TypeScript past `<6.1.0` will break `npm run lint` entirely. Before upgrading TypeScript, verify that `typescript-eslint` peer deps cover the target version — see https://github.com/typescript-eslint/typescript-eslint/issues/10940 for tracking.
+
 ## Feature-Specific Constraints
 
 ### Shelf Range Selection (AisleLabelForm)
@@ -31,7 +35,7 @@ Protect physical label accuracy and scan reliability before making UI/UX changes
 - Special aisle values (`KIOSK`, `FLORAL`, `SEASONAL`) are **blocked** on large-sel mode with `VALIDATION_MESSAGES.specificLargeSelSpecialCode`.
 - Reason: `getLargeSelDisplayParts()` returns `null` for special codes, resulting in empty heading text on a 105mm label.
 - Validation blocks generation immediately; mode switches clear stale output to prevent visual bypass.
-This blocking is intentional to avoid complexity in large labels, in the absence of any actual user requirement.
+  This blocking is intentional to avoid complexity in large labels, in the absence of any actual user requirement.
 
 ## Rendering Path Awareness
 
@@ -144,7 +148,7 @@ After feature implementation passes all validation gates (`npm run validate:ci` 
 - Domain validation functions never return message strings directly. They return a typed value (a discriminated union `{ code: ... }` for aisle/short, or a `reason` string literal for specific labels), and `src/config/validationMessages.ts` owns mapping that typed value to display text (`getValidationErrorMessage`, `getSpecificInvalidLabelMessage`). This keeps domain logic pure/testable and centralizes UI copy (and future i18n) in one place.
 - `LabelValidationErrorCode` (aisle/short) and `SpecificLabelValidationErrorReason` (specific labels) are both **owned by `validationMessages.ts`**, not by the domain files that use them — `src/domain/labelGeneration.ts` and `src/domain/labelCodeValidator.ts` import the type back from config. This is intentionally symmetric across all three label forms.
 - The specific-label error message names the actual offending code (e.g. `Label 'F0S01A' is not a recognized label format...`) rather than a generic "invalid input" message, so a typo in a multi-code batch is identifiable. `src/components/specificLabelValidationService.ts` finds the first invalid `{code, reason}` pair and passes both to `getSpecificInvalidLabelMessage`.
-- Do not add a *new* parallel error-code type when extending validation elsewhere — reuse this existing boundary (typed value from domain, text mapping in `validationMessages.ts`) rather than introducing message strings composed ad hoc in components/hooks.
+- Do not add a _new_ parallel error-code type when extending validation elsewhere — reuse this existing boundary (typed value from domain, text mapping in `validationMessages.ts`) rather than introducing message strings composed ad hoc in components/hooks.
 
 ## React / TypeScript Approach
 
@@ -168,10 +172,10 @@ After feature implementation passes all validation gates (`npm run validate:ci` 
 
   ```typescript
   React.useEffect(() => {
-    setCurrentPage((prev) => (totalPages > 0 ? Math.min(prev, totalPages) : 1));
-  }, [totalPages]);
+    setCurrentPage((prev) => (totalPages > 0 ? Math.min(prev, totalPages) : 1))
+  }, [totalPages])
   ```
-  
+
 - **Rationale**: When `currentPage` is in the deps, the effect runs on every page click (inefficient and redundant). It should only run when data length changes and `totalPages` shrinks, requiring a clamp. Functional setState avoids the need to include `currentPage` as a dependency.
 - **History**: This pattern was corrected to fix redundant effect runs caused by previous iterations that included both `currentPage` and `totalPages` in deps.
 

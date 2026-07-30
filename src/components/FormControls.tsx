@@ -2,7 +2,7 @@ import * as React from 'react'
 import styles from './FormControls.module.css'
 import { MAX_SHELF_LETTER } from '../config/labelConfig'
 
-const joinClasses = (...classNames: Array<string | undefined>): string => classNames.filter(Boolean).join(' ')
+const joinClasses = (...classNames: (string | undefined)[]): string => classNames.filter(Boolean).join(' ')
 
 const setForwardedRef = <T,>(ref: React.ForwardedRef<T>, value: T | null): void => {
   if (typeof ref === 'function') {
@@ -27,7 +27,7 @@ export const Button: React.FC<ButtonProps> = ({ className, type = 'button', chil
   )
 }
 
-type SharedTextFieldProps = {
+interface SharedTextFieldProps {
   className?: string
   multiline?: boolean
   autoGrow?: boolean
@@ -82,7 +82,9 @@ export const TextField = React.forwardRef<HTMLInputElement | HTMLTextAreaElement
   return (
     <input
       {...(props as React.InputHTMLAttributes<HTMLInputElement>)}
-      ref={(element) => setForwardedRef(ref as React.ForwardedRef<HTMLInputElement>, element)}
+      ref={(element) => {
+        setForwardedRef(ref as React.ForwardedRef<HTMLInputElement>, element)
+      }}
       className={joinClasses(styles.input, className)}
     />
   )
@@ -119,7 +121,9 @@ export const RadioGroup = <K extends string = string>({
               type="radio"
               name={name}
               checked={selectedKey === option.key}
-              onChange={() => onChange(option.key)}
+              onChange={() => {
+                onChange(option.key)
+              }}
             />
             <span className={styles.radioLabel}>{option.text}</span>
           </label>
@@ -129,7 +133,7 @@ export const RadioGroup = <K extends string = string>({
   )
 }
 
-const SHELF_LETTERS: ReadonlyArray<string> = (() => {
+const SHELF_LETTERS: readonly string[] = (() => {
   const letters: string[] = []
   const maxCode = MAX_SHELF_LETTER.charCodeAt(0)
   for (let code = 'A'.charCodeAt(0); code <= maxCode; code++) {
@@ -160,7 +164,9 @@ export const ShelfSelect: React.FC<ShelfSelectProps> = ({
       id={id}
       className={joinClasses(styles.input, className)}
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(e) => {
+        onChange(e.target.value)
+      }}
       aria-describedby={ariaDescribedBy}
       aria-invalid={ariaInvalid}
     >

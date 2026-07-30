@@ -33,5 +33,5 @@ export const buildLayoutCssVars = (layoutStrategy: ILabelLayoutStrategy): CSSPro
     [`--${mode}-barcode-margin-bottom-mm`]: toMmStyle(barcodeGeometry.marginBottomMm),
   }
 
-  return pageVars as CSSProperties
+  return pageVars
 }
