@@ -18,7 +18,7 @@ Protect physical label accuracy and scan reliability before making UI/UX changes
 
 ## Dependency Version Constraints
 
-- **TypeScript must stay on 5.x** (`^5.x.x`). `typescript-eslint` (and its dependency `ts-api-utils`, used by `eslint-plugin-sonarjs`) has a hard runtime block on TypeScript 7.0 and does not yet support TypeScript 6.1+. Upgrading TypeScript past `<6.1.0` will break `npm run lint` entirely. Before upgrading TypeScript, verify that `typescript-eslint` peer deps cover the target version — see https://github.com/typescript-eslint/typescript-eslint/issues/10940 for tracking.
+- **TypeScript must stay on 5.x** (`^5.x.x`). `typescript-eslint` (and its dependency `ts-api-utils`, used by `eslint-plugin-sonarjs`) has a hard runtime block on TypeScript 7.0 and does not yet support TypeScript 6.1+. Upgrading TypeScript past `<6.1.0` will break `npm run lint` entirely. Before upgrading TypeScript, verify that `typescript-eslint` peer deps cover the target version — see <https://github.com/typescript-eslint/typescript-eslint/issues/10940> for tracking.
 
 ## Feature-Specific Constraints
 
