@@ -2,7 +2,7 @@ export type Styles = {
   actionBar: string
   actionButton: string
   labelDiv: string
-  pdfDiv: string
+  previewWrapper: string
   previewPage: string
   printLabelDiv: string
   printPage: string

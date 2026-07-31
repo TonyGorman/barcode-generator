@@ -87,7 +87,7 @@ const LabelGenerator = (props: ILabelGenerator): React.ReactElement => {
           </div>,
           printContainer,
         )}
-      <div className={styles.pdfDiv}>
+      <div className={styles.previewWrapper}>
         <div className={styles.previewPage} style={pageStyle}>
           {renderLabelGrid(previewItems)}
         </div>

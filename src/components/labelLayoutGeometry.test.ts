@@ -4,7 +4,6 @@ import {
   fitMiniPrimaryFontSizeMm,
   getMiniAisleThreeRowGeometry,
   getMiniBarcodeTopFromTileTopMm,
-  getPdfBaselineFromCenterMm,
 } from './labelLayoutGeometry'
 import { ILabelLayoutStrategy } from '../models/ILabelLayoutStrategy'
 
@@ -35,8 +34,6 @@ const createMiniStrategy = (): ILabelLayoutStrategy => ({
     primaryCenterFromTileTopMm: 12,
     secondaryBaselineFromTileTopMm: 20,
     secondaryDomTopOffsetMm: 0.5,
-    pdfTextBaselineOffsetFactor: 0.35,
-    pdfEncodedTextBaselineOffsetFactor: 0.3,
     barcodeModuleThicknessMm: 0.35,
     barcodeHeightMm: 10,
     tilePaddingHorizontalMm: 1,
@@ -116,7 +113,7 @@ describe('labelLayoutGeometry', () => {
     expect(result).toBeLessThanOrEqual(mini.typography.primaryTextMaxSizeMm)
   })
 
-  it('computes stacked mini and PDF geometry offsets', () => {
+  it('computes stacked mini geometry offsets', () => {
     const mini = createMiniStrategy()
     const geometry = getMiniAisleThreeRowGeometry(mini)
 
@@ -132,7 +129,5 @@ describe('labelLayoutGeometry', () => {
         mini.barcodeGeometry.marginBottomMm -
         mini.barcodeGeometry.heightMm,
     )
-
-    expect(getPdfBaselineFromCenterMm(10, 2, 0.5)).toBe(11)
   })
 })

@@ -95,11 +95,3 @@ export const getMiniAisleThreeRowGeometry = (layoutStrategy: ILabelLayoutStrateg
     mainMaxTextSizeMm: MINI_AISLE_MAIN_MAX_TEXT_SIZE_MM,
   }
 }
-
-export const getPdfBaselineFromCenterMm = (
-  centerFromTileTopMm: number,
-  fontSizeMm: number,
-  baselineOffsetFactor: number,
-): number => {
-  return centerFromTileTopMm + fontSizeMm * baselineOffsetFactor
-}

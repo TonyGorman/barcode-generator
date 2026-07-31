@@ -1,4 +1,4 @@
-.pdfDiv {
+.previewWrapper {
   width: var(--current-sheet-width-mm);
   margin: 0 auto;
 }
@@ -77,7 +77,7 @@
     display: block !important;
   }
 
-  .pdfDiv,
+  .previewWrapper,
   .actionBar {
     display: none;
   }

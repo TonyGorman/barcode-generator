@@ -26,8 +26,6 @@ export interface ILabelTypographyGeometry {
   primaryCenterFromTileTopMm: number
   secondaryBaselineFromTileTopMm: number
   secondaryDomTopOffsetMm: number
-  pdfTextBaselineOffsetFactor: number
-  pdfEncodedTextBaselineOffsetFactor: number
   barcodeModuleThicknessMm: number
   barcodeHeightMm: number
   tilePaddingHorizontalMm: number
