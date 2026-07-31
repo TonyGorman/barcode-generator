@@ -6,17 +6,20 @@ import FormFeedback from './FormFeedback'
 import InlineFieldError from './InlineFieldError'
 import FormSection from './FormSection'
 import LabelFormShell from './LabelFormShell'
+import ShelfRangeSection from './ShelfRangeSection'
 import {
   MIN_AISLE_VALUE,
   MAX_AISLE_VALUE,
   MAX_BAY_VALUE,
-  MAX_SHELF_LETTER,
+  AISLE_RANGE_TEXT,
+  BAY_RANGE_TEXT,
+  SHELF_RANGE_TEXT,
   LABEL_SOFT_LIMIT,
   LABEL_HARD_LIMIT,
   formatTwoDigitValue,
 } from '../config/labelConfig'
 import { AISLE_SIDE_METADATA } from '../config/aisleSideMetadata'
-import { RadioGroup, ShelfSelect, TextField } from './FormControls'
+import { RadioGroup, TextField } from './FormControls'
 import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant'
 import { useResetOnVariantChange } from '../hooks/useResetOnVariantChange'
 import { useLabelPrintMode } from '../hooks/useLabelPrintMode'
@@ -37,9 +40,6 @@ interface AisleLabelFormProps {
 }
 
 const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
-  const aisleRangeText = `${MIN_AISLE_VALUE}-${MAX_AISLE_VALUE}`
-  const bayRangeText = `1-${MAX_BAY_VALUE}`
-  const shelfRangeText = `A-${MAX_SHELF_LETTER}`
   const sideNamesText = AISLE_SIDE_METADATA.map((side) => side.label).join(', ')
 
   const idPrefix = React.useId()
@@ -79,7 +79,6 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
   const shelfFieldInvalid =
     isAisleShelfFieldInvalid(validationError) || isAisleRequiredShelfFieldMissing(validationError, formInput)
 
-  const sideRows = AISLE_SIDE_METADATA
   const validationUi = useFormValidationUi({
     idPrefix,
     errorScope: 'aisle',
@@ -93,9 +92,9 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
           validationError,
           formInput,
           idPrefix,
-          sideRows,
+          sideRows: AISLE_SIDE_METADATA,
         }),
-      [validationError, formInput, idPrefix, sideRows],
+      [validationError, formInput, idPrefix],
     ),
   })
 
@@ -110,7 +109,7 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
       <div className={formLayoutStyles.sectionIntro}>
         <p>
           <strong>Enter values for:</strong> aisles from {MIN_AISLE_VALUE} to {MAX_AISLE_VALUE}, Sides ({sideNamesText}
-          ), Bays from 1 to {MAX_BAY_VALUE} and Shelves (alphabetical only) within {shelfRangeText}.
+          ), Bays from 1 to {MAX_BAY_VALUE} and Shelves (alphabetical only) within {SHELF_RANGE_TEXT}.
         </p>
         <p>
           The barcode will <strong>always</strong> be encoded <strong>without</strong> spaces or dashes.
@@ -118,7 +117,7 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
       </div>
       <FormFeedback {...validationUi.feedbackProps} />
       <div className={styles.configLayout}>
-        <FormSection title={`Aisle Range (${aisleRangeText})`}>
+        <FormSection title={`Aisle Range (${AISLE_RANGE_TEXT})`}>
           <div className={formLayoutStyles.twoFieldGrid}>
             <div className={formLayoutStyles.fieldGroup}>
               <label className={shellStyles.fieldLabel} htmlFor={`${idPrefix}-aisle-start`}>
@@ -153,9 +152,9 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
           />
         </FormSection>
 
-        <FormSection title={`Bay Configuration (${bayRangeText})`}>
+        <FormSection title={`Bay Configuration (${BAY_RANGE_TEXT})`}>
           <div className={styles.sideGrid}>
-            {sideRows.map((side) => {
+            {AISLE_SIDE_METADATA.map((side) => {
               const sideInvalid = isAisleSideFieldInvalid(validationError, getAisleSideRange(formInput, side.side))
               return (
                 <div key={side.side} className={styles.sideRow}>
@@ -195,43 +194,24 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
           <InlineFieldError
             id={validationUi.getInlineErrorId('side')}
             message={validationUi.getInlineErrorMessage(
-              sideRows.some((side) =>
+              AISLE_SIDE_METADATA.some((side) =>
                 isAisleSideFieldInvalid(validationError, getAisleSideRange(formInput, side.side)),
               ),
             )}
           />
         </FormSection>
 
-        <FormSection title={`Shelf Range (${shelfRangeText})`}>
-          <div className={formLayoutStyles.twoFieldGrid}>
-            <div className={formLayoutStyles.fieldGroup}>
-              <label className={shellStyles.fieldLabel} htmlFor={`${idPrefix}-shelf-start`}>
-                Start Shelf
-              </label>
-              <ShelfSelect
-                id={`${idPrefix}-shelf-start`}
-                value={formInput.shelfStart ?? ''}
-                onChange={onShelfStartChange}
-                {...validationUi.getFieldA11yProps('shelf', shelfFieldInvalid)}
-              />
-            </div>
-            <div className={formLayoutStyles.fieldGroup}>
-              <label className={shellStyles.fieldLabel} htmlFor={`${idPrefix}-shelf-end`}>
-                End Shelf
-              </label>
-              <ShelfSelect
-                id={`${idPrefix}-shelf-end`}
-                value={formInput.shelfEnd ?? ''}
-                onChange={onShelfEndChange}
-                {...validationUi.getFieldA11yProps('shelf', shelfFieldInvalid)}
-              />
-            </div>
-          </div>
-          <InlineFieldError
-            id={validationUi.getInlineErrorId('shelf')}
-            message={validationUi.getInlineErrorMessage(shelfFieldInvalid)}
-          />
-        </FormSection>
+        <ShelfRangeSection
+          idPrefix={idPrefix}
+          shelfStart={formInput.shelfStart}
+          shelfEnd={formInput.shelfEnd}
+          onShelfStartChange={onShelfStartChange}
+          onShelfEndChange={onShelfEndChange}
+          shelfFieldInvalid={shelfFieldInvalid}
+          getFieldA11yProps={validationUi.getFieldA11yProps}
+          getInlineErrorId={validationUi.getInlineErrorId}
+          getInlineErrorMessage={validationUi.getInlineErrorMessage}
+        />
 
         <FormSection title="Label Size">
           <RadioGroup

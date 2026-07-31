@@ -42,7 +42,11 @@ export const formatTwoDigitValue = (value: number): string => {
   return value.toString().padStart(2, '0')
 }
 
-export const normalizePrefix = (values: readonly string[]): string[] => {
+export const AISLE_RANGE_TEXT = `${MIN_AISLE_VALUE}-${MAX_AISLE_VALUE}`
+export const BAY_RANGE_TEXT = `${formatTwoDigitValue(MIN_BAY_VALUE)}-${formatTwoDigitValue(MAX_BAY_VALUE)}`
+export const SHELF_RANGE_TEXT = `${MIN_SHELF_LETTER}-${MAX_SHELF_LETTER}`
+
+export const normalizeCodeTokens = (values: readonly string[]): string[] => {
   const normalized = values
     .map((value) =>
       value
@@ -60,7 +64,7 @@ const normalizedSetCache = new WeakMap<readonly string[], Set<string>>()
 const getNormalizedValueSet = (values: readonly string[]): Set<string> => {
   let set = normalizedSetCache.get(values)
   if (set === undefined) {
-    set = new Set(normalizePrefix(values))
+    set = new Set(normalizeCodeTokens(values))
     normalizedSetCache.set(values, set)
   }
   return set
@@ -75,9 +79,9 @@ export const normalizeAllowedValue = (value: string, allowedValues: readonly str
   return normalized
 }
 
-const AISLE_PREFIX_SET: ReadonlySet<string> = new Set(normalizePrefix(AISLE_PREFIXES))
-const SHORT_CODE_PREFIX_SET: ReadonlySet<string> = new Set(normalizePrefix(SHORT_CODE_PREFIXES))
-const SPECIAL_AISLE_VALUE_SET: ReadonlySet<string> = new Set(normalizePrefix(SPECIAL_AISLE_VALUES))
+const AISLE_PREFIX_SET: ReadonlySet<string> = new Set(normalizeCodeTokens(AISLE_PREFIXES))
+const SHORT_CODE_PREFIX_SET: ReadonlySet<string> = new Set(normalizeCodeTokens(SHORT_CODE_PREFIXES))
+const SPECIAL_AISLE_VALUE_SET: ReadonlySet<string> = new Set(normalizeCodeTokens(SPECIAL_AISLE_VALUES))
 
 const isValueInSet = (value: string, set: ReadonlySet<string>): boolean => {
   return set.has(value.trim().toUpperCase())
@@ -91,6 +95,7 @@ export const isAislePrefix = (value: string): boolean => {
   return isValueInSet(value, AISLE_PREFIX_SET)
 }
 
+// Exported for direct testing; no production code currently imports it.
 export const isSpecialAisleValue = (value: string): boolean => {
   return isValueInSet(value, SPECIAL_AISLE_VALUE_SET)
 }

@@ -7,6 +7,8 @@ import {
   MAX_BAY_VALUE,
   MAX_SHELF_LETTER,
   SPECIAL_AISLE_VALUES,
+  BAY_RANGE_TEXT,
+  SHELF_RANGE_TEXT,
 } from '../config/labelConfig'
 import { validateSpecificLabelCode } from '../domain/labelCodeDomain'
 import { LabelPrintMode } from '../models/ILabelLayoutStrategy'
@@ -38,8 +40,8 @@ interface UseSpecificLabelFormResult {
 }
 
 export const useSpecificLabelForm = (): UseSpecificLabelFormResult => {
-  const bayRangeText = `01-${MAX_BAY_VALUE.toString().padStart(2, '0')}`
-  const shelfRangeText = `A-${MAX_SHELF_LETTER}`
+  const bayRangeText = BAY_RANGE_TEXT
+  const shelfRangeText = SHELF_RANGE_TEXT
   const namedAisleExamples = SPECIAL_AISLE_VALUES.join(', ')
   const aislePrefixedExamples = [`${AISLE_PREFIXES[0]}1L01A`, `${AISLE_PREFIXES[1]}2L02B`].join(', ')
 

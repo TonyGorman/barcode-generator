@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { validateSpecificLabels } from './specificLabelValidationService'
+import { BAY_RANGE_TEXT, SHELF_RANGE_TEXT } from '../config/labelConfig'
 
 const contentTokens = {
-  bayRangeText: '01-99',
-  shelfRangeText: 'A-Z',
+  bayRangeText: BAY_RANGE_TEXT,
+  shelfRangeText: SHELF_RANGE_TEXT,
   namedAisleExamples: 'KIOSK, FLORAL',
   aislePrefixedExamples: 'BR1L01A, BL2L02B',
 }

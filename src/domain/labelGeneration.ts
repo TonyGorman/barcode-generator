@@ -1,5 +1,5 @@
 import type { LabelValidationErrorCode } from '../config/validationMessages'
-import { AISLE_SIDES } from '../config/labelConfig'
+import { AISLE_SIDES, MIN_SHELF_LETTER } from '../config/labelConfig'
 import { AisleSide } from '../models/IAisleCodeParts'
 import { hasValue } from './numericGuard'
 
@@ -59,7 +59,7 @@ export const getShelfRangeCount = (shelfStart: string | null, shelfEnd: string |
     return 0
   }
 
-  const start = shelfStart ?? 'A'
+  const start = shelfStart ?? MIN_SHELF_LETTER
   return shelfEnd.charCodeAt(0) - start.charCodeAt(0) + 1
 }
 
@@ -224,7 +224,7 @@ export const generateAisleLabelCodes = (
     return []
   }
 
-  const shelfTokens = getShelfTokens(input.shelfStart ?? 'A', input.shelfEnd)
+  const shelfTokens = getShelfTokens(input.shelfStart ?? MIN_SHELF_LETTER, input.shelfEnd)
   const labelsBySide = Object.fromEntries(AISLE_SIDES.map((side) => [side, [] as string[]])) as Record<
     AisleSide,
     string[]
@@ -279,7 +279,7 @@ export const generateShortLabelCodes = (
     return []
   }
 
-  const shelfTokens = getShelfTokens(input.shelfStart ?? 'A', input.shelfEnd)
+  const shelfTokens = getShelfTokens(input.shelfStart ?? MIN_SHELF_LETTER, input.shelfEnd)
   const labels: string[] = []
 
   for (let bay = input.bayStart; bay <= input.bayEnd; bay += 1) {

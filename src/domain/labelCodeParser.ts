@@ -8,7 +8,7 @@ import {
   isAislePrefix,
   isShortCodePrefix,
   normalizeAllowedValue,
-  normalizePrefix,
+  normalizeCodeTokens,
 } from '../config/labelConfig'
 import {
   buildCompactConfiguredAisleCodePattern,
@@ -34,7 +34,7 @@ const parseCompactAisleCode = (code: string): IAisleCodeParts | null => {
 }
 
 const normalizeConfiguredAislePrefixes = (prefixes: readonly string[]): string[] => {
-  const normalizedConfiguredPrefixes = normalizePrefix(prefixes).filter((prefix) => isAislePrefix(prefix))
+  const normalizedConfiguredPrefixes = normalizeCodeTokens(prefixes).filter((prefix) => isAislePrefix(prefix))
 
   return Array.from(new Set(normalizedConfiguredPrefixes)).sort((left, right) => right.length - left.length)
 }
@@ -115,7 +115,9 @@ export const parseLabelCode = (
   code: string,
   shortCodePrefixes: string | readonly string[] = SHORT_CODE_PREFIXES,
 ): ParsedLabelCode | null => {
-  const preferredPrefixes = normalizePrefix(Array.isArray(shortCodePrefixes) ? shortCodePrefixes : [shortCodePrefixes])
+  const preferredPrefixes = normalizeCodeTokens(
+    Array.isArray(shortCodePrefixes) ? shortCodePrefixes : [shortCodePrefixes],
+  )
   const normalizedCode = code.toUpperCase()
 
   const specialAisle = normalizeAllowedValue(normalizedCode, SPECIAL_AISLE_VALUES)

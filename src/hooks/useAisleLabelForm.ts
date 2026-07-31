@@ -9,6 +9,7 @@ import {
 } from '../domain/labelGeneration'
 import { hasValue } from '../domain/numericGuard'
 import { AisleSide } from '../models/IAisleCodeParts'
+import { MIN_SHELF_LETTER } from '../config/labelConfig'
 import { generateAisleLabels } from '../services/labelGenerationService'
 import {
   setParsedNumericField,
@@ -122,7 +123,7 @@ export const useAisleLabelForm = ({
     if (!formInput.shelfEnd) {
       return '--'
     }
-    const start = formInput.shelfStart ?? 'A'
+    const start = formInput.shelfStart ?? MIN_SHELF_LETTER
     if (start === formInput.shelfEnd) {
       return formInput.shelfEnd
     }

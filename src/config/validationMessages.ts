@@ -62,15 +62,15 @@ export const getValidationErrorMessage = (error: LabelValidationErrorCode): stri
   return STATIC_LABEL_VALIDATION_MESSAGES[error.code]
 }
 
-export const getAisleRangeValidationMessage = (minAisleValue: number, maxAisleValue: number): string => {
+const getAisleRangeValidationMessage = (minAisleValue: number, maxAisleValue: number): string => {
   return `Aisles must be between ${minAisleValue} and ${maxAisleValue}.`
 }
 
-export const getShortBayRangeValidationMessage = (minBayValue: number, maxBayValue: number): string => {
+const getShortBayRangeValidationMessage = (minBayValue: number, maxBayValue: number): string => {
   return `Bays must be between ${minBayValue} and ${maxBayValue}.`
 }
 
-export const getSideBayRangeValidationMessage = (minBayValue: number, maxBayValue: number): string => {
+const getSideBayRangeValidationMessage = (minBayValue: number, maxBayValue: number): string => {
   return `Bay values must be between ${minBayValue} and ${maxBayValue}.`
 }
 

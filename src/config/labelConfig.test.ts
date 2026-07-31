@@ -9,6 +9,9 @@ import {
   MIN_SHELF_LETTER,
   MAX_SHELF_LETTER,
   SPECIAL_AISLE_VALUES,
+  AISLE_RANGE_TEXT,
+  BAY_RANGE_TEXT,
+  SHELF_RANGE_TEXT,
   LABEL_SOFT_LIMIT,
   LABEL_HARD_LIMIT,
   LABEL_CONSTRAINTS,
@@ -17,7 +20,7 @@ import {
   isSpecialAisleValue,
   isShortCodePrefix,
   normalizeAllowedValue,
-  normalizePrefix,
+  normalizeCodeTokens,
 } from './labelConfig'
 
 describe('labelConfig', () => {
@@ -48,6 +51,12 @@ describe('labelConfig', () => {
     expect(LABEL_SOFT_LIMIT).toBe(1800)
     expect(LABEL_HARD_LIMIT).toBe(2000)
     expect(LABEL_SOFT_LIMIT).toBeLessThan(LABEL_HARD_LIMIT)
+  })
+
+  it('exports centralized range display text', () => {
+    expect(AISLE_RANGE_TEXT).toBe('0-99')
+    expect(BAY_RANGE_TEXT).toBe('01-99')
+    expect(SHELF_RANGE_TEXT).toBe('A-Z')
   })
 
   it('keeps Back prefix default stable', () => {
@@ -101,7 +110,7 @@ describe('labelConfig', () => {
   })
 
   it('normalizes value lists without truncation', () => {
-    expect(normalizePrefix([' kiosk ', 'Floral123', 'seasonal', 'ProduceZone'])).toEqual([
+    expect(normalizeCodeTokens([' kiosk ', 'Floral123', 'seasonal', 'ProduceZone'])).toEqual([
       'KIOSK',
       'FLORAL',
       'SEASONAL',

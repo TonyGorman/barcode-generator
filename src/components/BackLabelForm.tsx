@@ -6,16 +6,17 @@ import FormFeedback from './FormFeedback'
 import InlineFieldError from './InlineFieldError'
 import FormSection from './FormSection'
 import LabelFormShell from './LabelFormShell'
+import ShelfRangeSection from './ShelfRangeSection'
 import {
   SHORT_CODE_PREFIXES,
   MIN_BAY_VALUE,
   MAX_BAY_VALUE,
-  MAX_SHELF_LETTER,
+  BAY_RANGE_TEXT,
   LABEL_SOFT_LIMIT,
   LABEL_HARD_LIMIT,
   formatTwoDigitValue,
 } from '../config/labelConfig'
-import { RadioGroup, ShelfSelect, TextField } from './FormControls'
+import { RadioGroup, TextField } from './FormControls'
 import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant'
 import { useResetOnVariantChange } from '../hooks/useResetOnVariantChange'
 import { useShortLabelForm } from '../hooks/useShortLabelForm'
@@ -38,8 +39,6 @@ const SHORT_CODE_PREFIX_OPTIONS = SHORT_CODE_PREFIXES.map((prefix) => ({
 }))
 
 const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
-  const bayRangeText = `${MIN_BAY_VALUE}-${MAX_BAY_VALUE}`
-  const shelfRangeText = `A-${MAX_SHELF_LETTER}`
   const idPrefix = React.useId()
 
   const { state, actions } = useShortLabelForm({
@@ -118,7 +117,7 @@ const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
           />
         </FormSection>
 
-        <FormSection title={`Bay Range (${bayRangeText})`}>
+        <FormSection title={`Bay Range (${BAY_RANGE_TEXT})`}>
           <div className={formLayoutStyles.twoFieldGrid}>
             <div className={formLayoutStyles.fieldGroup}>
               <label className={shellStyles.fieldLabel} htmlFor={`${idPrefix}-bay-start`}>
@@ -153,36 +152,17 @@ const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
           />
         </FormSection>
 
-        <FormSection title={`Shelf Range (${shelfRangeText})`}>
-          <div className={formLayoutStyles.twoFieldGrid}>
-            <div className={formLayoutStyles.fieldGroup}>
-              <label className={shellStyles.fieldLabel} htmlFor={`${idPrefix}-shelf-start`}>
-                Start Shelf
-              </label>
-              <ShelfSelect
-                id={`${idPrefix}-shelf-start`}
-                value={formInput.shelfStart ?? ''}
-                onChange={onShelfStartChange}
-                {...validationUi.getFieldA11yProps('shelf', shelfFieldInvalid)}
-              />
-            </div>
-            <div className={formLayoutStyles.fieldGroup}>
-              <label className={shellStyles.fieldLabel} htmlFor={`${idPrefix}-shelf-end`}>
-                End Shelf
-              </label>
-              <ShelfSelect
-                id={`${idPrefix}-shelf-end`}
-                value={formInput.shelfEnd ?? ''}
-                onChange={onShelfEndChange}
-                {...validationUi.getFieldA11yProps('shelf', shelfFieldInvalid)}
-              />
-            </div>
-          </div>
-          <InlineFieldError
-            id={validationUi.getInlineErrorId('shelf')}
-            message={validationUi.getInlineErrorMessage(shelfFieldInvalid)}
-          />
-        </FormSection>
+        <ShelfRangeSection
+          idPrefix={idPrefix}
+          shelfStart={formInput.shelfStart}
+          shelfEnd={formInput.shelfEnd}
+          onShelfStartChange={onShelfStartChange}
+          onShelfEndChange={onShelfEndChange}
+          shelfFieldInvalid={shelfFieldInvalid}
+          getFieldA11yProps={validationUi.getFieldA11yProps}
+          getInlineErrorId={validationUi.getInlineErrorId}
+          getInlineErrorMessage={validationUi.getInlineErrorMessage}
+        />
       </div>
     </LabelFormShell>
   )

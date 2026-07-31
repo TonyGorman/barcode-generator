@@ -1,6 +1,6 @@
 import type { ParsedLabelCode } from './labelCodeParser'
 import { parseLabelCode } from './labelCodeParser'
-import { AISLE_PREFIXES, isAislePrefix, normalizePrefix } from '../config/labelConfig'
+import { AISLE_PREFIXES, isAislePrefix, normalizeCodeTokens } from '../config/labelConfig'
 import type { SpecificLabelValidationErrorReason } from '../config/validationMessages'
 
 // Re-exported for consumers (and the domain barrel) that import this alongside
@@ -50,7 +50,7 @@ const isNumericAisleToken = (aisleToken: string): boolean => {
 }
 
 const getConfiguredAislePrefixes = (configuredPrefixes?: readonly string[]): string[] => {
-  const normalizedConfiguredPrefixes = normalizePrefix(configuredPrefixes ?? AISLE_PREFIXES)
+  const normalizedConfiguredPrefixes = normalizeCodeTokens(configuredPrefixes ?? AISLE_PREFIXES)
   return normalizedConfiguredPrefixes.filter((prefix) => isAislePrefix(prefix))
 }
 

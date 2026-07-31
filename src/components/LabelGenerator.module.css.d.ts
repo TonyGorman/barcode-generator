@@ -2,8 +2,8 @@ export type Styles = {
   actionBar: string
   actionButton: string
   labelDiv: string
-  previewWrapper: string
   previewPage: string
+  previewWrapper: string
   printLabelDiv: string
   printPage: string
   printPortal: string

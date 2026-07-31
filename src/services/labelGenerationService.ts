@@ -7,20 +7,40 @@ import {
 import { ILabelGenerationResult } from '../models/ILabelGenerationResult'
 import { evaluateLabelBatchLimits } from './labelBatchLimitService'
 
-interface AisleLabelGenerationArgs {
-  formInput: IAisleLabelInput
+interface LabelBatchConfig {
   softLimit: number
   hardLimit: number
   totalLabels: number
+}
+
+interface AisleLabelGenerationArgs extends LabelBatchConfig {
+  formInput: IAisleLabelInput
   formatTwoDigitValue: (value: number) => string
 }
 
-interface ShortLabelGenerationArgs {
+interface ShortLabelGenerationArgs extends LabelBatchConfig {
   formInput: IShortLabelInput
-  softLimit: number
-  hardLimit: number
-  totalLabels: number
   formatTwoDigitValue: (value: number) => string
+}
+
+const buildLabelGenerationResult = (
+  config: LabelBatchConfig,
+  generateCodes: () => string[],
+): ILabelGenerationResult => {
+  const batchLimits = evaluateLabelBatchLimits(config.totalLabels, config.softLimit, config.hardLimit)
+  if (batchLimits.hardLimitError) {
+    return {
+      errorMessage: batchLimits.hardLimitError,
+      warningMessage: null,
+      labels: [],
+    }
+  }
+
+  return {
+    errorMessage: null,
+    warningMessage: batchLimits.warningMessage,
+    labels: generateCodes(),
+  }
 }
 
 export const generateAisleLabels = ({
@@ -30,20 +50,9 @@ export const generateAisleLabels = ({
   totalLabels,
   formatTwoDigitValue,
 }: AisleLabelGenerationArgs): ILabelGenerationResult => {
-  const batchLimits = evaluateLabelBatchLimits(totalLabels, softLimit, hardLimit)
-  if (batchLimits.hardLimitError) {
-    return {
-      errorMessage: batchLimits.hardLimitError,
-      warningMessage: null,
-      labels: [],
-    }
-  }
-
-  return {
-    errorMessage: null,
-    warningMessage: batchLimits.warningMessage,
-    labels: generateAisleLabelCodes(formInput, formatTwoDigitValue),
-  }
+  return buildLabelGenerationResult({ softLimit, hardLimit, totalLabels }, () =>
+    generateAisleLabelCodes(formInput, formatTwoDigitValue),
+  )
 }
 
 export const generateShortLabels = ({
@@ -53,18 +62,7 @@ export const generateShortLabels = ({
   totalLabels,
   formatTwoDigitValue,
 }: ShortLabelGenerationArgs): ILabelGenerationResult => {
-  const batchLimits = evaluateLabelBatchLimits(totalLabels, softLimit, hardLimit)
-  if (batchLimits.hardLimitError) {
-    return {
-      errorMessage: batchLimits.hardLimitError,
-      warningMessage: null,
-      labels: [],
-    }
-  }
-
-  return {
-    errorMessage: null,
-    warningMessage: batchLimits.warningMessage,
-    labels: generateShortLabelCodes(formInput, formatTwoDigitValue),
-  }
+  return buildLabelGenerationResult({ softLimit, hardLimit, totalLabels }, () =>
+    generateShortLabelCodes(formInput, formatTwoDigitValue),
+  )
 }
