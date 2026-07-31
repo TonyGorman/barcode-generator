@@ -7,3 +7,4 @@ declare const compactBrand: unique symbol
 export type CompactLabelCode = string & { readonly [compactBrand]: 'compact' }
 
 export const asCompactLabelCode = (value: string): CompactLabelCode => value as CompactLabelCode
+
