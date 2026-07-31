@@ -79,7 +79,7 @@ describe('specificLabelValidationService', () => {
 
   it('returns soft-limit warning for valid large batches', () => {
     const result = validateSpecificLabels({
-      labelText: new Array<string>(1801).fill('01L01A').join(','),
+      labelText: Array.from({ length: 1801 }, () => '01L01A').join(','),
       labelPrintMode: 'mini-sel',
       validateSpecificCode: alwaysValid,
       contentTokens,
