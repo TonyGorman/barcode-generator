@@ -24,7 +24,7 @@ export type ParsedLabelCode =
 const aisleCodePattern = buildCompactLabelCodePattern()
 
 const parseCompactAisleCode = (code: string): IAisleCodeParts | null => {
-  const match = code.match(aisleCodePattern)
+  const match = aisleCodePattern.exec(code)
   if (!match) {
     return null
   }
@@ -62,7 +62,7 @@ const parseCompactConfiguredAisleCode = (code: string): IAisleCodeParts | null =
     return null
   }
 
-  const match = code.match(configuredAisleCodePattern)
+  const match = configuredAisleCodePattern.exec(code)
   if (!match) {
     return null
   }
@@ -77,7 +77,7 @@ const parseCompactConfiguredAisleCode = (code: string): IAisleCodeParts | null =
 }
 
 const parseCompactShortCode = (code: string, normalizedShortCodePrefix: string): IShortCodeParts | null => {
-  const match = code.match(getShortCodePattern(normalizedShortCodePrefix))
+  const match = getShortCodePattern(normalizedShortCodePrefix).exec(code)
   if (!match) {
     return null
   }

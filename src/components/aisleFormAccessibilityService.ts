@@ -13,12 +13,10 @@ export const getAisleValidationError = (formInput: IAisleLabelInput) => {
 }
 
 export const isAisleRangeFieldInvalid = (validationError: ReturnType<typeof getAisleValidationError>): boolean => {
-  // eslint-disable-next-line sonarjs/argument-type -- .includes() with literal union is valid
   return validationError !== null && ['AISLE_RANGE', 'AISLE_ORDER'].includes(validationError.code)
 }
 
 export const isAisleShelfFieldInvalid = (validationError: ReturnType<typeof getAisleValidationError>): boolean => {
-  // eslint-disable-next-line sonarjs/argument-type -- .includes() with literal union is valid
   return validationError !== null && ['SHELF_ORDER'].includes(validationError.code)
 }
 

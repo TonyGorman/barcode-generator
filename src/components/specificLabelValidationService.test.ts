@@ -78,7 +78,6 @@ describe('specificLabelValidationService', () => {
 
   it('returns soft-limit warning for valid large batches', () => {
     const result = validateSpecificLabels({
-      // eslint-disable-next-line sonarjs/argument-type -- false positive: Array<string>.fill accepts string
       labelText: new Array<string>(1801).fill('01L01A').join(','),
       labelPrintMode: 'mini-sel',
       validateSpecificCode: alwaysValid,
