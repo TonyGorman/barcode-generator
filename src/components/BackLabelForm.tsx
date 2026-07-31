@@ -5,7 +5,7 @@ import shellStyles from './FormShell.module.css'
 import FormFeedback from './FormFeedback'
 import InlineFieldError from './InlineFieldError'
 import FormSection from './FormSection'
-import FormGenerateAndPreview from './FormGenerateAndPreview'
+import LabelFormShell from './LabelFormShell'
 import {
   SHORT_CODE_PREFIXES,
   MIN_BAY_VALUE,
@@ -22,7 +22,6 @@ import { useShortLabelForm } from '../hooks/useShortLabelForm'
 import { useFormValidationUi } from '../hooks/useFormValidationUi'
 import {
   getFirstInvalidShortFieldId,
-  getShortValidationError,
   isShortRequiredBayFieldMissing,
   isShortRequiredShelfFieldMissing,
   isShortBayFieldInvalid,
@@ -52,7 +51,7 @@ const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
     formatTwoDigitValue,
   })
 
-  const { formInput, selectedShortCodePrefix, errorMessage, warningMessage, generatedLabels } = state
+  const { formInput, selectedShortCodePrefix, errorMessage, warningMessage, generatedLabels, validationError } = state
 
   const {
     setSelectedShortCodePrefix,
@@ -70,7 +69,6 @@ const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
     }),
     [formInput, selectedShortCodePrefix],
   )
-  const validationError = React.useMemo(() => getShortValidationError(shortFormInput), [shortFormInput])
   const bayFieldInvalid =
     isShortBayFieldInvalid(validationError) || isShortRequiredBayFieldMissing(validationError, shortFormInput)
   const shelfFieldInvalid =
@@ -95,8 +93,13 @@ const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
   })
 
   return (
-    <div className={shellStyles.panel}>
-      <h1 className={shellStyles.panelTitle}>Generate FOS/BAK Labels</h1>
+    <LabelFormShell
+      title="Generate FOS/BAK Labels"
+      generatedLabels={generatedLabels}
+      layoutMode="mini-sel"
+      onGenerate={validationUi.handleGenerate}
+      miniVariantId={miniVariantId}
+    >
       <p className={formLayoutStyles.sectionIntro}>
         Choose BAK (Back Wall), FOS (Front Of Store) or FNT (Front) using the prefix selector.
         <br />
@@ -181,16 +184,7 @@ const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
           />
         </FormSection>
       </div>
-
-      <FormGenerateAndPreview
-        generatedLabels={generatedLabels}
-        layoutMode="mini-sel"
-        onGenerate={validationUi.handleGenerate}
-        miniVariantId={miniVariantId}
-        actionsRowClassName={formLayoutStyles.actionsRow}
-        buttonClassName={formLayoutStyles.generateButton}
-      />
-    </div>
+    </LabelFormShell>
   )
 }
 

@@ -1,14 +1,20 @@
 import * as React from 'react'
+import { getValidationErrorMessage, type LabelValidationErrorCode } from '../config/validationMessages'
 import { IAisleSideMetadata } from '../config/aisleSideMetadata'
-import { createEmptyAisleSideRanges, getShelfRangeCount, IAisleLabelInput } from '../domain/labelGeneration'
+import {
+  createEmptyAisleSideRanges,
+  getShelfRangeCount,
+  IAisleLabelInput,
+  validateAisleLabelInput,
+} from '../domain/labelGeneration'
 import { hasValue } from '../domain/numericGuard'
 import { AisleSide } from '../models/IAisleCodeParts'
-import { generateAisleLabels } from '../components/labelGenerationService'
+import { generateAisleLabels } from '../services/labelGenerationService'
 import {
   setParsedNumericField,
   updateParsedNumericField,
   updateOptionalLetterField,
-} from '../components/formStateService'
+} from '../services/formStateService'
 import { useLabelGenerationFeedback } from './useLabelGenerationFeedback'
 
 type NumericAisleInputKey = 'aisleStart' | 'aisleEnd'
@@ -32,6 +38,7 @@ interface UseAisleLabelFormResult {
     generatedLabels: string[] | null
     totalLabels: number
     shelfSummary: string
+    validationError: LabelValidationErrorCode | null
   }
   actions: {
     onInputChange: (e: React.ChangeEvent<HTMLInputElement>, type: NumericAisleInputKey) => void
@@ -157,12 +164,19 @@ export const useAisleLabelForm = ({
   const shelfCount = getShelfRangeCount(formInput.shelfStart, formInput.shelfEnd)
   const totalLabels = totalAisles > 0 && shelfCount > 0 ? totalAisles * totalBayValues * shelfCount : 0
 
+  const validationError = React.useMemo(
+    () => validateAisleLabelInput(formInput, { minAisleValue, maxAisleValue, maxBayValue }),
+    [formInput, minAisleValue, maxAisleValue, maxBayValue],
+  )
+
   const generateLabel = React.useCallback((): void => {
+    if (validationError) {
+      setFailure(getValidationErrorMessage(validationError))
+      return
+    }
+
     const generationResult = generateAisleLabels({
       formInput,
-      minAisleValue,
-      maxAisleValue,
-      maxBayValue,
       softLimit,
       hardLimit,
       totalLabels,
@@ -174,18 +188,7 @@ export const useAisleLabelForm = ({
     }
 
     setSuccess(generationResult.labels, generationResult.warningMessage)
-  }, [
-    formInput,
-    formatTwoDigitValue,
-    hardLimit,
-    maxAisleValue,
-    maxBayValue,
-    minAisleValue,
-    setFailure,
-    setSuccess,
-    softLimit,
-    totalLabels,
-  ])
+  }, [formInput, formatTwoDigitValue, hardLimit, setFailure, setSuccess, softLimit, totalLabels, validationError])
 
   return {
     state: {
@@ -196,6 +199,7 @@ export const useAisleLabelForm = ({
       generatedLabels,
       totalLabels,
       shelfSummary,
+      validationError,
     },
     actions: {
       onInputChange,

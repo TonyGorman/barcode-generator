@@ -4,7 +4,7 @@ import formLayoutStyles from './FormLayout.module.css'
 import shellStyles from './FormShell.module.css'
 import FormFeedback from './FormFeedback'
 import FormSection from './FormSection'
-import FormGenerateAndPreview from './FormGenerateAndPreview'
+import LabelFormShell from './LabelFormShell'
 import { SHORT_CODE_PREFIXES, SPECIAL_AISLE_VALUES } from '../config/labelConfig'
 import { RadioGroup, TextField } from './FormControls'
 import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant'
@@ -37,8 +37,13 @@ const SpecificLabelForm: React.FC<SpecificLabelFormProps> = ({ miniVariantId }) 
   })
 
   return (
-    <div className={shellStyles.panel}>
-      <h1 className={shellStyles.panelTitle}>Generate Specific Labels</h1>
+    <LabelFormShell
+      title="Generate Specific Labels"
+      generatedLabels={generatedLabels}
+      layoutMode={labelPrintMode}
+      onGenerate={validationUi.handleGenerate}
+      miniVariantId={miniVariantId}
+    >
       <p className={formLayoutStyles.sectionIntro}>
         Enter one label or a comma-separated list (for example: 01L01A, {aislePrefixedExamples},{' '}
         {SHORT_CODE_PREFIXES[0]}01A, {SHORT_CODE_PREFIXES[1]}01A, {SPECIAL_AISLE_VALUES[0]}).
@@ -76,16 +81,7 @@ const SpecificLabelForm: React.FC<SpecificLabelFormProps> = ({ miniVariantId }) 
           onChange={handleModeChange}
         />
       </FormSection>
-
-      <FormGenerateAndPreview
-        generatedLabels={generatedLabels}
-        layoutMode={labelPrintMode}
-        onGenerate={validationUi.handleGenerate}
-        miniVariantId={miniVariantId}
-        actionsRowClassName={formLayoutStyles.actionsRow}
-        buttonClassName={formLayoutStyles.generateButton}
-      />
-    </div>
+    </LabelFormShell>
   )
 }
 

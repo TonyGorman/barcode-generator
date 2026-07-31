@@ -1,34 +1,28 @@
-import { MAX_BAY_VALUE, MIN_BAY_VALUE } from '../config/labelConfig'
-import { IShortLabelInput, validateShortLabelInput } from '../domain/labelGeneration'
+import type { LabelValidationErrorCode } from '../config/validationMessages'
+import { IShortLabelInput } from '../domain/labelGeneration'
+import { isFieldInvalidByCodes, isRequiredFieldMissing } from '../services/formFieldValidationService'
 
-export const getShortValidationError = (formInput: IShortLabelInput) => {
-  return validateShortLabelInput(formInput, MIN_BAY_VALUE, MAX_BAY_VALUE)
-}
+type ShortValidationError = LabelValidationErrorCode | null
 
-export const isShortBayFieldInvalid = (validationError: ReturnType<typeof getShortValidationError>): boolean => {
-  return validationError !== null && ['SHORT_ORDER', 'SHORT_BAY_RANGE'].includes(validationError.code)
-}
+export const isShortBayFieldInvalid = (validationError: ShortValidationError): boolean =>
+  isFieldInvalidByCodes(validationError, ['SHORT_ORDER', 'SHORT_BAY_RANGE'])
 
-export const isShortShelfFieldInvalid = (validationError: ReturnType<typeof getShortValidationError>): boolean => {
-  return validationError !== null && ['SHELF_ORDER'].includes(validationError.code)
-}
+export const isShortShelfFieldInvalid = (validationError: ShortValidationError): boolean =>
+  isFieldInvalidByCodes(validationError, ['SHELF_ORDER'])
 
 export const isShortRequiredBayFieldMissing = (
-  validationError: ReturnType<typeof getShortValidationError>,
+  validationError: ShortValidationError,
   formInput: IShortLabelInput,
-): boolean => {
-  return validationError?.code === 'SHORT_REQUIRED' && (formInput.bayStart === null || formInput.bayEnd === null)
-}
+): boolean =>
+  isRequiredFieldMissing(validationError, 'SHORT_REQUIRED', formInput.bayStart === null || formInput.bayEnd === null)
 
 export const isShortRequiredShelfFieldMissing = (
-  validationError: ReturnType<typeof getShortValidationError>,
+  validationError: ShortValidationError,
   formInput: IShortLabelInput,
-): boolean => {
-  return validationError?.code === 'SHORT_REQUIRED' && formInput.shelfEnd === null
-}
+): boolean => isRequiredFieldMissing(validationError, 'SHORT_REQUIRED', formInput.shelfEnd === null)
 
 interface FirstInvalidShortFieldArgs {
-  validationError: ReturnType<typeof getShortValidationError>
+  validationError: ShortValidationError
   formInput: IShortLabelInput
   idPrefix: string
 }

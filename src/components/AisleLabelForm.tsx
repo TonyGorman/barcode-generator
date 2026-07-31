@@ -5,7 +5,7 @@ import shellStyles from './FormShell.module.css'
 import FormFeedback from './FormFeedback'
 import InlineFieldError from './InlineFieldError'
 import FormSection from './FormSection'
-import FormGenerateAndPreview from './FormGenerateAndPreview'
+import LabelFormShell from './LabelFormShell'
 import {
   MIN_AISLE_VALUE,
   MAX_AISLE_VALUE,
@@ -24,7 +24,6 @@ import { useAisleLabelForm } from '../hooks/useAisleLabelForm'
 import { useFormValidationUi } from '../hooks/useFormValidationUi'
 import {
   getAisleSideRange,
-  getAisleValidationError,
   getFirstInvalidAisleFieldId,
   isAisleRequiredAisleFieldMissing,
   isAisleRequiredShelfFieldMissing,
@@ -53,8 +52,16 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
     hardLimit: LABEL_HARD_LIMIT,
     formatTwoDigitValue,
   })
-  const { formInput, activeSideRanges, errorMessage, warningMessage, generatedLabels, totalLabels, shelfSummary } =
-    state
+  const {
+    formInput,
+    activeSideRanges,
+    errorMessage,
+    warningMessage,
+    generatedLabels,
+    totalLabels,
+    shelfSummary,
+    validationError,
+  } = state
   const {
     onInputChange,
     onSideRangeInputChange,
@@ -67,7 +74,6 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
 
   useResetOnVariantChange(miniVariantId, resetGeneratedLabels)
   const { labelPrintMode, printModeOptions, handleModeChange } = useLabelPrintMode(resetGeneratedLabels)
-  const validationError = React.useMemo(() => getAisleValidationError(formInput), [formInput])
   const aisleFieldInvalid =
     isAisleRangeFieldInvalid(validationError) || isAisleRequiredAisleFieldMissing(validationError, formInput)
   const shelfFieldInvalid =
@@ -94,8 +100,13 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
   })
 
   return (
-    <div className={shellStyles.panel}>
-      <h1 className={shellStyles.panelTitle}>Generate Aisle Labels</h1>
+    <LabelFormShell
+      title="Generate Aisle Labels"
+      generatedLabels={generatedLabels}
+      layoutMode={labelPrintMode}
+      onGenerate={validationUi.handleGenerate}
+      miniVariantId={miniVariantId}
+    >
       <div className={formLayoutStyles.sectionIntro}>
         <p>
           <strong>Enter values for:</strong> aisles from {MIN_AISLE_VALUE} to {MAX_AISLE_VALUE}, Sides ({sideNamesText}
@@ -257,16 +268,7 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
           </div>
         </FormSection>
       </div>
-
-      <FormGenerateAndPreview
-        generatedLabels={generatedLabels}
-        layoutMode={labelPrintMode}
-        onGenerate={validationUi.handleGenerate}
-        miniVariantId={miniVariantId}
-        actionsRowClassName={formLayoutStyles.actionsRow}
-        buttonClassName={formLayoutStyles.generateButton}
-      />
-    </div>
+    </LabelFormShell>
   )
 }
 

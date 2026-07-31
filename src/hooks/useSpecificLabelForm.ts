@@ -12,7 +12,7 @@ import { validateSpecificLabelCode } from '../domain/labelCodeDomain'
 import { LabelPrintMode } from '../models/ILabelLayoutStrategy'
 import { useLabelPrintMode } from './useLabelPrintMode'
 import { useLabelGenerationFeedback } from './useLabelGenerationFeedback'
-import { validateSpecificLabels } from '../components/specificLabelValidationService'
+import { validateSpecificLabels } from '../services/specificLabelValidationService'
 
 interface UseSpecificLabelFormResult {
   content: {

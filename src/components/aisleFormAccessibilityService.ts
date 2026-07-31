@@ -1,26 +1,19 @@
 import { IAisleSideMetadata } from '../config/aisleSideMetadata'
-import { MAX_AISLE_VALUE, MAX_BAY_VALUE, MIN_AISLE_VALUE } from '../config/labelConfig'
-import { IAisleLabelInput, validateAisleLabelInput } from '../domain/labelGeneration'
+import { MAX_BAY_VALUE } from '../config/labelConfig'
+import type { LabelValidationErrorCode } from '../config/validationMessages'
+import { IAisleLabelInput } from '../domain/labelGeneration'
 import { hasValue } from '../domain/numericGuard'
 import { AisleSide } from '../models/IAisleCodeParts'
+import { isFieldInvalidByCodes, isRequiredFieldMissing } from '../services/formFieldValidationService'
 
-export const getAisleValidationError = (formInput: IAisleLabelInput) => {
-  return validateAisleLabelInput(formInput, {
-    minAisleValue: MIN_AISLE_VALUE,
-    maxAisleValue: MAX_AISLE_VALUE,
-    maxBayValue: MAX_BAY_VALUE,
-  })
-}
+type AisleValidationError = LabelValidationErrorCode | null
 
-export const isAisleRangeFieldInvalid = (validationError: ReturnType<typeof getAisleValidationError>): boolean => {
-  return validationError !== null && ['AISLE_RANGE', 'AISLE_ORDER'].includes(validationError.code)
-}
+export const isAisleRangeFieldInvalid = (validationError: AisleValidationError): boolean =>
+  isFieldInvalidByCodes(validationError, ['AISLE_RANGE', 'AISLE_ORDER'])
 
-export const isAisleShelfFieldInvalid = (validationError: ReturnType<typeof getAisleValidationError>): boolean => {
-  return validationError !== null && ['SHELF_ORDER'].includes(validationError.code)
-}
+export const isAisleShelfFieldInvalid = (validationError: AisleValidationError): boolean =>
+  isFieldInvalidByCodes(validationError, ['SHELF_ORDER'])
 
-type AisleValidationError = ReturnType<typeof getAisleValidationError>
 interface SideRange {
   start: number | null
   end: number | null
@@ -62,20 +55,19 @@ export const isAisleSideFieldInvalid = (validationError: AisleValidationError, s
 }
 
 export const isAisleRequiredAisleFieldMissing = (
-  validationError: ReturnType<typeof getAisleValidationError>,
+  validationError: AisleValidationError,
   formInput: IAisleLabelInput,
-): boolean => {
-  return (
-    validationError?.code === 'AISLE_REQUIRED' && (!hasValue(formInput.aisleStart) || !hasValue(formInput.aisleEnd))
+): boolean =>
+  isRequiredFieldMissing(
+    validationError,
+    'AISLE_REQUIRED',
+    !hasValue(formInput.aisleStart) || !hasValue(formInput.aisleEnd),
   )
-}
 
 export const isAisleRequiredShelfFieldMissing = (
-  validationError: ReturnType<typeof getAisleValidationError>,
+  validationError: AisleValidationError,
   formInput: IAisleLabelInput,
-): boolean => {
-  return validationError?.code === 'AISLE_REQUIRED' && !formInput.shelfEnd
-}
+): boolean => isRequiredFieldMissing(validationError, 'AISLE_REQUIRED', !formInput.shelfEnd)
 
 interface FirstInvalidAisleFieldArgs {
   validationError: AisleValidationError

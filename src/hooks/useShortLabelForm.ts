@@ -1,7 +1,8 @@
 import * as React from 'react'
-import { getShelfRangeCount, IShortLabelInput } from '../domain/labelGeneration'
-import { updateOptionalLetterField, updateParsedNumericField } from '../components/formStateService'
-import { generateShortLabels } from '../components/labelGenerationService'
+import { getValidationErrorMessage, type LabelValidationErrorCode } from '../config/validationMessages'
+import { getShelfRangeCount, IShortLabelInput, validateShortLabelInput } from '../domain/labelGeneration'
+import { updateOptionalLetterField, updateParsedNumericField } from '../services/formStateService'
+import { generateShortLabels } from '../services/labelGenerationService'
 import { useLabelGenerationFeedback } from './useLabelGenerationFeedback'
 
 type ShortInputWithoutPrefix = Omit<IShortLabelInput, 'prefix'>
@@ -23,6 +24,7 @@ interface UseShortLabelFormResult {
     errorMessage: string | null
     warningMessage: string | null
     generatedLabels: string[] | null
+    validationError: LabelValidationErrorCode | null
   }
   actions: {
     setSelectedShortCodePrefix: React.Dispatch<React.SetStateAction<string>>
@@ -86,11 +88,19 @@ export const useShortLabelForm = ({
     }
   }, [formInput, selectedShortCodePrefix])
 
+  const validationError = React.useMemo(
+    () => validateShortLabelInput(shortLabelInput, minBayValue, maxBayValue),
+    [shortLabelInput, minBayValue, maxBayValue],
+  )
+
   const generateLabel = React.useCallback((): void => {
+    if (validationError) {
+      setFailure(getValidationErrorMessage(validationError))
+      return
+    }
+
     const generationResult = generateShortLabels({
       formInput: shortLabelInput,
-      minBayValue,
-      maxBayValue,
       softLimit,
       hardLimit,
       totalLabels,
@@ -102,17 +112,7 @@ export const useShortLabelForm = ({
     }
 
     setSuccess(generationResult.labels, generationResult.warningMessage)
-  }, [
-    formatTwoDigitValue,
-    hardLimit,
-    maxBayValue,
-    minBayValue,
-    setFailure,
-    setSuccess,
-    shortLabelInput,
-    softLimit,
-    totalLabels,
-  ])
+  }, [formatTwoDigitValue, hardLimit, setFailure, setSuccess, shortLabelInput, softLimit, totalLabels, validationError])
 
   return {
     state: {
@@ -121,6 +121,7 @@ export const useShortLabelForm = ({
       errorMessage,
       warningMessage,
       generatedLabels,
+      validationError,
     },
     actions: {
       setSelectedShortCodePrefix,

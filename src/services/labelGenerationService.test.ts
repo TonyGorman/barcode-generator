@@ -4,30 +4,27 @@ import { generateAisleLabels, generateShortLabels } from './labelGenerationServi
 const formatTwoDigits = (value: number): string => value.toString().padStart(2, '0')
 
 describe('labelGenerationService', () => {
-  it('returns aisle validation errors before generation', () => {
+  it('returns aisle hard-limit error before generation', () => {
     const result = generateAisleLabels({
       formInput: {
-        aisleStart: null,
-        aisleEnd: null,
+        aisleStart: 1,
+        aisleEnd: 1,
         sideRanges: {
-          L: { start: null, end: null },
+          L: { start: 1, end: 2 },
           R: { start: null, end: null },
           E: { start: null, end: null },
           F: { start: null, end: null },
         },
-        shelfStart: null,
-        shelfEnd: null,
+        shelfStart: 'A',
+        shelfEnd: 'B',
       },
-      minAisleValue: 0,
-      maxAisleValue: 99,
-      maxBayValue: 99,
       softLimit: 100,
-      hardLimit: 200,
-      totalLabels: 0,
+      hardLimit: 0,
+      totalLabels: 4,
       formatTwoDigitValue: formatTwoDigits,
     })
 
-    expect(result.errorMessage).toBe('Please enter aisle start, aisle end, and select a shelf.')
+    expect(result.errorMessage).toContain('Too many labels requested.')
     expect(result.warningMessage).toBeNull()
     expect(result.labels).toEqual([])
   })
@@ -41,8 +38,6 @@ describe('labelGenerationService', () => {
         shelfEnd: 'A',
         prefix: 'BAK',
       },
-      minBayValue: 1,
-      maxBayValue: 99,
       softLimit: 100,
       hardLimit: 0,
       totalLabels: 1,
@@ -68,9 +63,6 @@ describe('labelGenerationService', () => {
         shelfStart: 'A',
         shelfEnd: 'B',
       },
-      minAisleValue: 0,
-      maxAisleValue: 99,
-      maxBayValue: 99,
       softLimit: 100,
       hardLimit: 200,
       totalLabels: 4,
@@ -91,8 +83,6 @@ describe('labelGenerationService', () => {
         shelfEnd: 'C',
         prefix: 'BAK',
       },
-      minBayValue: 1,
-      maxBayValue: 99,
       softLimit: 2,
       hardLimit: 10,
       totalLabels: 3,
