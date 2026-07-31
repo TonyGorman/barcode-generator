@@ -1,11 +1,7 @@
-declare const compactBrand: unique symbol
-
-// Branded type to distinguish compact barcode payloads from display strings.
-// The unique-symbol computed key prevents accidental use of display-formatted
-// strings where a compact payload is required, while avoiding the
-// no-useless-intersection lint rule that plain phantom brands trigger.
-export type CompactLabelCode = string & { readonly [compactBrand]: 'compact' }
+// Branded nominal type to distinguish compact barcode payloads from display
+// strings at compile time. The phantom brand is intentional: it prevents
+// accidental use of display-formatted codes as barcode values.
+// eslint-disable-next-line sonarjs/no-useless-intersection -- intentional branded type; the empty intersection is the branding mechanism
+export type CompactLabelCode = string & { readonly __brand: 'compact' }
 
 export const asCompactLabelCode = (value: string): CompactLabelCode => value as CompactLabelCode
-
-// ccc
