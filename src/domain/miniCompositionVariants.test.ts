@@ -1,8 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createLocalStorageShim } from '../test/localStorageShim'
 import { DEFAULT_MINI_COMPOSITION_VARIANT_ID, resolveMiniCompositionVariantId } from './miniCompositionVariants'
-import { resolveConfiguredMiniVariantId } from './miniVariantPreference'
-import { readPersistedMiniVariantRaw } from '../services/miniVariantPreferenceStore'
+import { readPersistedMiniVariantRaw, resolveConfiguredMiniVariantId } from '../services/miniVariantPreferenceStore'
 
 const storageShim = createLocalStorageShim()
 

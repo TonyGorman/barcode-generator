@@ -5,8 +5,11 @@ import AisleLabelForm from './AisleLabelForm'
 import BackLabelForm from './BackLabelForm'
 import SpecificLabelForm from './SpecificLabelForm'
 import { ITabItem } from '../models/ITabItem'
-import { MINI_VARIANT_STORAGE_KEY, writePersistedMiniVariant } from '../services/miniVariantPreferenceStore'
-import { resolveConfiguredMiniVariantId } from '../domain/miniVariantPreference'
+import {
+  MINI_VARIANT_STORAGE_KEY,
+  resolveConfiguredMiniVariantId,
+  writePersistedMiniVariant,
+} from '../services/miniVariantPreferenceStore'
 import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant'
 import { isMiniCompositionVariantId, MINI_VARIANT_OPTIONS } from '../domain/miniCompositionVariants'
 
