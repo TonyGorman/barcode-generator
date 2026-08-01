@@ -1,12 +1,12 @@
 import * as React from 'react'
 import styles from './BackLabelForm.module.css'
-import formLayoutStyles from './FormLayout.module.css'
-import shellStyles from './FormShell.module.css'
-import FormFeedback from './FormFeedback'
-import InlineFieldError from './InlineFieldError'
-import FormSection from './FormSection'
+import formLayoutStyles from '../formUi/FormLayout.module.css'
+import shellStyles from '../formUi/FormShell.module.css'
+import FormFeedback from '../formUi/FormFeedback'
+import InlineFieldError from '../formUi/InlineFieldError'
+import FormSection from '../formUi/FormSection'
 import LabelFormShell from './LabelFormShell'
-import ShelfRangeSection from './ShelfRangeSection'
+import ShelfRangeSection from '../formUi/ShelfRangeSection'
 import {
   SHORT_CODE_PREFIXES,
   MIN_BAY_VALUE,
@@ -15,12 +15,12 @@ import {
   LABEL_SOFT_LIMIT,
   LABEL_HARD_LIMIT,
   formatTwoDigitValue,
-} from '../config/labelConfig'
-import { RadioGroup, TextField } from './FormControls'
-import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant'
-import { useResetOnVariantChange } from '../hooks/useResetOnVariantChange'
-import { useShortLabelForm } from '../hooks/useShortLabelForm'
-import { useFormValidationUi } from '../hooks/useFormValidationUi'
+} from '../../config/labelConfig'
+import { RadioGroup, TextField } from '../formUi/FormControls'
+import { MiniCompositionVariantId } from '../../models/IMiniCompositionVariant'
+import { useResetOnVariantChange } from '../../hooks/useResetOnVariantChange'
+import { useShortLabelForm } from '../../hooks/useShortLabelForm'
+import { useFormValidationUi } from '../../hooks/useFormValidationUi'
 import {
   getFirstInvalidShortFieldId,
   isShortRequiredBayFieldMissing,

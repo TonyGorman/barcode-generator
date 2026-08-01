@@ -1,9 +1,9 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import LabelTile, { getMiniPrimaryFontSizeMm } from './LabelTile'
-import { normalizeLabelCode, getEncodedLabelCode, getLargeSelDisplayParts } from '../domain/labelCodeDomain'
-import { SHORT_CODE_PREFIXES } from '../config/labelConfig'
-import { getLabelLayoutStrategy } from '../config/labelLayoutStrategies'
+import { normalizeLabelCode, getEncodedLabelCode, getLargeSelDisplayParts } from '../../domain/labelCodeDomain'
+import { SHORT_CODE_PREFIXES } from '../../config/labelConfig'
+import { getLabelLayoutStrategy } from '../../config/labelLayoutStrategies'
 
 const MM_TO_PX = 96 / 25.4
 const mmToPx = (mm: number): number => mm * MM_TO_PX

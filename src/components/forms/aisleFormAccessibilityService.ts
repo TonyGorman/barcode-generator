@@ -1,10 +1,10 @@
-import { IAisleSideMetadata } from '../config/aisleSideMetadata'
-import { MAX_BAY_VALUE } from '../config/labelConfig'
-import type { LabelValidationErrorCode } from '../config/validationMessages'
-import { IAisleLabelInput } from '../domain/labelGeneration'
-import { hasValue } from '../domain/numericGuard'
-import { AisleSide } from '../models/IAisleCodeParts'
-import { isFieldInvalidByCodes, isRequiredFieldMissing } from '../services/formFieldValidationService'
+import { IAisleSideMetadata } from '../../config/aisleSideMetadata'
+import { MAX_BAY_VALUE } from '../../config/labelConfig'
+import type { LabelValidationErrorCode } from '../../config/validationMessages'
+import { IAisleLabelInput } from '../../domain/labelGeneration'
+import { hasValue } from '../../domain/numericGuard'
+import { AisleSide } from '../../models/IAisleCodeParts'
+import { isFieldInvalidByCodes, isRequiredFieldMissing } from '../../services/formFieldValidationService'
 
 type AisleValidationError = LabelValidationErrorCode | null
 

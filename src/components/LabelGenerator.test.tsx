@@ -4,7 +4,7 @@ import LabelGenerator from './LabelGenerator'
 import { getLabelLayoutStrategy } from '../config/labelLayoutStrategies'
 import { TabPanelVisibilityContext } from './TabPanelVisibilityContext'
 
-vi.mock('./LabelTile', () => ({
+vi.mock('./labelTile/LabelTile', () => ({
   default: ({ code }: { code: string }) => <div>{code}</div>,
   normalizeLabelCode: (code: string) => code,
   getEncodedLabelCode: (code: string) => code,

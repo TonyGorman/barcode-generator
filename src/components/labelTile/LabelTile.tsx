@@ -1,11 +1,11 @@
 import * as React from 'react'
-import { DEFAULT_LABEL_PRINT_MODE, getLabelLayoutStrategy } from '../config/labelLayoutStrategies'
-import { LabelPrintMode } from '../models/ILabelLayoutStrategy'
-import { DEFAULT_MINI_COMPOSITION_VARIANT_ID } from '../domain/labelCodeDomain'
-import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant'
+import { DEFAULT_LABEL_PRINT_MODE, getLabelLayoutStrategy } from '../../config/labelLayoutStrategies'
+import { LabelPrintMode } from '../../models/ILabelLayoutStrategy'
+import { DEFAULT_MINI_COMPOSITION_VARIANT_ID } from '../../domain/labelCodeDomain'
+import { MiniCompositionVariantId } from '../../models/IMiniCompositionVariant'
 import MiniLabelTile from './MiniLabelTile'
 import LargeLabelTile from './LargeLabelTile'
-export { getMiniPrimaryFontSizeMm } from './miniPrimaryTextMeasurement'
+export { getMiniPrimaryFontSizeMm } from '../miniPrimaryTextMeasurement'
 
 interface ILabelTileProps {
   code: string

@@ -1,9 +1,9 @@
 import * as React from 'react'
-import shellStyles from './FormShell.module.css'
-import formLayoutStyles from './FormLayout.module.css'
-import FormGenerateAndPreview from './FormGenerateAndPreview'
-import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant'
-import { LabelPrintMode } from '../models/ILabelLayoutStrategy'
+import shellStyles from '../formUi/FormShell.module.css'
+import formLayoutStyles from '../formUi/FormLayout.module.css'
+import FormGenerateAndPreview from '../formUi/FormGenerateAndPreview'
+import { MiniCompositionVariantId } from '../../models/IMiniCompositionVariant'
+import { LabelPrintMode } from '../../models/ILabelLayoutStrategy'
 
 interface LabelFormShellProps {
   title: string

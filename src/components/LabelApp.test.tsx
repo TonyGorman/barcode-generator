@@ -5,15 +5,15 @@ import { createLocalStorageShim } from '../test/localStorageShim'
 
 const storageShim = createLocalStorageShim()
 
-vi.mock('./SpecificLabelForm', () => ({
+vi.mock('./forms/SpecificLabelForm', () => ({
   default: () => <div>Specific Form Mock</div>,
 }))
 
-vi.mock('./AisleLabelForm', () => ({
+vi.mock('./forms/AisleLabelForm', () => ({
   default: () => <div>Aisle Mock</div>,
 }))
 
-vi.mock('./BackLabelForm', () => ({
+vi.mock('./forms/BackLabelForm', () => ({
   default: () => <div>Back Mock</div>,
 }))
 

@@ -1,8 +1,8 @@
 import * as React from 'react'
 import styles from './LabelTile.module.css'
-import { getLabelLayoutStrategy } from '../config/labelLayoutStrategies'
-import { LabelPrintMode } from '../models/ILabelLayoutStrategy'
-import { getEncodedLabelCode } from '../domain/labelCodeDomain'
+import { getLabelLayoutStrategy } from '../../config/labelLayoutStrategies'
+import { LabelPrintMode } from '../../models/ILabelLayoutStrategy'
+import { getEncodedLabelCode } from '../../domain/labelCodeDomain'
 import LargeLabelTileContent from './LargeLabelTileContent'
 import BarcodeBlock from './BarcodeBlock'
 

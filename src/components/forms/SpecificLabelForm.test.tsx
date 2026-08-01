@@ -1,10 +1,10 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import SpecificLabelForm from './SpecificLabelForm'
-import { AISLE_PREFIXES, SHORT_CODE_PREFIXES } from '../config/labelConfig'
-import { clickGenerateLabels, setInputByPlaceholder } from '../test/formTestHelpers'
+import { AISLE_PREFIXES, SHORT_CODE_PREFIXES } from '../../config/labelConfig'
+import { clickGenerateLabels, setInputByPlaceholder } from '../../test/formTestHelpers'
 
-vi.mock('./LabelGenerator', () => ({
+vi.mock('../LabelGenerator', () => ({
   default: ({ labelCodes, layoutMode }: { labelCodes: string[]; layoutMode?: string }) => (
     <div data-testid="generated-labels" data-layout-mode={layoutMode}>
       {labelCodes.join('|')}

@@ -1,8 +1,8 @@
 import * as React from 'react'
-import LabelGenerator from './LabelGenerator'
+import LabelGenerator from '../LabelGenerator'
 import GenerateLabelsButton from './GenerateLabelsButton'
-import { LabelPrintMode } from '../models/ILabelLayoutStrategy'
-import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant'
+import { LabelPrintMode } from '../../models/ILabelLayoutStrategy'
+import { MiniCompositionVariantId } from '../../models/IMiniCompositionVariant'
 
 interface FormGenerateAndPreviewProps {
   generatedLabels: string[] | null

@@ -2,7 +2,7 @@ import React from 'react'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { Button, RadioGroup, ShelfSelect, TextField } from './FormControls'
-import { MAX_SHELF_LETTER } from '../config/labelConfig'
+import { MAX_SHELF_LETTER } from '../../config/labelConfig'
 
 describe('FormControls', () => {
   it('renders Button with default type button', () => {

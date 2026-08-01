@@ -4,7 +4,7 @@ import shellStyles from './FormShell.module.css'
 import FormSection from './FormSection'
 import InlineFieldError from './InlineFieldError'
 import { ShelfSelect } from './FormControls'
-import { SHELF_RANGE_TEXT } from '../config/labelConfig'
+import { SHELF_RANGE_TEXT } from '../../config/labelConfig'
 
 interface ValidationFieldA11yProps {
   'aria-invalid'?: true

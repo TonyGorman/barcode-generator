@@ -1,9 +1,9 @@
 import * as React from 'react'
 import styles from './LabelApp.module.css'
 import Tabs from './Tabs'
-import AisleLabelForm from './AisleLabelForm'
-import BackLabelForm from './BackLabelForm'
-import SpecificLabelForm from './SpecificLabelForm'
+import AisleLabelForm from './forms/AisleLabelForm'
+import BackLabelForm from './forms/BackLabelForm'
+import SpecificLabelForm from './forms/SpecificLabelForm'
 import { ITabItem } from '../models/ITabItem'
 import {
   MINI_VARIANT_STORAGE_KEY,

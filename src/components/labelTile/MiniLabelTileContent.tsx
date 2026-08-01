@@ -1,6 +1,10 @@
 import * as React from 'react'
 import styles from './LabelTile.module.css'
-import { IComposedMiniLabel, IMiniTypographyFitResult, IMiniVariantGeometry } from '../models/IMiniCompositionVariant'
+import {
+  IComposedMiniLabel,
+  IMiniTypographyFitResult,
+  IMiniVariantGeometry,
+} from '../../models/IMiniCompositionVariant'
 
 interface IMiniSelPrimaryTextProps {
   primary: string

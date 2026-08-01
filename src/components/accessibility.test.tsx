@@ -1,10 +1,10 @@
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 import { axe } from 'vitest-axe'
-import AisleLabelForm from './AisleLabelForm'
-import BackLabelForm from './BackLabelForm'
+import AisleLabelForm from './forms/AisleLabelForm'
+import BackLabelForm from './forms/BackLabelForm'
 import LabelApp from './LabelApp'
-import SpecificLabelForm from './SpecificLabelForm'
+import SpecificLabelForm from './forms/SpecificLabelForm'
 
 const expectNoAxeViolations = async (container: HTMLElement): Promise<void> => {
   const results = await axe(container)

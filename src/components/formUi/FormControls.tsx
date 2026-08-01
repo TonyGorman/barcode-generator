@@ -1,6 +1,6 @@
 import * as React from 'react'
 import styles from './FormControls.module.css'
-import { MAX_SHELF_LETTER } from '../config/labelConfig'
+import { MAX_SHELF_LETTER } from '../../config/labelConfig'
 
 const joinClasses = (...classNames: (string | undefined)[]): string => classNames.filter(Boolean).join(' ')
 

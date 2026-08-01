@@ -1,7 +1,7 @@
 import * as React from 'react'
 import Barcode from 'react-barcode'
 import styles from './LabelTile.module.css'
-import { convertMmToPx } from './miniPrimaryTextMeasurement'
+import { convertMmToPx } from '../miniPrimaryTextMeasurement'
 
 interface IBarcodeBlockProps {
   labelValue: string
