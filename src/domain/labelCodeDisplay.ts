@@ -16,13 +16,7 @@ export interface IMiniThreeRowDisplayParts {
   bottom: string
 }
 
-interface DisplayParts {
-  top: string
-  main: string
-  bottom: string
-}
-
-const toDisplayParts = (parsed: ParsedLabelCode): DisplayParts => {
+const toDisplayParts = (parsed: ParsedLabelCode): IMiniThreeRowDisplayParts => {
   switch (parsed.kind) {
     case 'aisle':
       return { top: parsed.parts.aisle, main: `${parsed.parts.side}${parsed.parts.bay}`, bottom: parsed.parts.shelf }
@@ -30,6 +24,10 @@ const toDisplayParts = (parsed: ParsedLabelCode): DisplayParts => {
       return { top: parsed.parts.prefix, main: parsed.parts.bay, bottom: parsed.parts.shelf }
     case 'special':
       return { top: '', main: parsed.parts.value, bottom: '' }
+    default: {
+      const _exhaustive: never = parsed
+      throw new Error(`Unhandled parsed label code kind: ${(_exhaustive as ParsedLabelCode).kind}`)
+    }
   }
 }
 
@@ -60,7 +58,8 @@ export const getLargeSelDisplayParts = (
   code: string,
   shortCodePrefix: string = SHORT_CODE_PREFIXES[0],
 ): ILargeLabelDisplayParts | null => {
-  const parsed = parseLabelCode(code, shortCodePrefix)
+  const normalizedCode = code.toUpperCase()
+  const parsed = parseLabelCode(normalizedCode, shortCodePrefix)
   if (parsed?.kind !== 'aisle' && parsed?.kind !== 'short') {
     return null
   }
