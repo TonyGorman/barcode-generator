@@ -11,6 +11,11 @@ import { MiniCompositionVariantId } from '../../models/IMiniCompositionVariant'
 import { useResetOnVariantChange } from '../../hooks/useResetOnVariantChange'
 import { useSpecificLabelForm } from '../../hooks/useSpecificLabelForm'
 import { useFormValidationUi } from '../../hooks/useFormValidationUi'
+import {
+  getFirstInvalidSpecificFieldId,
+  getSpecificLabelInputId,
+  isSpecificLabelFieldInvalid,
+} from './specificFormAccessibilityService'
 
 interface SpecificLabelFormProps {
   miniVariantId?: MiniCompositionVariantId
@@ -22,7 +27,7 @@ const SpecificLabelForm: React.FC<SpecificLabelFormProps> = ({ miniVariantId }) 
   const { bayRangeText, shelfRangeText, namedAisleExamples, aislePrefixedExamples } = content
   const { labelText, generatedLabels, errorMessage, warningMessage, labelPrintMode, printModeOptions } = state
   const { onInputChange, handleModeChange, generateLabel, resetGeneratedLabels } = actions
-  const inputId = `${idPrefix}-specific-input`
+  const inputId = getSpecificLabelInputId(idPrefix)
 
   useResetOnVariantChange(miniVariantId, resetGeneratedLabels)
 
@@ -33,7 +38,7 @@ const SpecificLabelForm: React.FC<SpecificLabelFormProps> = ({ miniVariantId }) 
     warningMessage,
     generatedLabels,
     onGenerate: generateLabel,
-    getFirstInvalidFieldId: React.useCallback(() => inputId, [inputId]),
+    getFirstInvalidFieldId: React.useCallback(() => getFirstInvalidSpecificFieldId({ idPrefix }), [idPrefix]),
   })
 
   return (
@@ -64,7 +69,7 @@ const SpecificLabelForm: React.FC<SpecificLabelFormProps> = ({ miniVariantId }) 
             value={labelText}
             placeholder="Enter labels"
             onChange={onInputChange}
-            aria-invalid={validationUi.showFieldErrors}
+            aria-invalid={isSpecificLabelFieldInvalid(validationUi.showFieldErrors)}
             aria-describedby={validationUi.showFieldErrors ? validationUi.summaryErrorId : undefined}
           />
           <p>
