@@ -287,7 +287,7 @@ Run the fast local validation gate:
 
 `npm run validate:ci`
 
-Run full release validation (adds dependency audit, accessibility, and E2E checks):
+Run full release validation (adds dependency audit, axe + pa11y accessibility checks, and E2E checks):
 
 `npm run validate:release`
 
@@ -301,6 +301,10 @@ Run accessibility checks (axe) against key views:
 
 `npm run test:a11y`
 
+Run scripted pa11y CI checks across major tab/form states (requires the app to already be running at `http://127.0.0.1:4173`):
+
+`npm run test:pa11y`
+
 This is required by the release validation gate (`npm run validate:release`) and must pass before release is considered complete.
 
 ### Git hooks
@@ -309,7 +313,7 @@ This repo configures Git to use [.githooks/pre-push](/.githooks/pre-push), insta
 
 The pre-push hook is branch-aware:
 
-- **Pushing to `main`**: runs `npm run validate:release` (includes E2E).
+- **Pushing to `main`**: runs `npm run validate:release` (includes axe, pa11y, and E2E).
 - **Pushing to other branches**: runs `npm run validate:ci` (fast validation without E2E).
 
 This ensures deploy-branch pushes have full confidence while keeping feature-branch iteration fast.

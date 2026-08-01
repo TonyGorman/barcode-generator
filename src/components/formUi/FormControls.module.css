@@ -4,7 +4,7 @@
   appearance: none;
   border: 1px solid #1f5fbf;
   border-radius: 10px;
-  background: linear-gradient(180deg, #2f7df4 0%, #1f5fbf 100%);
+  background: linear-gradient(180deg, #1f6fe8 0%, #1f5fbf 100%);
   color: #ffffff;
   font: inherit;
   font-weight: 600;
@@ -19,7 +19,7 @@
 }
 
 .button:hover {
-  background: linear-gradient(180deg, #1f6fe8 0%, #194f9f 100%);
+  background: linear-gradient(180deg, #1c63ce 0%, #194f9f 100%);
 }
 
 .button:focus-visible {
