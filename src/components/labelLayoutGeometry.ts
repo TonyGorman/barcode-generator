@@ -1,5 +1,5 @@
 import { ILabelLayoutStrategy } from '../models/ILabelLayoutStrategy'
-import { clampMm } from '../domain/mathUtils'
+import { fitLineByWidth } from '../domain/miniCompositionVariantMath'
 
 const PRIMARY_TEXT_AVERAGE_GLYPH_WIDTH_FACTOR = 0.62
 const PRIMARY_TEXT_FIT_SAFETY_RATIO = 0.95
@@ -32,32 +32,17 @@ export const fitMiniPrimaryFontSizeMm = (
     return typography.primaryTextMaxSizeMm
   }
 
-  const minSizeMm = typography.primaryTextMinSizeMm
-  const maxSizeMm = typography.primaryTextMaxSizeMm
-  if (!primaryText) {
-    return maxSizeMm
-  }
-
+  // Reserve a small safety margin so fitted text does not visually crowd edges when printed.
   const availableWidthMm = (page.labelWidthMm - typography.tilePaddingHorizontalMm * 2) * PRIMARY_TEXT_FIT_SAFETY_RATIO
-  if (availableWidthMm <= 0) {
-    return minSizeMm
-  }
 
-  const measuredWidthAtMax = measureTextWidth(primaryText, maxSizeMm, typography.primaryLetterSpacingMm)
-  if (measuredWidthAtMax <= availableWidthMm) {
-    return maxSizeMm
-  }
-
-  const proportionalFit = maxSizeMm * (availableWidthMm / measuredWidthAtMax)
-  const firstPass = clampMm(proportionalFit, minSizeMm, maxSizeMm)
-
-  const firstPassWidth = measureTextWidth(primaryText, firstPass, typography.primaryLetterSpacingMm)
-  if (firstPassWidth <= 0) {
-    return firstPass
-  }
-
-  const refinedFit = firstPass * (availableWidthMm / firstPassWidth)
-  return clampMm(refinedFit, minSizeMm, maxSizeMm)
+  return fitLineByWidth(
+    primaryText,
+    typography.primaryTextMinSizeMm,
+    typography.primaryTextMaxSizeMm,
+    availableWidthMm,
+    typography.primaryLetterSpacingMm,
+    measureTextWidth,
+  )
 }
 
 export const getMiniBarcodeTopFromTileTopMm = (layoutStrategy: ILabelLayoutStrategy): number => {
@@ -82,6 +67,7 @@ export const getMiniAisleThreeRowGeometry = (layoutStrategy: ILabelLayoutStrateg
   let bottomCenter = availableHeightFromContentTopMm - MINI_AISLE_BOTTOM_SAFE_GUTTER_MM - auxHalfHeight
 
   if (bottomCenter - topCenter < MINI_AISLE_MIN_ROW_GAP_MM * 2) {
+    // When space is tight, re-center around the middle and preserve minimum row separation.
     const middle = availableHeightFromContentTopMm / 2
     topCenter = middle - MINI_AISLE_MIN_ROW_GAP_MM
     bottomCenter = middle + MINI_AISLE_MIN_ROW_GAP_MM

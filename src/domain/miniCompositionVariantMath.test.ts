@@ -1,11 +1,21 @@
 import { describe, expect, it } from 'vitest'
-import { clampMm, fitLineByWidth, getSecondaryCenterFromBarcodeTopMm } from './miniCompositionVariantMath'
+import { fitLineByWidth, getSecondaryCenterFromBarcodeTopMm } from './miniCompositionVariantMath'
 
 describe('miniCompositionVariantMath', () => {
-  it('clampMm returns min, max, and in-range values as expected', () => {
-    expect(clampMm(1, 2, 10)).toBe(2)
-    expect(clampMm(12, 2, 10)).toBe(10)
-    expect(clampMm(6, 2, 10)).toBe(6)
+  it('fitLineByWidth keeps results within min/max bounds', () => {
+    const maxSizeMm = 10
+    const minSizeMm = 4
+    const hugeMeasure = () => 1_000_000
+
+    expect(fitLineByWidth('ABCDE', minSizeMm, maxSizeMm, 40, 0, hugeMeasure)).toBe(minSizeMm)
+
+    const fitsAtMax = () => 1
+    expect(fitLineByWidth('AB', minSizeMm, maxSizeMm, 25, 0, fitsAtMax)).toBe(maxSizeMm)
+
+    const inRangeMeasure = (text: string, fontSizeMm: number): number => text.length * fontSizeMm
+    const result = fitLineByWidth('ABCDE', minSizeMm, maxSizeMm, 30, 0, inRangeMeasure)
+    expect(result).toBeGreaterThanOrEqual(minSizeMm)
+    expect(result).toBeLessThanOrEqual(maxSizeMm)
   })
 
   it('fitLineByWidth returns max size for empty text', () => {
