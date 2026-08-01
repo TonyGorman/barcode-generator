@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { axe } from 'vitest-axe'
 import AisleLabelForm from './forms/AisleLabelForm'
 import BackLabelForm from './forms/BackLabelForm'
-import LabelApp from './LabelApp'
+import LabelApp from './appShell/LabelApp'
 import SpecificLabelForm from './forms/SpecificLabelForm'
 
 const expectNoAxeViolations = async (container: HTMLElement): Promise<void> => {

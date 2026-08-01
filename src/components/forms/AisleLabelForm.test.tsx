@@ -4,7 +4,7 @@ import AisleLabelForm from './AisleLabelForm'
 import { MIN_AISLE_VALUE, MAX_AISLE_VALUE, MAX_BAY_VALUE, MAX_SHELF_LETTER } from '../../config/labelConfig'
 import { clickGenerateLabels, setComboboxValue, setTextboxValues } from '../../test/formTestHelpers'
 
-vi.mock('../LabelGenerator', () => ({
+vi.mock('../print/LabelGenerator', () => ({
   default: ({ labelCodes, layoutMode }: { labelCodes: string[]; layoutMode?: string }) => (
     <div data-testid="generated-count" data-layout-mode={layoutMode}>
       {labelCodes.length}

@@ -147,7 +147,7 @@ After feature implementation passes all validation gates (`npm run validate:ci` 
 
 - Domain validation functions never return message strings directly. They return a typed value (a discriminated union `{ code: ... }` for aisle/short, or a `reason` string literal for specific labels), and `src/config/validationMessages.ts` owns mapping that typed value to display text (`getValidationErrorMessage`, `getSpecificInvalidLabelMessage`). This keeps domain logic pure/testable and centralizes UI copy (and future i18n) in one place.
 - `LabelValidationErrorCode` (aisle/short) and `SpecificLabelValidationErrorReason` (specific labels) are both **owned by `validationMessages.ts`**, not by the domain files that use them — `src/domain/labelGeneration.ts` and `src/domain/labelCodeValidator.ts` import the type back from config. This is intentionally symmetric across all three label forms.
-- The specific-label error message names the actual offending code (e.g. `Label 'F0S01A' is not a recognized label format...`) rather than a generic "invalid input" message, so a typo in a multi-code batch is identifiable. `src/components/specificLabelValidationService.ts` finds the first invalid `{code, reason}` pair and passes both to `getSpecificInvalidLabelMessage`.
+- The specific-label error message names the actual offending code (e.g. `Label 'F0S01A' is not a recognized label format...`) rather than a generic "invalid input" message, so a typo in a multi-code batch is identifiable. `src/services/specificLabelValidationService.ts` finds the first invalid `{code, reason}` pair and passes both to `getSpecificInvalidLabelMessage`.
 - Do not add a _new_ parallel error-code type when extending validation elsewhere — reuse this existing boundary (typed value from domain, text mapping in `validationMessages.ts`) rather than introducing message strings composed ad hoc in components/hooks.
 
 ## React / TypeScript Approach
@@ -166,7 +166,7 @@ After feature implementation passes all validation gates (`npm run validate:ci` 
 
 ## Component-Specific Guidance
 
-### Pagination (`src/components/Pagination.tsx`)
+### Pagination (`src/components/print/Pagination.tsx`)
 
 - **Do not include `currentPage` in the `useEffect` dependency array** when syncing to `totalPages`. Use functional `setState` to depend only on `totalPages`:
 
@@ -202,7 +202,7 @@ After feature implementation passes all validation gates (`npm run validate:ci` 
 ### Hooks Location (`src/hooks/`)
 
 - Custom hooks (`useAisleLabelForm`, `useLabelGenerationFeedback`, `useLabelPrintMode`, `usePaginatedLabels`, `usePrintPortal`, `useResetOnVariantChange`, `useShortLabelForm`, `useSpecificLabelForm`) live in `src/hooks/`, a sibling of `src/config`, `src/domain`, and `src/models` (same depth as `src/components`).
-- Non-hook helpers (`formStateService.ts`, `labelBatchLimitService.ts`, `labelGenerationService.ts`, `labelLayoutGeometry.ts`, `specificLabelValidationService.ts`) intentionally remain in `src/components/`. A full components/hooks/utils split was evaluated and deemed not worth the churn for a purely organizational change.
+- Non-hook app orchestration helpers (`formStateService.ts`, `labelBatchLimitService.ts`, `labelGenerationService.ts`, `specificLabelValidationService.ts`) intentionally live in `src/services/`. Geometry/fitting helpers (`labelLayoutGeometry.ts`) live in `src/domain/` as pure domain logic.
 - New hooks importing `../config/*`, `../domain/*`, or `../models/*` need no path adjustment from `src/hooks/`; only imports reaching back into `src/components/` need the `../components/*` prefix.
 - Coverage config (`vite.config.ts` `test.coverage.include`) must include `src/hooks/**/*.ts` and `src/hooks/**/*.tsx`, or moved/added hooks silently drop out of coverage.
 

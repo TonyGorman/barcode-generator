@@ -1,17 +1,17 @@
 import * as React from 'react'
 import styles from './LabelApp.module.css'
 import Tabs from './Tabs'
-import AisleLabelForm from './forms/AisleLabelForm'
-import BackLabelForm from './forms/BackLabelForm'
-import SpecificLabelForm from './forms/SpecificLabelForm'
-import { ITabItem } from '../models/ITabItem'
+import AisleLabelForm from '../forms/AisleLabelForm'
+import BackLabelForm from '../forms/BackLabelForm'
+import SpecificLabelForm from '../forms/SpecificLabelForm'
+import { ITabItem } from '../../models/ITabItem'
 import {
   MINI_VARIANT_STORAGE_KEY,
   resolveConfiguredMiniVariantId,
   writePersistedMiniVariant,
-} from '../services/miniVariantPreferenceStore'
-import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant'
-import { isMiniCompositionVariantId, MINI_VARIANT_OPTIONS } from '../domain/miniCompositionVariants'
+} from '../../services/miniVariantPreferenceStore'
+import { MiniCompositionVariantId } from '../../models/IMiniCompositionVariant'
+import { isMiniCompositionVariantId, MINI_VARIANT_OPTIONS } from '../../domain/miniCompositionVariants'
 
 const resolveInitialMiniVariant = (): MiniCompositionVariantId => {
   return resolveConfiguredMiniVariantId()

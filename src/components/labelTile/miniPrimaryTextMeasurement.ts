@@ -1,5 +1,5 @@
-import { ILabelLayoutStrategy } from '../models/ILabelLayoutStrategy'
-import { estimatePrimaryTextWidthMm, fitMiniPrimaryFontSizeMm } from './labelLayoutGeometry'
+import { ILabelLayoutStrategy } from '../../models/ILabelLayoutStrategy'
+import { estimatePrimaryTextWidthMm, fitMiniPrimaryFontSizeMm } from '../../domain/labelLayoutGeometry'
 
 const MM_TO_PX = 96 / 25.4
 const PRIMARY_TEXT_FONT_WEIGHT = 800

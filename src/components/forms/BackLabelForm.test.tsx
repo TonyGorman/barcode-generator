@@ -4,7 +4,7 @@ import BackLabelForm from './BackLabelForm'
 import { SHORT_CODE_PREFIXES, MAX_BAY_VALUE, MAX_SHELF_LETTER } from '../../config/labelConfig'
 import { clickGenerateLabels, setComboboxValue, setTextboxValues } from '../../test/formTestHelpers'
 
-vi.mock('../LabelGenerator', () => ({
+vi.mock('../print/LabelGenerator', () => ({
   default: ({ labelCodes }: { labelCodes: string[] }) => (
     <div data-testid="generated-labels">{labelCodes.join('|')}</div>
   ),

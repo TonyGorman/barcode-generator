@@ -1,19 +1,19 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import LabelApp from './LabelApp'
-import { createLocalStorageShim } from '../test/localStorageShim'
+import { createLocalStorageShim } from '../../test/localStorageShim'
 
 const storageShim = createLocalStorageShim()
 
-vi.mock('./forms/SpecificLabelForm', () => ({
+vi.mock('../forms/SpecificLabelForm', () => ({
   default: () => <div>Specific Form Mock</div>,
 }))
 
-vi.mock('./forms/AisleLabelForm', () => ({
+vi.mock('../forms/AisleLabelForm', () => ({
   default: () => <div>Aisle Mock</div>,
 }))
 
-vi.mock('./forms/BackLabelForm', () => ({
+vi.mock('../forms/BackLabelForm', () => ({
   default: () => <div>Back Mock</div>,
 }))
 

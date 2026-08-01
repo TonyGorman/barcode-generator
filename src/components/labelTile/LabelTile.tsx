@@ -5,7 +5,7 @@ import { DEFAULT_MINI_COMPOSITION_VARIANT_ID } from '../../domain/labelCodeDomai
 import { MiniCompositionVariantId } from '../../models/IMiniCompositionVariant'
 import MiniLabelTile from './MiniLabelTile'
 import LargeLabelTile from './LargeLabelTile'
-export { getMiniPrimaryFontSizeMm } from '../miniPrimaryTextMeasurement'
+export { getMiniPrimaryFontSizeMm } from './miniPrimaryTextMeasurement'
 
 interface ILabelTileProps {
   code: string

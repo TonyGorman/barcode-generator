@@ -1,6 +1,6 @@
 import * as React from 'react'
 import styles from './Pagination.module.css'
-import { IPaginationProps } from '../models/IPaginationProps'
+import { IPaginationProps } from '../../models/IPaginationProps'
 
 const Pagination = (props: IPaginationProps): React.ReactElement => {
   const { data, onPageChange, itemsPerPage = 35 } = props

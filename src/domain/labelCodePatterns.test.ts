@@ -8,7 +8,7 @@ import {
   buildCompactConfiguredAisleCodePattern,
   buildCompactLabelCodePattern,
   buildCompactShortCodePattern,
-} from '../domain/labelCodePatterns'
+} from './labelCodePatterns'
 import { AISLE_SIDES } from '../config/labelConfig'
 
 describe('labelCodePatterns', () => {

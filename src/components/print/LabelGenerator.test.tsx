@@ -1,10 +1,10 @@
 import { fireEvent, render, screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import LabelGenerator from './LabelGenerator'
-import { getLabelLayoutStrategy } from '../config/labelLayoutStrategies'
-import { TabPanelVisibilityContext } from './TabPanelVisibilityContext'
+import { getLabelLayoutStrategy } from '../../config/labelLayoutStrategies'
+import { TabPanelVisibilityContext } from '../appShell/TabPanelVisibilityContext'
 
-vi.mock('./labelTile/LabelTile', () => ({
+vi.mock('../labelTile/LabelTile', () => ({
   default: ({ code }: { code: string }) => <div>{code}</div>,
   normalizeLabelCode: (code: string) => code,
   getEncodedLabelCode: (code: string) => code,

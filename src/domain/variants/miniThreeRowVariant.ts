@@ -10,7 +10,7 @@ import {
   fitMiniPrimaryFontSizeMm,
   getMiniAisleThreeRowGeometry,
   getMiniBarcodeTopFromTileTopMm,
-} from '../../components/labelLayoutGeometry'
+} from '../labelLayoutGeometry'
 
 const MINI_THREE_ROW_AUX_FONT_WEIGHT = 600
 

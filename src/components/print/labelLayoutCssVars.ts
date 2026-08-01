@@ -1,5 +1,5 @@
 import { CSSProperties } from 'react'
-import { ILabelLayoutStrategy } from '../models/ILabelLayoutStrategy'
+import { ILabelLayoutStrategy } from '../../models/ILabelLayoutStrategy'
 
 const toMmStyle = (value: number): string => `${value}mm`
 

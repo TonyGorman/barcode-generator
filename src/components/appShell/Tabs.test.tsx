@@ -2,7 +2,7 @@ import * as React from 'react'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import Tabs from './Tabs'
-import { ITabItem } from '../models/ITabItem'
+import { ITabItem } from '../../models/ITabItem'
 
 const tabs: ITabItem[] = [
   { key: 'one', headerText: 'One', content: <div>Panel One</div> },
