@@ -1,0 +1,226 @@
+import { render, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
+import LabelTile, { getMiniPrimaryFontSizeMm } from './LabelTile'
+import { normalizeLabelCode, getEncodedLabelCode, getLargeSelDisplayParts } from '../../domain/labelCodeDomain'
+import { SHORT_CODE_PREFIXES } from '../../config/labelConfig'
+import { getLabelLayoutStrategy } from '../../config/labelLayoutStrategies'
+
+const MM_TO_PX = 96 / 25.4
+const mmToPx = (mm: number): number => mm * MM_TO_PX
+
+vi.mock('react-barcode', () => ({
+  default: ({ value, width, height }: { value: string; width: number; height: number }) => (
+    <div data-testid="label-value" data-width={String(width)} data-height={String(height)}>
+      {value}
+    </div>
+  ),
+}))
+
+describe('LabelTile helpers', () => {
+  it('formats compact aisle code into spaced display output', () => {
+    expect(normalizeLabelCode('01L01A')).toBe('01 L01 A')
+  })
+
+  it('formats configured prefixed aisle code into spaced display output', () => {
+    expect(normalizeLabelCode('BR1L01A')).toBe('BR1 L01 A')
+  })
+
+  it('formats compact short code into spaced display output', () => {
+    expect(normalizeLabelCode(`${SHORT_CODE_PREFIXES[0]}01A`)).toBe(`${SHORT_CODE_PREFIXES[0]} 01 A`)
+  })
+
+  it('keeps named aisle values unchanged in normalized form', () => {
+    expect(normalizeLabelCode('FLORAL')).toBe('FLORAL')
+    expect(normalizeLabelCode('kiosk')).toBe('KIOSK')
+  })
+
+  it('encodes compact aisle values without separators for scanners', () => {
+    expect(getEncodedLabelCode('01L01A')).toBe('01L01A')
+  })
+
+  it('encodes configured prefixed aisle values without separators for scanners', () => {
+    expect(getEncodedLabelCode('BR1L01A')).toBe('BR1L01A')
+  })
+
+  it('encodes lowercase named aisle values as uppercase barcode payloads', () => {
+    expect(getEncodedLabelCode('kiosk')).toBe('KIOSK')
+    expect(getEncodedLabelCode('floral')).toBe('FLORAL')
+  })
+
+  it('formats compact front-of-store code into spaced display output', () => {
+    expect(normalizeLabelCode(`${SHORT_CODE_PREFIXES[1]}01A`)).toBe(`${SHORT_CODE_PREFIXES[1]} 01 A`)
+  })
+
+  it('returns unknown, non-valid values unchanged', () => {
+    expect(normalizeLabelCode('ABCDEF')).toBe('ABCDEF')
+  })
+
+  it('returns unchanged output for plain non-matching values', () => {
+    expect(normalizeLabelCode('XYZ')).toBe('XYZ')
+  })
+
+  it('parses large-sel display parts from aisle values', () => {
+    expect(getLargeSelDisplayParts('31L03A')).toEqual({
+      prefix: '31',
+      main: 'L03',
+      suffix: 'A',
+    })
+  })
+
+  it('parses large-sel display parts from prefixed aisle values', () => {
+    expect(getLargeSelDisplayParts('BR1L03A')).toEqual({
+      prefix: 'BR1',
+      main: 'L03',
+      suffix: 'A',
+    })
+  })
+
+  it('parses large-sel display parts from back values', () => {
+    expect(getLargeSelDisplayParts(`${SHORT_CODE_PREFIXES[0]}01A`)).toEqual({
+      prefix: SHORT_CODE_PREFIXES[0],
+      main: '01',
+      suffix: 'A',
+    })
+  })
+
+  it('keeps mini primary size at max for short values', () => {
+    const mini = getLabelLayoutStrategy('mini-sel')
+    expect(getMiniPrimaryFontSizeMm('L01', mini)).toBe(mini.typography.primaryTextMaxSizeMm)
+  })
+
+  it('shrinks mini primary size for long values without going below min', () => {
+    const mini = getLabelLayoutStrategy('mini-sel')
+    const fitted = getMiniPrimaryFontSizeMm('LONGSHELFTOKEN999', mini)
+
+    expect(fitted).toBeGreaterThanOrEqual(mini.typography.primaryTextMinSizeMm)
+    expect(fitted).toBeLessThan(mini.typography.primaryTextMaxSizeMm)
+  })
+
+  it('does not auto-fit when layout mode is large-sel', () => {
+    const large = getLabelLayoutStrategy('large-sel')
+    expect(getMiniPrimaryFontSizeMm('LONGSHELFTOKEN999', large)).toBe(large.typography.primaryTextMaxSizeMm)
+  })
+
+  it('shrinks short code token enough to avoid mini-label overflow', () => {
+    const mini = getLabelLayoutStrategy('mini-sel')
+    const fitted = getMiniPrimaryFontSizeMm(`${SHORT_CODE_PREFIXES[0]}01`, mini)
+
+    expect(fitted).toBeGreaterThanOrEqual(mini.typography.primaryTextMinSizeMm)
+    expect(fitted).toBeLessThan(mini.typography.primaryTextMaxSizeMm)
+  })
+
+  it('shrinks long named aisles enough to avoid mini-label overflow', () => {
+    const mini = getLabelLayoutStrategy('mini-sel')
+    const fitted = getMiniPrimaryFontSizeMm('SEASONAL', mini)
+
+    expect(fitted).toBeGreaterThanOrEqual(mini.typography.primaryTextMinSizeMm)
+    expect(fitted).toBeLessThanOrEqual(7.5)
+  })
+})
+
+describe('LabelTile', () => {
+  it('renders stacked mini rows for aisle label value', () => {
+    render(<LabelTile code="01L01A" />)
+    const miniTypography = getLabelLayoutStrategy('mini-sel').typography
+
+    expect(screen.getByText('01', { exact: true })).toBeInTheDocument()
+    expect(screen.getByText('L01', { exact: true })).toBeInTheDocument()
+    expect(screen.getByText('A', { exact: true })).toBeInTheDocument()
+    expect(screen.queryByText('01 L01 A', { exact: true })).toBeNull()
+    const label = screen.getByTestId('label-value')
+    expect(label).toHaveTextContent('01L01A')
+    expect(label).toHaveAttribute('data-width', String(mmToPx(miniTypography.barcodeModuleThicknessMm)))
+    expect(label).toHaveAttribute('data-height', String(mmToPx(miniTypography.barcodeHeightMm)))
+    expect(screen.getAllByText('01L01A')).toHaveLength(2)
+  })
+
+  it('anchors stacked mini top and bottom rows using explicit style variables', () => {
+    render(<LabelTile code="BAK" />)
+
+    const topRow = document.querySelector('[class*="miniAisleTopCode"]')
+    const bottomRow = document.querySelector('[class*="miniAisleBottomCode"]')
+    expect(topRow?.getAttribute('style')).toContain('--current-mini-aisle-top-center-from-content-top-mm')
+    expect(bottomRow?.getAttribute('style')).toContain('--current-mini-aisle-bottom-center-from-content-top-mm')
+  })
+
+  it('uses layout strategy label sizing for large-sel mode', () => {
+    render(<LabelTile code="01L01A" layoutMode="large-sel" />)
+
+    const label = screen.getByTestId('label-value')
+    const largeSelTypography = getLabelLayoutStrategy('large-sel').typography
+
+    expect(label).toHaveAttribute('data-width', String(mmToPx(largeSelTypography.barcodeModuleThicknessMm)))
+    expect(label).toHaveAttribute('data-height', String(mmToPx(largeSelTypography.barcodeHeightMm)))
+    expect(screen.getAllByText('01L01A')).toHaveLength(2)
+  })
+
+  it('barcode payload stays compact with compact aisle input', () => {
+    render(<LabelTile code="01L01A" />)
+
+    expect(screen.getByTestId('label-value')).toHaveTextContent('01L01A')
+    expect(screen.getByText('01', { exact: true })).toBeInTheDocument()
+    expect(screen.getByText('L01', { exact: true })).toBeInTheDocument()
+    expect(screen.getByText('A', { exact: true })).toBeInTheDocument()
+    expect(screen.queryByText('01 L01 A', { exact: true })).toBeNull()
+  })
+
+  it('barcode payload stays compact with configured prefixed aisle input', () => {
+    render(<LabelTile code="BR1L01A" />)
+
+    expect(screen.getByTestId('label-value')).toHaveTextContent('BR1L01A')
+    expect(screen.getByText('BR1', { exact: true })).toBeInTheDocument()
+    expect(screen.getByText('L01', { exact: true })).toBeInTheDocument()
+    expect(screen.getByText('A', { exact: true })).toBeInTheDocument()
+    expect(screen.queryByText('BR1 L01 A', { exact: true })).toBeNull()
+  })
+
+  it('Specific label with compact input uses stacked row formatting', () => {
+    render(<LabelTile code="01L01A" />)
+
+    expect(screen.getByTestId('label-value')).toHaveTextContent('01L01A')
+    expect(screen.getAllByText('01L01A').length).toBeGreaterThan(1)
+    expect(screen.getByText('01', { exact: true })).toBeInTheDocument()
+    expect(screen.getByText('L01', { exact: true })).toBeInTheDocument()
+    expect(screen.getByText('A', { exact: true })).toBeInTheDocument()
+    expect(screen.queryByText('01 L01 A', { exact: true })).toBeNull()
+  })
+
+  it('Specific back label with compact input produces compact barcode payload', () => {
+    render(<LabelTile code={`${SHORT_CODE_PREFIXES[0]}01A`} />)
+
+    expect(screen.getByTestId('label-value')).toHaveTextContent(`${SHORT_CODE_PREFIXES[0]}01A`)
+    expect(screen.getByText(SHORT_CODE_PREFIXES[0], { exact: true })).toBeInTheDocument()
+    expect(screen.getByText('01', { exact: true })).toBeInTheDocument()
+    expect(screen.getByText('A', { exact: true })).toBeInTheDocument()
+    expect(screen.queryByText(`${SHORT_CODE_PREFIXES[0]} 01 A`, { exact: true })).toBeNull()
+  })
+
+  it('Specific named aisle value renders in stacked main row for mini-sel', () => {
+    const { container } = render(<LabelTile code="FLORAL" />)
+
+    expect(screen.getAllByText('FLORAL').length).toBeGreaterThan(1)
+    expect(screen.getByTestId('label-value')).toHaveTextContent('FLORAL')
+    const legacySecondary = container.querySelector('[class*="secondaryCode"]')
+    expect(legacySecondary).toBeNull()
+    expect(screen.queryByText('ORA')).not.toBeInTheDocument()
+  })
+
+  it('does not render a large-sel heading for special aisles without structured parts', () => {
+    const { container } = render(<LabelTile code="floral" layoutMode="large-sel" />)
+
+    const largeHeadingText = container.querySelector('[class*="largeSelHeading"]')?.textContent
+    expect(largeHeadingText).toBe('')
+
+    // Ensure compact barcode payload remains unchanged from normalized special value.
+    expect(screen.getByTestId('label-value')).toHaveTextContent('FLORAL')
+  })
+
+  it('places prefixed aisle token on top row with side+bay and shelf below', () => {
+    render(<LabelTile code="BR1L01A" />)
+
+    expect(screen.getByText('BR1', { exact: true })).toBeInTheDocument()
+    expect(screen.getByText('L01', { exact: true })).toBeInTheDocument()
+    expect(screen.getByText('A', { exact: true })).toBeInTheDocument()
+    expect(screen.queryByText('BR1 L01 A', { exact: true })).toBeNull()
+  })
+})

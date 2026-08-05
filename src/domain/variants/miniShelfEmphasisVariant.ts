@@ -6,7 +6,7 @@ import {
   IMiniVariantGeometry,
 } from '../../models/IMiniCompositionVariant'
 import { ILabelLayoutStrategy } from '../../models/ILabelLayoutStrategy'
-import { getMiniBarcodeTopFromTileTopMm } from '../../components/labelLayoutGeometry'
+import { getMiniBarcodeTopFromTileTopMm } from '../labelLayoutGeometry'
 import { fitLineByWidth, getSecondaryCenterFromBarcodeTopMm } from '../miniCompositionVariantMath'
 import { parseLabelCode } from '../labelCodeParser'
 

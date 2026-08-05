@@ -113,7 +113,7 @@ The domain layer for sel codes is split across three files:
 ## Layer Intent
 
 - **`src/domain/*`**: Pure parsing, validation, generation, and formatting rules.
-- **`src/components/*Service.ts`**: Application orchestration for label workflows (validation + limits + generation).
+- **`src/services/*Service.ts`**: Application orchestration for label workflows (validation + limits + generation).
 - **`src/hooks/*`**: UI state and event orchestration for forms and preview/print behavior.
 - **`src/components/*` (render components)**: Presentation and layout rendering only.
 
