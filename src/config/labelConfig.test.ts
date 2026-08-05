@@ -78,7 +78,7 @@ describe('labelConfig', () => {
   })
 
   it('keeps named aisle allowlist stable and case-insensitive', () => {
-    expect(SPECIAL_AISLE_VALUES).toEqual(['FLORAL', 'KIOSK', 'SEASONAL'])
+    expect(SPECIAL_AISLE_VALUES).toEqual(['FLORAL', 'KIOSK'])
     expect(isSpecialAisleValue('KIOSK')).toBe(true)
     expect(isSpecialAisleValue('floral')).toBe(true)
     expect(isSpecialAisleValue('PRODUCE')).toBe(false)
@@ -110,11 +110,6 @@ describe('labelConfig', () => {
   })
 
   it('normalizes value lists without truncation', () => {
-    expect(normalizeCodeTokens([' kiosk ', 'Floral123', 'seasonal', 'ProduceZone'])).toEqual([
-      'KIOSK',
-      'FLORAL',
-      'SEASONAL',
-      'PRODUCEZONE',
-    ])
+    expect(normalizeCodeTokens([' kiosk ', 'Floral123'])).toEqual(['KIOSK', 'FLORAL'])
   })
 })

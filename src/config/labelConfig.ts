@@ -3,7 +3,7 @@ export const LABEL_CONSTRAINTS = {
     min: 0,
     max: 99,
     prefixes: ['BR', 'BL', 'FL', 'FR', 'PD'] as const,
-    specialValues: ['FLORAL', 'KIOSK', 'SEASONAL'] as const,
+    specialValues: ['FLORAL', 'KIOSK'] as const,
   },
   side: {
     values: ['L', 'R', 'E', 'F'] as const,

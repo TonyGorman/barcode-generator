@@ -1,7 +1,10 @@
 import { MiniTextMeasureFn } from '../models/IMiniCompositionVariant'
-import { clampMm } from './mathUtils'
 
-export { clampMm }
+// Constrains calculated values to avoid exceeding the min/max range.
+// Used to avoid overshooting the target size when scaling down/up to fit a line of text within a given width.
+const clampMm = (value: number, min: number, max: number): number => {
+  return Math.min(max, Math.max(min, value))
+}
 
 export const fitLineByWidth = (
   text: string,
