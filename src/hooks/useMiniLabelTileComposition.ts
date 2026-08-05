@@ -2,7 +2,7 @@ import * as React from 'react'
 import { ILabelLayoutStrategy } from '../models/ILabelLayoutStrategy'
 import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant'
 import { getMiniCompositionVariant } from '../domain/labelCodeDomain'
-import { measurePrimaryTextWidthMm } from '../components/labelTile/miniPrimaryTextMeasurement'
+import { measurePrimaryTextWidthMm } from '../components/miniPrimaryTextMeasurement'
 
 interface UseMiniLabelTileCompositionArgs {
   code: string

@@ -1,4 +1,4 @@
-import LabelApp from './components/appShell/LabelApp'
+import LabelApp from './components/LabelApp'
 import './App.css'
 
 function App() {
