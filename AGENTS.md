@@ -204,7 +204,7 @@ After feature implementation passes all validation gates (`npm run validate:ci` 
 - Custom hooks (`useAisleLabelForm`, `useLabelGenerationFeedback`, `useLabelPrintMode`, `usePaginatedLabels`, `usePrintPortal`, `useResetOnVariantChange`, `useShortLabelForm`, `useSpecificLabelForm`) live in `src/hooks/`, a sibling of `src/config`, `src/domain`, and `src/models` (same depth as `src/components`).
 - Non-hook app orchestration helpers (`formStateService.ts`, `labelBatchLimitService.ts`, `labelGenerationService.ts`, `specificLabelValidationService.ts`) intentionally live in `src/services/`. Geometry/fitting helpers (`labelLayoutGeometry.ts`) live in `src/domain/` as pure domain logic.
 - New hooks importing `../config/*`, `../domain/*`, or `../models/*` need no path adjustment from `src/hooks/`; only imports reaching back into `src/components/` need the `../components/*` prefix.
-- Coverage config (`vite.config.ts` `test.coverage.include`) must include `src/hooks/**/*.ts` and `src/hooks/**/*.tsx`, or moved/added hooks silently drop out of coverage.
+- Coverage config (`vite.config.mts` `test.coverage.include`) must include `src/hooks/**/*.ts` and `src/hooks/**/*.tsx`, or moved/added hooks silently drop out of coverage.
 
 ### Naming Convention: Application Services
 
