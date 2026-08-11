@@ -1,4 +1,4 @@
-import type { LabelValidationErrorCode } from '../config/validationMessages'
+import type { LabelValidationErrorCode } from '../../config/validationMessages'
 
 type ValidationError = LabelValidationErrorCode | null
 

@@ -1,9 +1,9 @@
 import { CSSProperties } from 'react'
-import { ILabelLayoutStrategy } from '../../models/ILabelLayoutStrategy'
+import { LabelLayoutStrategy } from '../../config/labelLayoutStrategies'
 
 const toMmStyle = (value: number): string => `${value}mm`
 
-export const buildLayoutCssVars = (layoutStrategy: ILabelLayoutStrategy): CSSProperties => {
+export const buildLayoutCssVars = (layoutStrategy: LabelLayoutStrategy): CSSProperties => {
   const { page, typography, barcodeGeometry, mode } = layoutStrategy
 
   const pageVars: Record<string, string> = {

@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import SpecificLabelForm from './SpecificLabelForm'
 import { AISLE_PREFIXES, SHORT_CODE_PREFIXES } from '../../config/labelConfig'
 import { clickGenerateLabels, setInputByPlaceholder } from '../../test/formTestHelpers'
+import { MiniVariantContext } from '../labelTile/MiniVariantContext'
 
 vi.mock('../print/LabelGenerator', () => ({
   default: ({ labelCodes, layoutMode }: { labelCodes: string[]; layoutMode?: string }) => (
@@ -241,13 +242,21 @@ describe('SpecificLabelForm', () => {
   })
 
   it('clears generated output when mini variant changes', () => {
-    const { rerender } = render(<SpecificLabelForm miniVariantId="mini-three-row" />)
+    const { rerender } = render(
+      <MiniVariantContext.Provider value="mini-three-row">
+        <SpecificLabelForm />
+      </MiniVariantContext.Provider>,
+    )
 
     submitLabels('01L01A')
 
     expect(screen.getByTestId('generated-labels')).toBeInTheDocument()
 
-    rerender(<SpecificLabelForm miniVariantId="mini-shelf-emphasis" />)
+    rerender(
+      <MiniVariantContext.Provider value="mini-shelf-emphasis">
+        <SpecificLabelForm />
+      </MiniVariantContext.Provider>,
+    )
 
     expect(screen.queryByTestId('generated-labels')).not.toBeInTheDocument()
   })

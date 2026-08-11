@@ -1,18 +1,12 @@
 import * as React from 'react'
 import styles from './LabelTile.module.css'
-import { getLabelLayoutStrategy } from '../../config/labelLayoutStrategies'
-import { LabelPrintMode } from '../../models/ILabelLayoutStrategy'
 import { getEncodedLabelCode } from '../../domain/labelCodeDomain'
 import LargeLabelTileContent from './LargeLabelTileContent'
 import BarcodeBlock from './BarcodeBlock'
+import { LabelLayoutContext } from '../print/LabelLayoutContext'
 
-interface ILargeLabelTileProps {
-  code: string
-  layoutMode: LabelPrintMode
-}
-
-const LargeLabelTile: React.FC<ILargeLabelTileProps> = ({ code, layoutMode }) => {
-  const layoutStrategy = getLabelLayoutStrategy(layoutMode)
+const LargeLabelTile: React.FC<{ code: string }> = ({ code }) => {
+  const layoutStrategy = React.useContext(LabelLayoutContext)
   const labelValue = getEncodedLabelCode(code)
 
   return (

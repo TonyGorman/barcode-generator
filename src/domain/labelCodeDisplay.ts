@@ -1,8 +1,10 @@
 import { SHORT_CODE_PREFIXES } from '../config/labelConfig'
 import { parseLabelCode, type ParsedLabelCode } from './labelCodeParser'
-import { asCompactLabelCode, type CompactLabelCode } from '../models/ILabelCode'
 
-export type { CompactLabelCode } from '../models/ILabelCode'
+// Branded nominal type to distinguish compact barcode payloads from display strings at compile time
+export type CompactLabelCode = string & { readonly __brand: 'compact' }
+
+const asCompactLabelCode = (value: string): CompactLabelCode => value as CompactLabelCode
 
 export interface ILargeLabelDisplayParts {
   prefix: string
@@ -19,7 +21,11 @@ export interface IMiniThreeRowDisplayParts {
 const toDisplayParts = (parsed: ParsedLabelCode): IMiniThreeRowDisplayParts => {
   switch (parsed.kind) {
     case 'aisle':
-      return { top: parsed.parts.aisle, main: `${parsed.parts.side}${parsed.parts.bay}`, bottom: parsed.parts.shelf }
+      return {
+        top: parsed.parts.aisle,
+        main: `${parsed.parts.side}${parsed.parts.bay}`,
+        bottom: parsed.parts.shelf,
+      }
     case 'short':
       return { top: parsed.parts.prefix, main: parsed.parts.bay, bottom: parsed.parts.shelf }
     case 'special':

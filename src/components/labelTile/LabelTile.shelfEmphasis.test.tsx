@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import LabelTile from './LabelTile'
+import { MiniVariantContext } from './MiniVariantContext'
 
 vi.mock('react-barcode', () => ({
   default: ({ value, width, height }: { value: string; width: number; height: number }) => (
@@ -12,7 +13,11 @@ vi.mock('react-barcode', () => ({
 
 describe('LabelTile shelf-emphasis selection', () => {
   it('renders shelf-emphasis mini composition when miniVariantId prop is set', () => {
-    render(<LabelTile code="01L01A" miniVariantId="mini-shelf-emphasis" />)
+    render(
+      <MiniVariantContext.Provider value="mini-shelf-emphasis">
+        <LabelTile code="01L01A" />
+      </MiniVariantContext.Provider>,
+    )
 
     expect(screen.getByText('A', { exact: true })).toBeInTheDocument()
     expect(screen.getByText('01 L01 A', { exact: true })).toBeInTheDocument()
@@ -24,7 +29,11 @@ describe('LabelTile shelf-emphasis selection', () => {
   })
 
   it('blocks shelf-emphasis rendering for special named values', () => {
-    render(<LabelTile code="KIOSK" miniVariantId="mini-shelf-emphasis" />)
+    render(
+      <MiniVariantContext.Provider value="mini-shelf-emphasis">
+        <LabelTile code="KIOSK" />
+      </MiniVariantContext.Provider>,
+    )
 
     const allKioskTexts = screen.getAllByText('KIOSK', { exact: true })
     expect(allKioskTexts.length).toBeGreaterThanOrEqual(2)

@@ -1,11 +1,55 @@
-import { LabelPrintMode } from '../models/ILabelLayoutStrategy'
-import { IMiniCompositionVariant, MiniCompositionVariantId } from '../models/IMiniCompositionVariant'
+import { LabelPrintMode, LabelLayoutStrategy } from '../config/labelLayoutStrategies'
 import { miniShelfEmphasisVariant } from './variants/miniShelfEmphasisVariant'
 import { miniThreeRowVariant } from './variants/miniThreeRowVariant'
 
+export type MiniCompositionVariantId = 'mini-three-row' | 'mini-shelf-emphasis'
+
+export interface ComposedMiniLabel {
+  variantId: MiniCompositionVariantId
+  primaryLineText: string
+  secondaryLineText: string
+  tertiaryLineText?: string
+  fullSpacedValue: string
+  encodedBarcodeValue: string
+}
+
+export interface MiniVariantGeometry {
+  primaryCenterFromContentTopMm: number
+  secondaryCenterFromContentTopMm: number
+  tertiaryCenterFromContentTopMm?: number
+  primaryMaxTextSizeMm: number
+  secondaryMaxTextSizeMm: number
+  tertiaryTextSizeMm?: number
+  barcodeTopFromTileTopMm: number
+}
+
+export interface MiniTypographyFitResult {
+  primaryTextSizeMm: number
+  secondaryTextSizeMm: number
+  secondaryCenterFromContentTopMm?: number
+  tertiaryTextSizeMm?: number
+  primaryFontWeight: number
+  secondaryFontWeight: number
+}
+
+export type MiniTextMeasureFn = (text: string, fontSizeMm: number, letterSpacingMm: number) => number
+
+export interface MiniCompositionVariant {
+  id: MiniCompositionVariantId
+  displayLabel: string
+  composeLabel: (code: string, shortCodePrefix?: string) => ComposedMiniLabel
+  resolveGeometry: (layoutStrategy: LabelLayoutStrategy) => MiniVariantGeometry
+  fitTypography: (
+    composedLabel: ComposedMiniLabel,
+    layoutStrategy: LabelLayoutStrategy,
+    geometry: MiniVariantGeometry,
+    measureText: MiniTextMeasureFn,
+  ) => MiniTypographyFitResult
+}
+
 export const DEFAULT_MINI_COMPOSITION_VARIANT_ID: MiniCompositionVariantId = 'mini-three-row'
 
-const variantRegistry = new Map<MiniCompositionVariantId, IMiniCompositionVariant>([
+const variantRegistry = new Map<MiniCompositionVariantId, MiniCompositionVariant>([
   [DEFAULT_MINI_COMPOSITION_VARIANT_ID, miniThreeRowVariant],
   ['mini-shelf-emphasis', miniShelfEmphasisVariant],
 ])
@@ -18,7 +62,7 @@ export const isMiniCompositionVariantId = (value: unknown): value is MiniComposi
   return typeof value === 'string' && variantRegistry.has(value as MiniCompositionVariantId)
 }
 
-export const getMiniCompositionVariant = (id: MiniCompositionVariantId): IMiniCompositionVariant => {
+export const getMiniCompositionVariant = (id: MiniCompositionVariantId): MiniCompositionVariant => {
   return variantRegistry.get(id) ?? miniThreeRowVariant
 }
 

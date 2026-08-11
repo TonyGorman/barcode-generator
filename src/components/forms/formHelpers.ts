@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { parseNumericInput } from '../domain/labelGeneration'
+import { parseNumericInput } from '../../domain/labelGeneration'
 
 type StateWithNullableNumber<K extends string> = Record<K, number | null>
 type StateWithNullableString<K extends string> = Record<K, string | null>

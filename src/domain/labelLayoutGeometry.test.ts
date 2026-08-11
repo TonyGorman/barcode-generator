@@ -5,9 +5,9 @@ import {
   getMiniAisleThreeRowGeometry,
   getMiniBarcodeTopFromTileTopMm,
 } from './labelLayoutGeometry'
-import { ILabelLayoutStrategy } from '../models/ILabelLayoutStrategy'
+import { LabelLayoutStrategy } from '../config/labelLayoutStrategies'
 
-const createMiniStrategy = (): ILabelLayoutStrategy => ({
+const createMiniStrategy = (): LabelLayoutStrategy => ({
   mode: 'mini-sel',
   renderVariant: 'small',
   displayName: 'Mini',

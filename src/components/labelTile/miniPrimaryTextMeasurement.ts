@@ -1,5 +1,5 @@
-import { ILabelLayoutStrategy } from '../../models/ILabelLayoutStrategy'
 import { estimatePrimaryTextWidthMm, fitMiniPrimaryFontSizeMm } from '../../domain/labelLayoutGeometry'
+import { LabelLayoutStrategy } from '../../config/labelLayoutStrategies'
 
 const MM_TO_PX = 96 / 25.4
 const PRIMARY_TEXT_FONT_WEIGHT = 800
@@ -49,7 +49,7 @@ export const measurePrimaryTextWidthMm = (text: string, fontSizeMm: number, lett
   return glyphWidthMm + spacingWidthMm
 }
 
-export const getMiniPrimaryFontSizeMm = (primaryText: string, layoutStrategy: ILabelLayoutStrategy): number => {
+export const getMiniPrimaryFontSizeMm = (primaryText: string, layoutStrategy: LabelLayoutStrategy): number => {
   return fitMiniPrimaryFontSizeMm(primaryText, layoutStrategy, measurePrimaryTextWidthMm)
 }
 

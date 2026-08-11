@@ -2,29 +2,29 @@ import * as React from 'react'
 import ReactDOM from 'react-dom'
 import styles from './LabelGenerator.module.css'
 
-import { ILabelGenerator } from '../../models/ILabelGenerator'
 import Pagination from './Pagination'
 import LabelTile from '../labelTile/LabelTile'
 import { Button } from '../formUi/FormControls'
 import controlStyles from '../formUi/FormControls.module.css'
 import { DEFAULT_LABEL_PRINT_MODE, getLabelLayoutStrategy } from '../../config/labelLayoutStrategies'
-import { ILabelLayoutStrategy } from '../../models/ILabelLayoutStrategy'
+import { LabelPrintMode, LabelLayoutStrategy } from '../../config/labelLayoutStrategies'
 import { buildLayoutCssVars } from './labelLayoutCssVars'
 import { usePaginatedLabels } from '../../hooks/usePaginatedLabels'
 import { usePrintPortal } from '../../hooks/usePrintPortal'
-import { DEFAULT_MINI_COMPOSITION_VARIANT_ID, resolveMiniCompositionVariantId } from '../../domain/labelCodeDomain'
 import { TabPanelVisibilityContext } from '../appShell/TabPanelVisibilityContext'
+import { LabelLayoutContext } from './LabelLayoutContext'
 
-const getItemsPerPage = (layoutStrategy: ILabelLayoutStrategy): number => {
+const getItemsPerPage = (layoutStrategy: LabelLayoutStrategy): number => {
   return layoutStrategy.page.columns * layoutStrategy.page.rows
 }
 
-const LabelGenerator = (props: ILabelGenerator): React.ReactElement => {
-  const {
-    labelCodes,
-    layoutMode = DEFAULT_LABEL_PRINT_MODE,
-    miniVariantId: configuredMiniVariantId = DEFAULT_MINI_COMPOSITION_VARIANT_ID,
-  } = props
+interface Props {
+  labelCodes: string[]
+  layoutMode?: LabelPrintMode
+}
+
+const LabelGenerator = (props: Props): React.ReactElement => {
+  const { labelCodes, layoutMode = DEFAULT_LABEL_PRINT_MODE } = props
   const isTabPanelVisible = React.useContext(TabPanelVisibilityContext)
   const layoutStrategy = React.useMemo(() => getLabelLayoutStrategy(layoutMode), [layoutMode])
   const itemsPerPage = React.useMemo(() => getItemsPerPage(layoutStrategy), [layoutStrategy])
@@ -36,31 +36,20 @@ const LabelGenerator = (props: ILabelGenerator): React.ReactElement => {
   }, [])
 
   const pageStyle = React.useMemo(() => buildLayoutCssVars(layoutStrategy), [layoutStrategy])
-  const miniVariantId = React.useMemo(
-    () => resolveMiniCompositionVariantId(layoutStrategy.mode, configuredMiniVariantId),
-    [layoutStrategy.mode, configuredMiniVariantId],
-  )
 
   const renderLabelGrid = React.useCallback(
     (labels: string[], className?: string): React.ReactElement => (
       <div className={className ?? styles.labelDiv}>
-        {labels.map((labelCode: string, index: number) => {
-          return (
-            <LabelTile
-              key={`${labelCode}-${index}`}
-              code={labelCode}
-              layoutMode={layoutStrategy.mode}
-              miniVariantId={miniVariantId}
-            />
-          )
-        })}
+        {labels.map((labelCode: string, index: number) => (
+          <LabelTile key={`${labelCode}-${index}`} code={labelCode} />
+        ))}
       </div>
     ),
-    [layoutStrategy.mode, miniVariantId],
+    [],
   )
 
   return (
-    <>
+    <LabelLayoutContext.Provider value={layoutStrategy}>
       {isTabPanelVisible && (
         <style media="print">{`@page { size: A4 ${layoutStrategy.page.orientation}; margin: 0; }`}</style>
       )}
@@ -95,7 +84,7 @@ const LabelGenerator = (props: ILabelGenerator): React.ReactElement => {
       {labelCodes.length > itemsPerPage && (
         <Pagination data={labelCodes} itemsPerPage={itemsPerPage} onPageChange={handlePageChange} />
       )}
-    </>
+    </LabelLayoutContext.Provider>
   )
 }
 

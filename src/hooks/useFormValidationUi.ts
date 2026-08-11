@@ -1,5 +1,4 @@
 import * as React from 'react'
-import { useAccessibleGenerateAction } from './useAccessibleGenerateAction'
 
 interface UseFormValidationUiArgs {
   idPrefix: string
@@ -72,12 +71,32 @@ export const useFormValidationUi = ({
     [errorMessage, showFieldErrors],
   )
 
-  const handleGenerate = useAccessibleGenerateAction({
-    errorMessage,
-    generatedLabels,
-    onGenerate,
-    getFirstInvalidFieldId,
-  })
+  const [submitAttempted, setSubmitAttempted] = React.useState(false)
+
+  React.useEffect(() => {
+    if (!submitAttempted) {
+      return
+    }
+    if (errorMessage === null) {
+      if (generatedLabels) {
+        setSubmitAttempted(false)
+      }
+      return
+    }
+    const firstInvalidFieldId = getFirstInvalidFieldId()
+    if (firstInvalidFieldId) {
+      const invalidField = document.getElementById(firstInvalidFieldId)
+      if (invalidField instanceof HTMLElement) {
+        invalidField.focus()
+      }
+    }
+    setSubmitAttempted(false)
+  }, [errorMessage, generatedLabels, getFirstInvalidFieldId, submitAttempted])
+
+  const handleGenerate = React.useCallback(() => {
+    setSubmitAttempted(true)
+    onGenerate()
+  }, [onGenerate])
 
   return {
     showFieldErrors,

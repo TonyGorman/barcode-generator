@@ -1,4 +1,4 @@
-import { ILabelLayoutStrategy } from '../models/ILabelLayoutStrategy'
+import { LabelLayoutStrategy } from '../config/labelLayoutStrategies'
 import { fitLineByWidth } from '../domain/miniCompositionVariantMath'
 
 const PRIMARY_TEXT_AVERAGE_GLYPH_WIDTH_FACTOR = 0.62
@@ -23,7 +23,7 @@ export type PrimaryTextMeasureFn = (text: string, fontSizeMm: number, letterSpac
 
 export const fitMiniPrimaryFontSizeMm = (
   primaryText: string,
-  layoutStrategy: ILabelLayoutStrategy,
+  layoutStrategy: LabelLayoutStrategy,
   measureTextWidth: PrimaryTextMeasureFn = estimatePrimaryTextWidthMm,
 ): number => {
   const { page, typography } = layoutStrategy
@@ -45,12 +45,12 @@ export const fitMiniPrimaryFontSizeMm = (
   )
 }
 
-export const getMiniBarcodeTopFromTileTopMm = (layoutStrategy: ILabelLayoutStrategy): number => {
+export const getMiniBarcodeTopFromTileTopMm = (layoutStrategy: LabelLayoutStrategy): number => {
   const { page, typography, barcodeGeometry } = layoutStrategy
   return page.labelHeightMm - typography.tilePaddingBottomMm - barcodeGeometry.marginBottomMm - barcodeGeometry.heightMm
 }
 
-export interface IMiniAisleThreeRowGeometry {
+export interface MiniAisleThreeRowGeometry {
   topCenterFromContentTopMm: number
   mainCenterFromContentTopMm: number
   bottomCenterFromContentTopMm: number
@@ -58,7 +58,7 @@ export interface IMiniAisleThreeRowGeometry {
   mainMaxTextSizeMm: number
 }
 
-export const getMiniAisleThreeRowGeometry = (layoutStrategy: ILabelLayoutStrategy): IMiniAisleThreeRowGeometry => {
+export const getMiniAisleThreeRowGeometry = (layoutStrategy: LabelLayoutStrategy): MiniAisleThreeRowGeometry => {
   const barcodeTopFromTileTopMm = getMiniBarcodeTopFromTileTopMm(layoutStrategy)
   const availableHeightFromContentTopMm = barcodeTopFromTileTopMm - layoutStrategy.typography.tilePaddingTopMm
 

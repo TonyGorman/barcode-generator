@@ -1,6 +1,4 @@
-import { AisleSide, IAisleCodeParts } from '../models/IAisleCodeParts'
-import { IShortCodeParts } from '../models/IShortCodeParts'
-import { ISpecialCodeParts } from '../models/ISpecialCodeParts'
+import { AISLE_SIDES } from '../config/labelConfig'
 import {
   AISLE_PREFIXES,
   SHORT_CODE_PREFIXES,
@@ -16,14 +14,33 @@ import {
   buildCompactShortCodePattern,
 } from './labelCodePatterns'
 
+export type AisleSide = (typeof AISLE_SIDES)[number]
+
+interface AisleCodeParts {
+  aisle: string
+  side: AisleSide
+  bay: string
+  shelf: string
+}
+
+interface SpecialCodeParts {
+  value: string
+}
+
+interface ShortCodeParts {
+  prefix: string
+  bay: string
+  shelf: string
+}
+
 export type ParsedLabelCode =
-  | { kind: 'special'; parts: ISpecialCodeParts }
-  | { kind: 'aisle'; parts: IAisleCodeParts }
-  | { kind: 'short'; parts: IShortCodeParts }
+  | { kind: 'special'; parts: SpecialCodeParts }
+  | { kind: 'aisle'; parts: AisleCodeParts }
+  | { kind: 'short'; parts: ShortCodeParts }
 
 const aisleCodePattern = buildCompactLabelCodePattern()
 
-const parseCompactAisleCode = (code: string): IAisleCodeParts | null => {
+const parseCompactAisleCode = (code: string): AisleCodeParts | null => {
   const match = aisleCodePattern.exec(code)
   if (!match) {
     return null
@@ -57,7 +74,7 @@ const getShortCodePattern = (prefix: string): RegExp => {
   return pattern
 }
 
-const parseCompactConfiguredAisleCode = (code: string): IAisleCodeParts | null => {
+const parseCompactConfiguredAisleCode = (code: string): AisleCodeParts | null => {
   if (!configuredAisleCodePattern) {
     return null
   }
@@ -76,7 +93,7 @@ const parseCompactConfiguredAisleCode = (code: string): IAisleCodeParts | null =
   }
 }
 
-const parseCompactShortCode = (code: string, normalizedShortCodePrefix: string): IShortCodeParts | null => {
+const parseCompactShortCode = (code: string, normalizedShortCodePrefix: string): ShortCodeParts | null => {
   const match = getShortCodePattern(normalizedShortCodePrefix).exec(code)
   if (!match) {
     return null
@@ -97,7 +114,7 @@ const filterConfiguredShortCodePrefixes = (prefixes: readonly string[]): string[
 const parseCompactShortCodeByAnySupportedPrefix = (
   code: string,
   preferredPrefixes: readonly string[],
-): IShortCodeParts | null => {
+): ShortCodeParts | null => {
   const configuredPreferredPrefixes = filterConfiguredShortCodePrefixes(preferredPrefixes)
   const prefixes = Array.from(new Set([...configuredPreferredPrefixes, ...SHORT_CODE_PREFIXES]))
 

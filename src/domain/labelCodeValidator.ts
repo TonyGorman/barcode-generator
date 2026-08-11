@@ -3,10 +3,6 @@ import { parseLabelCode } from './labelCodeParser'
 import { AISLE_PREFIXES, isAislePrefix, normalizeCodeTokens } from '../config/labelConfig'
 import type { SpecificLabelValidationErrorReason } from '../config/validationMessages'
 
-// Re-exported for consumers (and the domain barrel) that import this alongside
-// the other specific-label validation types from this module.
-export type { SpecificLabelValidationErrorReason }
-
 export type SpecificLabelValidationResult =
   | {
       ok: true

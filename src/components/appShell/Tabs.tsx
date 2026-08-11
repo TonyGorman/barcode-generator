@@ -1,9 +1,15 @@
 import * as React from 'react'
-import { ICommonTabsProps } from '../../models/ICommonTabsProps'
+import { TabItem } from './TabItem'
 import styles from './Tabs.module.css'
 import { TabPanelVisibilityContext } from './TabPanelVisibilityContext'
 
-const Tabs: React.FC<ICommonTabsProps> = ({ tabs, selectedKey, onTabClick }) => {
+interface Props {
+  tabs: TabItem[]
+  selectedKey?: string
+  onTabClick?: (key: string) => void
+}
+
+const Tabs: React.FC<Props> = ({ tabs, selectedKey, onTabClick }) => {
   const buttonRefs = React.useRef<(HTMLButtonElement | null)[]>([])
   const activeKey = selectedKey ?? tabs[0]?.key
   const activeTab = tabs.find((tab) => tab.key === activeKey) ?? tabs[0]

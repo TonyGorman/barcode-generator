@@ -1,11 +1,11 @@
 import { normalizeLabelCode, getEncodedLabelCode, getMiniThreeRowDisplayParts } from '../labelCodeDisplay'
 import {
-  IComposedMiniLabel,
-  IMiniCompositionVariant,
-  IMiniTypographyFitResult,
-  IMiniVariantGeometry,
-} from '../../models/IMiniCompositionVariant'
-import { ILabelLayoutStrategy } from '../../models/ILabelLayoutStrategy'
+  ComposedMiniLabel,
+  MiniCompositionVariant,
+  MiniTypographyFitResult,
+  MiniVariantGeometry,
+} from '../miniCompositionVariants'
+import { LabelLayoutStrategy } from '../../config/labelLayoutStrategies'
 import { getMiniBarcodeTopFromTileTopMm } from '../labelLayoutGeometry'
 import { fitLineByWidth, getSecondaryCenterFromBarcodeTopMm } from '../miniCompositionVariantMath'
 import { parseLabelCode } from '../labelCodeParser'
@@ -25,7 +25,7 @@ const getShelfPrimaryText = (code: string): string => {
   return parts.bottom || parts.main
 }
 
-const composeMiniShelfEmphasis = (code: string): IComposedMiniLabel => {
+const composeMiniShelfEmphasis = (code: string): ComposedMiniLabel => {
   const fullSpacedValue = normalizeLabelCode(code)
   const parsed = parseLabelCode(code)
 
@@ -49,7 +49,7 @@ const composeMiniShelfEmphasis = (code: string): IComposedMiniLabel => {
   }
 }
 
-const resolveMiniShelfEmphasisGeometry = (layoutStrategy: ILabelLayoutStrategy): IMiniVariantGeometry => {
+const resolveMiniShelfEmphasisGeometry = (layoutStrategy: LabelLayoutStrategy): MiniVariantGeometry => {
   const barcodeTopFromContentTopMm =
     getMiniBarcodeTopFromTileTopMm(layoutStrategy) - layoutStrategy.typography.tilePaddingTopMm
 
@@ -67,11 +67,11 @@ const resolveMiniShelfEmphasisGeometry = (layoutStrategy: ILabelLayoutStrategy):
 }
 
 const fitMiniShelfEmphasisTypography = (
-  composedLabel: IComposedMiniLabel,
-  layoutStrategy: ILabelLayoutStrategy,
-  geometry: IMiniVariantGeometry,
+  composedLabel: ComposedMiniLabel,
+  layoutStrategy: LabelLayoutStrategy,
+  geometry: MiniVariantGeometry,
   measureText: (text: string, fontSizeMm: number, letterSpacingMm: number) => number,
-): IMiniTypographyFitResult => {
+): MiniTypographyFitResult => {
   const availableWidthMm =
     (layoutStrategy.page.labelWidthMm - layoutStrategy.typography.tilePaddingHorizontalMm * 2) *
     MINI_SHELF_SAFE_WIDTH_RATIO
@@ -110,7 +110,7 @@ const fitMiniShelfEmphasisTypography = (
   }
 }
 
-export const miniShelfEmphasisVariant: IMiniCompositionVariant = {
+export const miniShelfEmphasisVariant: MiniCompositionVariant = {
   id: 'mini-shelf-emphasis',
   displayLabel: 'Big Shelf',
   composeLabel: composeMiniShelfEmphasis,

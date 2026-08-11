@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { setOptionalLetterField, setParsedNumericField } from './formStateService'
+import { setOptionalLetterField, setParsedNumericField } from './formHelpers'
 
 describe('formStateService', () => {
   it('sets parsed numeric values for valid digit input', () => {

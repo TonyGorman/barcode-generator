@@ -1,8 +1,13 @@
 import * as React from 'react'
 import styles from './Pagination.module.css'
-import { IPaginationProps } from '../../models/IPaginationProps'
 
-const Pagination = (props: IPaginationProps): React.ReactElement => {
+interface Props {
+  data: string[]
+  onPageChange: (pageNumber: number) => void
+  itemsPerPage?: number
+}
+
+const Pagination = (props: Props): React.ReactElement => {
   const { data, onPageChange, itemsPerPage = 35 } = props
   const [currentPage, setCurrentPage] = React.useState(1)
 

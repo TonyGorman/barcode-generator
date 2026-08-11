@@ -1,9 +1,12 @@
-import { MiniCompositionVariantId } from '../models/IMiniCompositionVariant'
-import { DEFAULT_MINI_COMPOSITION_VARIANT_ID, isMiniCompositionVariantId } from '../domain/miniCompositionVariants'
+import {
+  MiniCompositionVariantId,
+  DEFAULT_MINI_COMPOSITION_VARIANT_ID,
+  isMiniCompositionVariantId,
+} from '../domain/miniCompositionVariants'
 
 export const MINI_VARIANT_STORAGE_KEY = 'miniVariant'
 
-type MiniVariantStorageOperation = 'read' | 'write' | 'clear'
+type MiniVariantStorageOperation = 'read' | 'write'
 
 const reportMiniVariantStorageIssue = (operation: MiniVariantStorageOperation, error: unknown, key: string): void => {
   // Placeholder telemetry wrapper for storage failures; replace with real telemetry sink later.
@@ -38,18 +41,6 @@ export const writePersistedMiniVariant = (variantId: MiniCompositionVariantId): 
   } catch (error) {
     reportMiniVariantStorageIssue('write', error, MINI_VARIANT_STORAGE_KEY)
     // Ignore storage write failures so label generation remains functional in restricted environments.
-  }
-}
-
-export const clearPersistedMiniVariant = (): void => {
-  if (typeof window === 'undefined') {
-    return
-  }
-
-  try {
-    window.localStorage.removeItem(MINI_VARIANT_STORAGE_KEY)
-  } catch (error) {
-    reportMiniVariantStorageIssue('clear', error, MINI_VARIANT_STORAGE_KEY)
   }
 }
 

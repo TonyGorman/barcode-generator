@@ -5,7 +5,9 @@ import shellStyles from '../formUi/FormShell.module.css'
 import FormFeedback from '../formUi/FormFeedback'
 import InlineFieldError from '../formUi/InlineFieldError'
 import FormSection from '../formUi/FormSection'
-import LabelFormShell from './LabelFormShell'
+import { MiniVariantContext } from '../labelTile/MiniVariantContext'
+import GenerateLabelsButton from '../formUi/GenerateLabelsButton'
+import LabelGenerator from '../print/LabelGenerator'
 import ShelfRangeSection from '../formUi/ShelfRangeSection'
 import {
   SHORT_CODE_PREFIXES,
@@ -17,9 +19,10 @@ import {
   formatTwoDigitValue,
 } from '../../config/labelConfig'
 import { RadioGroup, TextField } from '../formUi/FormControls'
-import { MiniCompositionVariantId } from '../../models/IMiniCompositionVariant'
-import { useResetOnVariantChange } from '../../hooks/useResetOnVariantChange'
-import { useShortLabelForm } from '../../hooks/useShortLabelForm'
+import { generateShortLabels } from '../../services/labelGenerationService'
+import { updateOptionalLetterField, updateParsedNumericField } from './formHelpers'
+import { getValidationErrorMessage, type LabelValidationErrorCode } from '../../config/validationMessages'
+import { getShelfRangeCount, type IShortLabelInput, validateShortLabelInput } from '../../domain/labelGeneration'
 import { useFormValidationUi } from '../../hooks/useFormValidationUi'
 import {
   getFirstInvalidShortFieldId,
@@ -29,45 +32,105 @@ import {
   isShortShelfFieldInvalid,
 } from './backFormAccessibilityService'
 
-interface BackLabelFormProps {
-  miniVariantId?: MiniCompositionVariantId
-}
-
 const SHORT_CODE_PREFIX_OPTIONS = SHORT_CODE_PREFIXES.map((prefix) => ({
   key: prefix,
   text: prefix,
 }))
 
-const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
+const BackLabelForm = (): React.ReactElement => {
   const idPrefix = React.useId()
+  const miniVariantId = React.useContext(MiniVariantContext)
 
-  const { state, actions } = useShortLabelForm({
-    initialPrefix: SHORT_CODE_PREFIXES[0],
-    minBayValue: MIN_BAY_VALUE,
-    maxBayValue: MAX_BAY_VALUE,
-    softLimit: LABEL_SOFT_LIMIT,
-    hardLimit: LABEL_HARD_LIMIT,
-    formatTwoDigitValue,
+  const [generatedLabels, setGeneratedLabels] = React.useState<string[] | null>(null)
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
+  const [warningMessage, setWarningMessage] = React.useState<string | null>(null)
+
+  const resetGeneratedLabels = React.useCallback(() => {
+    setGeneratedLabels(null)
+  }, [])
+
+  const setFailure = React.useCallback((nextErrorMessage: string) => {
+    setErrorMessage(nextErrorMessage)
+    setWarningMessage(null)
+    setGeneratedLabels(null)
+  }, [])
+
+  const setSuccess = React.useCallback((nextGeneratedLabels: string[], nextWarningMessage: string | null) => {
+    setErrorMessage(null)
+    setWarningMessage(nextWarningMessage)
+    setGeneratedLabels(nextGeneratedLabels)
+  }, [])
+
+  const [selectedShortCodePrefix, setSelectedShortCodePrefix] = React.useState<string>(SHORT_CODE_PREFIXES[0])
+  const [formInput, setFormInput] = React.useState<Omit<IShortLabelInput, 'prefix'>>({
+    bayStart: null,
+    bayEnd: null,
+    shelfStart: null,
+    shelfEnd: null,
   })
 
-  const { formInput, selectedShortCodePrefix, errorMessage, warningMessage, generatedLabels, validationError } = state
+  const onInputChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>, type: 'bayStart' | 'bayEnd'): void => {
+      updateParsedNumericField(setFormInput, type, e.target.value)
+    },
+    [],
+  )
 
-  const {
-    setSelectedShortCodePrefix,
-    onInputChange,
-    onShelfStartChange,
-    onShelfEndChange,
-    generateLabel,
-    resetGeneratedLabels,
-  } = actions
-  useResetOnVariantChange(miniVariantId, resetGeneratedLabels)
-  const shortFormInput = React.useMemo(
-    () => ({
-      ...formInput,
-      prefix: selectedShortCodePrefix,
-    }),
+  const onShelfStartChange = React.useCallback((letter: string): void => {
+    updateOptionalLetterField(setFormInput, 'shelfStart', letter)
+  }, [])
+
+  const onShelfEndChange = React.useCallback((letter: string): void => {
+    updateOptionalLetterField(setFormInput, 'shelfEnd', letter)
+  }, [])
+
+  const shortFormInput = React.useMemo<IShortLabelInput>(
+    () => ({ ...formInput, prefix: selectedShortCodePrefix }),
     [formInput, selectedShortCodePrefix],
   )
+
+  const shelfCount = getShelfRangeCount(formInput.shelfStart, formInput.shelfEnd)
+  const bayCount = React.useMemo(() => {
+    if (formInput.bayStart === null || formInput.bayEnd === null) {
+      return 0
+    }
+    return formInput.bayEnd - formInput.bayStart + 1
+  }, [formInput.bayEnd, formInput.bayStart])
+  const totalLabels = bayCount * shelfCount
+
+  const validationError = React.useMemo<LabelValidationErrorCode | null>(
+    () => validateShortLabelInput(shortFormInput, MIN_BAY_VALUE, MAX_BAY_VALUE),
+    [shortFormInput],
+  )
+
+  const generateLabel = React.useCallback((): void => {
+    if (validationError) {
+      setFailure(getValidationErrorMessage(validationError))
+      return
+    }
+
+    const generationResult = generateShortLabels({
+      formInput: shortFormInput,
+      softLimit: LABEL_SOFT_LIMIT,
+      hardLimit: LABEL_HARD_LIMIT,
+      totalLabels,
+      formatTwoDigitValue,
+    })
+    if (generationResult.errorMessage) {
+      setFailure(generationResult.errorMessage)
+      return
+    }
+
+    setSuccess(generationResult.labels, generationResult.warningMessage)
+  }, [setFailure, setSuccess, shortFormInput, totalLabels, validationError])
+  const isInitialMountRef = React.useRef(true)
+  React.useEffect(() => {
+    if (isInitialMountRef.current) {
+      isInitialMountRef.current = false
+      return
+    }
+    resetGeneratedLabels()
+  }, [miniVariantId, resetGeneratedLabels])
   const bayFieldInvalid =
     isShortBayFieldInvalid(validationError) || isShortRequiredBayFieldMissing(validationError, shortFormInput)
   const shelfFieldInvalid =
@@ -92,13 +155,8 @@ const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
   })
 
   return (
-    <LabelFormShell
-      title="Generate FOS/BAK Labels"
-      generatedLabels={generatedLabels}
-      layoutMode="mini-sel"
-      onGenerate={validationUi.handleGenerate}
-      miniVariantId={miniVariantId}
-    >
+    <div className={shellStyles.panel}>
+      <h1 className={shellStyles.panelTitle}>Generate FOS/BAK Labels</h1>
       <p className={formLayoutStyles.sectionIntro}>
         Choose BAK (Back Wall), FOS (Front Of Store) or FNT (Front) using the prefix selector.
         <br />
@@ -164,7 +222,11 @@ const BackLabelForm: React.FC<BackLabelFormProps> = ({ miniVariantId }) => {
           getInlineErrorMessage={validationUi.getInlineErrorMessage}
         />
       </div>
-    </LabelFormShell>
+      <div className={formLayoutStyles.actionsRow}>
+        <GenerateLabelsButton className={formLayoutStyles.generateButton} onClick={validationUi.handleGenerate} />
+      </div>
+      {generatedLabels && <LabelGenerator labelCodes={generatedLabels} layoutMode="mini-sel" />}
+    </div>
   )
 }
 

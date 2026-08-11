@@ -4,6 +4,7 @@ import LabelTile, { getMiniPrimaryFontSizeMm } from './LabelTile'
 import { normalizeLabelCode, getEncodedLabelCode, getLargeSelDisplayParts } from '../../domain/labelCodeDomain'
 import { SHORT_CODE_PREFIXES } from '../../config/labelConfig'
 import { getLabelLayoutStrategy } from '../../config/labelLayoutStrategies'
+import { LabelLayoutContext } from '../print/LabelLayoutContext'
 
 const MM_TO_PX = 96 / 25.4
 const mmToPx = (mm: number): number => mm * MM_TO_PX
@@ -144,7 +145,11 @@ describe('LabelTile', () => {
   })
 
   it('uses layout strategy label sizing for large-sel mode', () => {
-    render(<LabelTile code="01L01A" layoutMode="large-sel" />)
+    render(
+      <LabelLayoutContext.Provider value={getLabelLayoutStrategy('large-sel')}>
+        <LabelTile code="01L01A" />
+      </LabelLayoutContext.Provider>,
+    )
 
     const label = screen.getByTestId('label-value')
     const largeSelTypography = getLabelLayoutStrategy('large-sel').typography
@@ -206,7 +211,11 @@ describe('LabelTile', () => {
   })
 
   it('does not render a large-sel heading for special aisles without structured parts', () => {
-    const { container } = render(<LabelTile code="floral" layoutMode="large-sel" />)
+    const { container } = render(
+      <LabelLayoutContext.Provider value={getLabelLayoutStrategy('large-sel')}>
+        <LabelTile code="floral" />
+      </LabelLayoutContext.Provider>,
+    )
 
     const largeHeadingText = container.querySelector('[class*="largeSelHeading"]')?.textContent
     expect(largeHeadingText).toBe('')

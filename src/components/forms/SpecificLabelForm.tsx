@@ -4,12 +4,24 @@ import formLayoutStyles from '../formUi/FormLayout.module.css'
 import shellStyles from '../formUi/FormShell.module.css'
 import FormFeedback from '../formUi/FormFeedback'
 import FormSection from '../formUi/FormSection'
-import LabelFormShell from './LabelFormShell'
-import { SHORT_CODE_PREFIXES, SPECIAL_AISLE_VALUES } from '../../config/labelConfig'
-import { RadioGroup, TextField } from '../formUi/FormControls'
-import { MiniCompositionVariantId } from '../../models/IMiniCompositionVariant'
-import { useResetOnVariantChange } from '../../hooks/useResetOnVariantChange'
-import { useSpecificLabelForm } from '../../hooks/useSpecificLabelForm'
+import { MiniVariantContext } from '../labelTile/MiniVariantContext'
+import GenerateLabelsButton from '../formUi/GenerateLabelsButton'
+import LabelGenerator from '../print/LabelGenerator'
+import {
+  SHORT_CODE_PREFIXES,
+  SPECIAL_AISLE_VALUES,
+  MIN_AISLE_VALUE,
+  MAX_AISLE_VALUE,
+  MAX_BAY_VALUE,
+  MAX_SHELF_LETTER,
+  BAY_RANGE_TEXT,
+  SHELF_RANGE_TEXT,
+  AISLE_PREFIXES,
+} from '../../config/labelConfig'
+import { RadioGroup, TextField, type RadioOption } from '../formUi/FormControls'
+import { validateSpecificLabelCode } from '../../domain/labelCodeDomain'
+import { type LabelPrintMode } from '../../config/labelLayoutStrategies'
+import { validateSpecificLabels } from '../../services/specificLabelValidationService'
 import { useFormValidationUi } from '../../hooks/useFormValidationUi'
 import {
   getFirstInvalidSpecificFieldId,
@@ -17,19 +29,111 @@ import {
   isSpecificLabelFieldInvalid,
 } from './specificFormAccessibilityService'
 
-interface SpecificLabelFormProps {
-  miniVariantId?: MiniCompositionVariantId
-}
+const PRINT_MODE_OPTIONS: RadioOption<LabelPrintMode>[] = [
+  { key: 'mini-sel', text: 'Mini SEL' },
+  { key: 'large-sel', text: 'Large SEL' },
+]
 
-const SpecificLabelForm: React.FC<SpecificLabelFormProps> = ({ miniVariantId }) => {
+const SpecificLabelForm = (): React.ReactElement => {
   const idPrefix = React.useId()
-  const { content, state, actions } = useSpecificLabelForm()
-  const { bayRangeText, shelfRangeText, namedAisleExamples, aislePrefixedExamples } = content
-  const { labelText, generatedLabels, errorMessage, warningMessage, labelPrintMode, printModeOptions } = state
-  const { onInputChange, handleModeChange, generateLabel, resetGeneratedLabels } = actions
-  const inputId = getSpecificLabelInputId(idPrefix)
+  const miniVariantId = React.useContext(MiniVariantContext)
 
-  useResetOnVariantChange(miniVariantId, resetGeneratedLabels)
+  const bayRangeText = BAY_RANGE_TEXT
+  const shelfRangeText = SHELF_RANGE_TEXT
+  const namedAisleExamples = SPECIAL_AISLE_VALUES.join(', ')
+  const aislePrefixedExamples = [`${AISLE_PREFIXES[0]}1L01A`, `${AISLE_PREFIXES[1]}2L02B`].join(', ')
+
+  const [generatedLabels, setGeneratedLabels] = React.useState<string[] | null>(null)
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
+  const [warningMessage, setWarningMessage] = React.useState<string | null>(null)
+
+  const resetGeneratedLabels = React.useCallback(() => {
+    setGeneratedLabels(null)
+  }, [])
+
+  const setFailure = React.useCallback((nextErrorMessage: string) => {
+    setErrorMessage(nextErrorMessage)
+    setWarningMessage(null)
+    setGeneratedLabels(null)
+  }, [])
+
+  const setSuccess = React.useCallback((nextGeneratedLabels: string[], nextWarningMessage: string | null) => {
+    setErrorMessage(null)
+    setWarningMessage(nextWarningMessage)
+    setGeneratedLabels(nextGeneratedLabels)
+  }, [])
+
+  const [labelText, setLabelText] = React.useState('')
+  const [labelPrintMode, setLabelPrintMode] = React.useState<LabelPrintMode>('mini-sel')
+  const onModeChangeRef = React.useRef(resetGeneratedLabels)
+  onModeChangeRef.current = resetGeneratedLabels
+
+  const handleModeChange = React.useCallback((key: LabelPrintMode) => {
+    setLabelPrintMode((currentMode) => {
+      if (currentMode === key) {
+        return currentMode
+      }
+      onModeChangeRef.current()
+      return key
+    })
+  }, [])
+
+  const onInputChange = React.useCallback((e: React.ChangeEvent<HTMLInputElement>): void => {
+    setLabelText(e.target.value)
+  }, [])
+
+  const validateSpecificCode = React.useCallback((code: string) => {
+    return validateSpecificLabelCode(code, {
+      aislePrefixes: AISLE_PREFIXES,
+      shortCodePrefixes: SHORT_CODE_PREFIXES,
+      minAisleValue: MIN_AISLE_VALUE,
+      maxAisleValue: MAX_AISLE_VALUE,
+      maxBayValue: MAX_BAY_VALUE,
+      maxShelfLetter: MAX_SHELF_LETTER,
+    })
+  }, [])
+
+  const generateLabel = React.useCallback((): void => {
+    const validationResult = validateSpecificLabels({
+      labelText,
+      labelPrintMode,
+      validateSpecificCode,
+      contentTokens: {
+        bayRangeText,
+        shelfRangeText,
+        namedAisleExamples,
+        aislePrefixedExamples,
+      },
+    })
+
+    if (validationResult.errorMessage) {
+      setFailure(validationResult.errorMessage)
+      return
+    }
+
+    setSuccess(validationResult.labels, validationResult.warningMessage)
+  }, [
+    aislePrefixedExamples,
+    bayRangeText,
+    validateSpecificCode,
+    labelPrintMode,
+    labelText,
+    namedAisleExamples,
+    setFailure,
+    setSuccess,
+    shelfRangeText,
+  ])
+
+  const isInitialMountRef = React.useRef(true)
+  React.useEffect(() => {
+    if (isInitialMountRef.current) {
+      isInitialMountRef.current = false
+      return
+    }
+    resetGeneratedLabels()
+  }, [miniVariantId, resetGeneratedLabels])
+
+  const inputId = getSpecificLabelInputId(idPrefix)
 
   const validationUi = useFormValidationUi({
     idPrefix,
@@ -42,13 +146,8 @@ const SpecificLabelForm: React.FC<SpecificLabelFormProps> = ({ miniVariantId }) 
   })
 
   return (
-    <LabelFormShell
-      title="Generate Specific Labels"
-      generatedLabels={generatedLabels}
-      layoutMode={labelPrintMode}
-      onGenerate={validationUi.handleGenerate}
-      miniVariantId={miniVariantId}
-    >
+    <div className={shellStyles.panel}>
+      <h1 className={shellStyles.panelTitle}>Generate Specific Labels</h1>
       <p className={formLayoutStyles.sectionIntro}>
         Enter one label or a comma-separated list (for example: 01L01A, {aislePrefixedExamples},{' '}
         {SHORT_CODE_PREFIXES[0]}01A, {SHORT_CODE_PREFIXES[1]}01A, {SPECIAL_AISLE_VALUES[0]}).
@@ -81,12 +180,16 @@ const SpecificLabelForm: React.FC<SpecificLabelFormProps> = ({ miniVariantId }) 
       <FormSection title="Label Size">
         <RadioGroup
           name="specific-label-print-mode"
-          options={printModeOptions}
+          options={PRINT_MODE_OPTIONS}
           selectedKey={labelPrintMode}
           onChange={handleModeChange}
         />
       </FormSection>
-    </LabelFormShell>
+      <div className={formLayoutStyles.actionsRow}>
+        <GenerateLabelsButton className={formLayoutStyles.generateButton} onClick={validationUi.handleGenerate} />
+      </div>
+      {generatedLabels && <LabelGenerator labelCodes={generatedLabels} layoutMode={labelPrintMode} />}
+    </div>
   )
 }
 

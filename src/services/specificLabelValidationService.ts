@@ -1,10 +1,14 @@
 import { LABEL_HARD_LIMIT, LABEL_SOFT_LIMIT, SHORT_CODE_PREFIXES, SPECIAL_AISLE_VALUES } from '../config/labelConfig'
-import { VALIDATION_MESSAGES, getSpecificInvalidLabelMessage } from '../config/validationMessages'
+import {
+  getLabelHardLimitMessage,
+  getLabelSoftLimitMessage,
+  VALIDATION_MESSAGES,
+  getSpecificInvalidLabelMessage,
+} from '../config/validationMessages'
 import { normalizeSpecificInputCodes } from '../domain/labelGeneration'
 import type { SpecificLabelValidationResult } from '../domain/labelCodeDomain'
-import { LabelPrintMode } from '../models/ILabelLayoutStrategy'
-import { ILabelGenerationResult } from '../models/ILabelGenerationResult'
-import { evaluateLabelBatchLimits } from './labelBatchLimitService'
+import { LabelPrintMode } from '../config/labelLayoutStrategies'
+import { LabelGenerationResult } from './labelGenerationService'
 
 interface SpecificLabelValidationContent {
   bayRangeText: string
@@ -25,7 +29,7 @@ export const validateSpecificLabels = ({
   labelPrintMode,
   validateSpecificCode,
   contentTokens,
-}: SpecificLabelValidationArgs): ILabelGenerationResult => {
+}: SpecificLabelValidationArgs): LabelGenerationResult => {
   const labels = normalizeSpecificInputCodes(labelText)
 
   if (labels.length === 0) {
@@ -36,14 +40,15 @@ export const validateSpecificLabels = ({
     }
   }
 
-  const batchLimits = evaluateLabelBatchLimits(labels.length, LABEL_SOFT_LIMIT, LABEL_HARD_LIMIT)
-  if (batchLimits.hardLimitError) {
+  if (labels.length > LABEL_HARD_LIMIT) {
     return {
       labels: [],
-      errorMessage: batchLimits.hardLimitError,
+      errorMessage: getLabelHardLimitMessage(LABEL_HARD_LIMIT),
       warningMessage: null,
     }
   }
+
+  const warningMessage = labels.length > LABEL_SOFT_LIMIT ? getLabelSoftLimitMessage(LABEL_SOFT_LIMIT) : null
 
   const firstInvalidLabel = labels
     .map((code) => ({ code, result: validateSpecificCode(code) }))
@@ -83,6 +88,6 @@ export const validateSpecificLabels = ({
   return {
     labels,
     errorMessage: null,
-    warningMessage: batchLimits.warningMessage,
+    warningMessage,
   }
 }

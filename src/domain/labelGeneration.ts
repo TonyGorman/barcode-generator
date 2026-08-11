@@ -1,9 +1,9 @@
 import type { LabelValidationErrorCode } from '../config/validationMessages'
 import { AISLE_SIDES, MIN_SHELF_LETTER } from '../config/labelConfig'
-import { AisleSide } from '../models/IAisleCodeParts'
+import { AisleSide } from './labelCodeParser'
 import { hasValue } from './numericGuard'
 
-export interface IAisleSideRange {
+interface IAisleSideRange {
   start: number | null
   end: number | null
 }

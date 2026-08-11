@@ -1,11 +1,11 @@
 import { normalizeLabelCode, getEncodedLabelCode, getMiniThreeRowDisplayParts } from '../labelCodeDisplay'
 import {
-  IComposedMiniLabel,
-  IMiniCompositionVariant,
-  IMiniTypographyFitResult,
-  IMiniVariantGeometry,
-} from '../../models/IMiniCompositionVariant'
-import { ILabelLayoutStrategy } from '../../models/ILabelLayoutStrategy'
+  ComposedMiniLabel,
+  MiniCompositionVariant,
+  MiniTypographyFitResult,
+  MiniVariantGeometry,
+} from '../miniCompositionVariants'
+import { LabelLayoutStrategy } from '../../config/labelLayoutStrategies'
 import {
   fitMiniPrimaryFontSizeMm,
   getMiniAisleThreeRowGeometry,
@@ -14,7 +14,7 @@ import {
 
 const MINI_THREE_ROW_AUX_FONT_WEIGHT = 600
 
-const composeMiniThreeRow = (code: string): IComposedMiniLabel => {
+const composeMiniThreeRow = (code: string): ComposedMiniLabel => {
   const parts = getMiniThreeRowDisplayParts(code)
 
   return {
@@ -27,7 +27,7 @@ const composeMiniThreeRow = (code: string): IComposedMiniLabel => {
   }
 }
 
-const resolveMiniThreeRowGeometry = (layoutStrategy: ILabelLayoutStrategy): IMiniVariantGeometry => {
+const resolveMiniThreeRowGeometry = (layoutStrategy: LabelLayoutStrategy): MiniVariantGeometry => {
   const threeRow = getMiniAisleThreeRowGeometry(layoutStrategy)
 
   return {
@@ -42,11 +42,11 @@ const resolveMiniThreeRowGeometry = (layoutStrategy: ILabelLayoutStrategy): IMin
 }
 
 const fitMiniThreeRowTypography = (
-  composedLabel: IComposedMiniLabel,
-  layoutStrategy: ILabelLayoutStrategy,
-  geometry: IMiniVariantGeometry,
+  composedLabel: ComposedMiniLabel,
+  layoutStrategy: LabelLayoutStrategy,
+  geometry: MiniVariantGeometry,
   measureText: (text: string, fontSizeMm: number, letterSpacingMm: number) => number,
-): IMiniTypographyFitResult => {
+): MiniTypographyFitResult => {
   const primary = Math.min(
     fitMiniPrimaryFontSizeMm(composedLabel.primaryLineText, layoutStrategy, measureText),
     geometry.primaryMaxTextSizeMm,
@@ -61,7 +61,7 @@ const fitMiniThreeRowTypography = (
   }
 }
 
-export const miniThreeRowVariant: IMiniCompositionVariant = {
+export const miniThreeRowVariant: MiniCompositionVariant = {
   id: 'mini-three-row',
   displayLabel: 'Stacked ABS',
   composeLabel: composeMiniThreeRow,

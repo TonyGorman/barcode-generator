@@ -2,9 +2,9 @@ import * as React from 'react'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import Tabs from './Tabs'
-import { ITabItem } from '../../models/ITabItem'
+import { TabItem } from './TabItem'
 
-const tabs: ITabItem[] = [
+const tabs: TabItem[] = [
   { key: 'one', headerText: 'One', content: <div>Panel One</div> },
   { key: 'two', headerText: 'Two', content: <div>Panel Two</div> },
   { key: 'three', headerText: 'Three', content: <div>Panel Three</div> },
@@ -16,7 +16,7 @@ describe('Tabs', () => {
       const [selectedKey, setSelectedKey] = React.useState('one')
       const [firstValue, setFirstValue] = React.useState('')
 
-      const statefulTabItems: ITabItem[] = [
+      const statefulTabItems: TabItem[] = [
         {
           key: 'one',
           headerText: 'One',
@@ -103,7 +103,7 @@ describe('Tabs', () => {
   })
 
   it('returns early when keyboard navigation lands on a missing tab entry', () => {
-    const sparseTabs = new Array<ITabItem>(2)
+    const sparseTabs = new Array<TabItem>(2)
     sparseTabs[0] = { key: 'one', headerText: 'One', content: <div>Panel One</div> }
 
     const onTabClick = vi.fn()

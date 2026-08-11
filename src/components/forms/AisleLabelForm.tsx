@@ -5,7 +5,6 @@ import shellStyles from '../formUi/FormShell.module.css'
 import FormFeedback from '../formUi/FormFeedback'
 import InlineFieldError from '../formUi/InlineFieldError'
 import FormSection from '../formUi/FormSection'
-import LabelFormShell from './LabelFormShell'
 import ShelfRangeSection from '../formUi/ShelfRangeSection'
 import {
   MIN_AISLE_VALUE,
@@ -16,14 +15,31 @@ import {
   SHELF_RANGE_TEXT,
   LABEL_SOFT_LIMIT,
   LABEL_HARD_LIMIT,
+  MIN_SHELF_LETTER,
   formatTwoDigitValue,
 } from '../../config/labelConfig'
 import { AISLE_SIDE_METADATA } from '../../config/aisleSideMetadata'
-import { RadioGroup, TextField } from '../formUi/FormControls'
-import { MiniCompositionVariantId } from '../../models/IMiniCompositionVariant'
-import { useResetOnVariantChange } from '../../hooks/useResetOnVariantChange'
-import { useLabelPrintMode } from '../../hooks/useLabelPrintMode'
-import { useAisleLabelForm } from '../../hooks/useAisleLabelForm'
+import { RadioGroup, TextField, type RadioOption } from '../formUi/FormControls'
+import { type LabelPrintMode } from '../../config/labelLayoutStrategies'
+import { generateAisleLabels } from '../../services/labelGenerationService'
+import { setParsedNumericField, updateParsedNumericField, updateOptionalLetterField } from './formHelpers'
+import { hasValue } from '../../domain/numericGuard'
+import { getValidationErrorMessage, type LabelValidationErrorCode } from '../../config/validationMessages'
+import { type AisleSide } from '../../domain/labelCodeParser'
+import {
+  createEmptyAisleSideRanges,
+  getShelfRangeCount,
+  type IAisleLabelInput,
+  validateAisleLabelInput,
+} from '../../domain/labelGeneration'
+import { MiniVariantContext } from '../labelTile/MiniVariantContext'
+import GenerateLabelsButton from '../formUi/GenerateLabelsButton'
+import LabelGenerator from '../print/LabelGenerator'
+
+const PRINT_MODE_OPTIONS: RadioOption<LabelPrintMode>[] = [
+  { key: 'mini-sel', text: 'Mini SEL' },
+  { key: 'large-sel', text: 'Large SEL' },
+]
 import { useFormValidationUi } from '../../hooks/useFormValidationUi'
 import {
   getAisleSideRange,
@@ -35,45 +51,176 @@ import {
   isAisleSideFieldInvalid,
 } from './aisleFormAccessibilityService'
 
-interface AisleLabelFormProps {
-  miniVariantId?: MiniCompositionVariantId
-}
-
-const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
+const AisleLabelForm = (): React.ReactElement => {
   const sideNamesText = AISLE_SIDE_METADATA.map((side) => side.label).join(', ')
+  const miniVariantId = React.useContext(MiniVariantContext)
 
   const idPrefix = React.useId()
-  const { state, actions } = useAisleLabelForm({
-    sideRows: AISLE_SIDE_METADATA,
-    minAisleValue: MIN_AISLE_VALUE,
-    maxAisleValue: MAX_AISLE_VALUE,
-    maxBayValue: MAX_BAY_VALUE,
-    softLimit: LABEL_SOFT_LIMIT,
-    hardLimit: LABEL_HARD_LIMIT,
-    formatTwoDigitValue,
-  })
-  const {
-    formInput,
-    activeSideRanges,
-    errorMessage,
-    warningMessage,
-    generatedLabels,
-    totalLabels,
-    shelfSummary,
-    validationError,
-  } = state
-  const {
-    onInputChange,
-    onSideRangeInputChange,
-    onShelfStartChange,
-    onShelfEndChange,
-    generateLabel,
-    resetGeneratedLabels,
-    formatTwoDigits,
-  } = actions
 
-  useResetOnVariantChange(miniVariantId, resetGeneratedLabels)
-  const { labelPrintMode, printModeOptions, handleModeChange } = useLabelPrintMode(resetGeneratedLabels)
+  const [generatedLabels, setGeneratedLabels] = React.useState<string[] | null>(null)
+  const [errorMessage, setErrorMessage] = React.useState<string | null>(null)
+  const [warningMessage, setWarningMessage] = React.useState<string | null>(null)
+
+  const resetGeneratedLabels = React.useCallback(() => {
+    setGeneratedLabels(null)
+  }, [])
+
+  const setFailure = React.useCallback((nextErrorMessage: string) => {
+    setErrorMessage(nextErrorMessage)
+    setWarningMessage(null)
+    setGeneratedLabels(null)
+  }, [])
+
+  const setSuccess = React.useCallback((nextGeneratedLabels: string[], nextWarningMessage: string | null) => {
+    setErrorMessage(null)
+    setWarningMessage(nextWarningMessage)
+    setGeneratedLabels(nextGeneratedLabels)
+  }, [])
+
+  const [formInput, setFormInput] = React.useState<IAisleLabelInput>({
+    aisleStart: null,
+    aisleEnd: null,
+    sideRanges: createEmptyAisleSideRanges(),
+    shelfStart: null,
+    shelfEnd: null,
+  })
+
+  const onInputChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>, type: 'aisleStart' | 'aisleEnd'): void => {
+      updateParsedNumericField(setFormInput, type, e.target.value)
+    },
+    [],
+  )
+
+  const onSideRangeInputChange = React.useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>, side: AisleSide, rangeType: 'start' | 'end'): void => {
+      setFormInput((prevState) => ({
+        ...prevState,
+        sideRanges: {
+          ...prevState.sideRanges,
+          [side]: {
+            ...prevState.sideRanges[side],
+            ...setParsedNumericField(prevState.sideRanges[side], rangeType, e.target.value),
+          },
+        },
+      }))
+    },
+    [],
+  )
+
+  const onShelfStartChange = React.useCallback((letter: string): void => {
+    updateOptionalLetterField(setFormInput, 'shelfStart', letter)
+  }, [])
+
+  const onShelfEndChange = React.useCallback((letter: string): void => {
+    updateOptionalLetterField(setFormInput, 'shelfEnd', letter)
+  }, [])
+
+  const formatTwoDigits = React.useCallback((value: number | null): string => {
+    if (!hasValue(value)) {
+      return '--'
+    }
+    return formatTwoDigitValue(value)
+  }, [])
+
+  const shelfSummary = React.useMemo((): string => {
+    if (!formInput.shelfEnd) {
+      return '--'
+    }
+    const start = formInput.shelfStart ?? MIN_SHELF_LETTER
+    if (start === formInput.shelfEnd) {
+      return formInput.shelfEnd
+    }
+    return `${start} \u2013 ${formInput.shelfEnd}`
+  }, [formInput.shelfEnd, formInput.shelfStart])
+
+  const activeSideRanges = React.useMemo(
+    () =>
+      AISLE_SIDE_METADATA.map((side) => ({
+        ...side,
+        start: formInput.sideRanges[side.side].start,
+        end: formInput.sideRanges[side.side].end,
+      })).filter((side) => hasValue(side.start) && hasValue(side.end)),
+    [formInput.sideRanges],
+  )
+
+  const totalAisles = React.useMemo(() => {
+    if (!hasValue(formInput.aisleStart) || !hasValue(formInput.aisleEnd)) {
+      return 0
+    }
+    return formInput.aisleEnd - formInput.aisleStart + 1
+  }, [formInput.aisleEnd, formInput.aisleStart])
+
+  const totalBayValues = React.useMemo(() => {
+    return activeSideRanges.reduce((total, side) => {
+      const start = side.start
+      const end = side.end
+
+      if (!hasValue(start) || !hasValue(end)) {
+        return total
+      }
+
+      return total + (end - start + 1)
+    }, 0)
+  }, [activeSideRanges])
+
+  const totalLabels = React.useMemo(() => {
+    const shelfCount = getShelfRangeCount(formInput.shelfStart, formInput.shelfEnd)
+    return totalAisles > 0 && shelfCount > 0 ? totalAisles * totalBayValues * shelfCount : 0
+  }, [formInput.shelfEnd, formInput.shelfStart, totalAisles, totalBayValues])
+
+  const validationError = React.useMemo<LabelValidationErrorCode | null>(
+    () =>
+      validateAisleLabelInput(formInput, {
+        minAisleValue: MIN_AISLE_VALUE,
+        maxAisleValue: MAX_AISLE_VALUE,
+        maxBayValue: MAX_BAY_VALUE,
+      }),
+    [formInput],
+  )
+
+  const generateLabel = React.useCallback((): void => {
+    if (validationError) {
+      setFailure(getValidationErrorMessage(validationError))
+      return
+    }
+
+    const generationResult = generateAisleLabels({
+      formInput,
+      softLimit: LABEL_SOFT_LIMIT,
+      hardLimit: LABEL_HARD_LIMIT,
+      totalLabels,
+      formatTwoDigitValue,
+    })
+    if (generationResult.errorMessage) {
+      setFailure(generationResult.errorMessage)
+      return
+    }
+
+    setSuccess(generationResult.labels, generationResult.warningMessage)
+  }, [formInput, setFailure, setSuccess, totalLabels, validationError])
+
+  const isInitialMountRef = React.useRef(true)
+  React.useEffect(() => {
+    if (isInitialMountRef.current) {
+      isInitialMountRef.current = false
+      return
+    }
+    resetGeneratedLabels()
+  }, [miniVariantId, resetGeneratedLabels])
+  const [labelPrintMode, setLabelPrintMode] = React.useState<LabelPrintMode>('mini-sel')
+  const onModeChangeRef = React.useRef(resetGeneratedLabels)
+  onModeChangeRef.current = resetGeneratedLabels
+
+  const handleModeChange = React.useCallback((key: LabelPrintMode) => {
+    setLabelPrintMode((currentMode) => {
+      if (currentMode === key) {
+        return currentMode
+      }
+      onModeChangeRef.current()
+      return key
+    })
+  }, [])
   const aisleFieldInvalid =
     isAisleRangeFieldInvalid(validationError) || isAisleRequiredAisleFieldMissing(validationError, formInput)
   const shelfFieldInvalid =
@@ -99,13 +246,8 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
   })
 
   return (
-    <LabelFormShell
-      title="Generate Aisle Labels"
-      generatedLabels={generatedLabels}
-      layoutMode={labelPrintMode}
-      onGenerate={validationUi.handleGenerate}
-      miniVariantId={miniVariantId}
-    >
+    <div className={shellStyles.panel}>
+      <h1 className={shellStyles.panelTitle}>Generate Aisle Labels</h1>
       <div className={formLayoutStyles.sectionIntro}>
         <p>
           <strong>Enter values for:</strong> aisles from {MIN_AISLE_VALUE} to {MAX_AISLE_VALUE}, Sides ({sideNamesText}
@@ -216,7 +358,7 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
         <FormSection title="Label Size">
           <RadioGroup
             name={`${idPrefix}-label-print-mode`}
-            options={printModeOptions}
+            options={PRINT_MODE_OPTIONS}
             selectedKey={labelPrintMode}
             onChange={handleModeChange}
           />
@@ -248,7 +390,11 @@ const AisleLabelForm: React.FC<AisleLabelFormProps> = ({ miniVariantId }) => {
           </div>
         </FormSection>
       </div>
-    </LabelFormShell>
+      <div className={formLayoutStyles.actionsRow}>
+        <GenerateLabelsButton className={formLayoutStyles.generateButton} onClick={validationUi.handleGenerate} />
+      </div>
+      {generatedLabels && <LabelGenerator labelCodes={generatedLabels} layoutMode={labelPrintMode} />}
+    </div>
   )
 }
 

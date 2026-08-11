@@ -1,6 +1,57 @@
-import { ILabelLayoutStrategy, LabelPrintMode, RenderVariant } from '../models/ILabelLayoutStrategy'
+export type LabelPrintMode = 'mini-sel' | 'large-sel'
+type RenderVariant = 'small' | 'large'
+type PageOrientation = 'landscape' | 'portrait'
 
-class MiniSelLayoutStrategy implements ILabelLayoutStrategy {
+interface LabelPageGeometry {
+  sheetWidthMm: number
+  sheetHeightMm: number
+  orientation: PageOrientation
+  pagePadLeftMm: number
+  pagePadRightMm: number
+  pagePadTopMm: number
+  pagePadBottomMm: number
+  labelWidthMm: number
+  labelHeightMm: number
+  columns: number
+  rows: number
+}
+
+interface LabelTypographyGeometry {
+  primaryTextSizeMm: number
+  primaryTextMinSizeMm: number
+  primaryTextMaxSizeMm: number
+  primaryAutoFitEnabled: boolean
+  secondaryTextSizeMm: number
+  primaryLetterSpacingMm: number
+  primaryCenterFromTileTopMm: number
+  secondaryBaselineFromTileTopMm: number
+  secondaryDomTopOffsetMm: number
+  barcodeModuleThicknessMm: number
+  barcodeHeightMm: number
+  tilePaddingHorizontalMm: number
+  tilePaddingTopMm: number
+  tilePaddingBottomMm: number
+  largePrefixTextSizeMm: number
+  largeMainTextSizeMm: number
+  largeSuffixTextSizeMm: number
+}
+
+interface BarcodeDimensioning {
+  widthMm: number
+  heightMm: number
+  marginBottomMm: number
+}
+
+export interface LabelLayoutStrategy {
+  mode: LabelPrintMode
+  renderVariant: RenderVariant
+  displayName: string
+  page: LabelPageGeometry
+  typography: LabelTypographyGeometry
+  barcodeGeometry: BarcodeDimensioning
+}
+
+class MiniSelLayoutStrategy implements LabelLayoutStrategy {
   mode: LabelPrintMode = 'mini-sel'
   renderVariant: RenderVariant = 'small'
 
@@ -47,7 +98,7 @@ class MiniSelLayoutStrategy implements ILabelLayoutStrategy {
   }
 }
 
-class LargeSelLayoutStrategy implements ILabelLayoutStrategy {
+class LargeSelLayoutStrategy implements LabelLayoutStrategy {
   mode: LabelPrintMode = 'large-sel'
   renderVariant: RenderVariant = 'large'
 
@@ -97,12 +148,12 @@ class LargeSelLayoutStrategy implements ILabelLayoutStrategy {
 const miniSelLayoutStrategy = new MiniSelLayoutStrategy()
 const largeSelLayoutStrategy = new LargeSelLayoutStrategy()
 
-const strategyByMode = new Map<LabelPrintMode, ILabelLayoutStrategy>([
+const strategyByMode = new Map<LabelPrintMode, LabelLayoutStrategy>([
   ['mini-sel', miniSelLayoutStrategy],
   ['large-sel', largeSelLayoutStrategy],
 ])
 
-export const getLabelLayoutStrategy = (mode: LabelPrintMode): ILabelLayoutStrategy => {
+export const getLabelLayoutStrategy = (mode: LabelPrintMode): LabelLayoutStrategy => {
   return strategyByMode.get(mode) ?? miniSelLayoutStrategy
 }
 
