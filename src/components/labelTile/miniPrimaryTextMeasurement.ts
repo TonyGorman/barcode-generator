@@ -1,4 +1,4 @@
-import { estimatePrimaryTextWidthMm, fitMiniPrimaryFontSizeMm } from '../../domain/labelLayoutGeometry'
+import { estimatePrimaryTextWidthMm, fitMiniPrimaryFontSizeMm } from '../../domain'
 import { LabelLayoutStrategy } from '../../config/labelLayoutStrategies'
 
 const MM_TO_PX = 96 / 25.4

@@ -10,8 +10,8 @@ import {
   resolveConfiguredMiniVariantId,
   writePersistedMiniVariant,
 } from '../../services/miniVariantPreferenceStore'
-import type { MiniCompositionVariantId } from '../../domain/miniCompositionVariants'
-import { isMiniCompositionVariantId, MINI_VARIANT_OPTIONS } from '../../domain/miniCompositionVariants'
+import type { MiniCompositionVariantId } from '../../domain'
+import { isMiniCompositionVariantId, MINI_VARIANT_OPTIONS } from '../../domain'
 import { MiniVariantContext } from '../labelTile/MiniVariantContext'
 
 const LabelApp = (): React.ReactElement => {

@@ -8,10 +8,10 @@ import {
   buildCompactConfiguredAisleCodePattern,
   buildCompactLabelCodePattern,
   buildCompactShortCodePattern,
-} from './labelCodePatterns'
+} from './codesDomain'
 import { AISLE_SIDES } from '../config/labelConfig'
 
-describe('labelCodePatterns', () => {
+describe('codesDomain patterns', () => {
   it('keeps aisle token pattern numeric-only', () => {
     expect(AISLE_TOKEN_PATTERN).toBe('\\d{2}')
     expect(AISLE_PREFIX_NUMBER_PATTERN).toBe('\\d{1,2}')

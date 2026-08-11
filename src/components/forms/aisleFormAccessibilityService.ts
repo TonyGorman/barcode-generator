@@ -1,9 +1,7 @@
 import { AisleSidePresentation } from '../../config/aisleSidePresentationConfig'
 import { MAX_BAY_VALUE } from '../../config/labelConfig'
 import type { LabelValidationErrorCode } from '../../config/validationMessages'
-import { AisleLabelInput } from '../../domain/labelGeneration'
-import { hasValue } from '../../domain/numericGuard'
-import { AisleSide } from '../../domain/labelCodeParser'
+import { AisleLabelInput, hasValue, AisleSide } from '../../domain'
 import { isFieldInvalidByCodes, isRequiredFieldMissing } from './formFieldValidation'
 
 type AisleValidationError = LabelValidationErrorCode | null

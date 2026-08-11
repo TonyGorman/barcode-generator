@@ -3,10 +3,10 @@ import styles from './LabelTile.module.css'
 import BarcodeBlock from './BarcodeBlock'
 import { LabelLayoutContext } from '../print/LabelLayoutContext'
 import { MiniVariantContext } from './MiniVariantContext'
-import { getMiniCompositionVariant } from '../../domain/labelCodeDomain'
+import { getMiniCompositionVariant } from '../../domain'
 import { measurePrimaryTextWidthMm } from './miniPrimaryTextMeasurement'
 import { type LabelLayoutStrategy } from '../../config/labelLayoutStrategies'
-import { type MiniCompositionVariantId } from '../../domain/miniCompositionVariants'
+import { type MiniCompositionVariantId } from '../../domain'
 
 // --- private sub-components ---
 

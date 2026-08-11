@@ -1,5 +1,0 @@
-export { parseLabelCode } from './labelCodeParser'
-export type { SpecificLabelValidationResult } from './labelCodeValidator'
-export { validateSpecificLabelCode } from './labelCodeValidator'
-export { normalizeLabelCode, getEncodedLabelCode, getLargeSelDisplayParts } from './labelCodeDisplay'
-export { getMiniCompositionVariant } from './miniCompositionVariants'

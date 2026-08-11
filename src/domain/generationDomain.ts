@@ -1,7 +1,8 @@
-import type { LabelValidationErrorCode } from '../config/validationMessages'
 import { AISLE_SIDES, MIN_SHELF_LETTER } from '../config/labelConfig'
-import { AisleSide } from './labelCodeParser'
-import { hasValue } from './numericGuard'
+import type { LabelValidationErrorCode } from '../config/validationMessages'
+import type { AisleSide } from './codesDomain'
+
+export const hasValue = (value: number | null): value is number => value !== null
 
 type AisleSideRange = {
   start: number | null
@@ -54,6 +55,18 @@ const getShelfTokens = (startShelf: string, endShelf: string): string[] => {
   return Array.from({ length: endCode - startCode + 1 }, (_, index) => String.fromCharCode(startCode + index))
 }
 
+const hasCompleteAisleGenerationInput = (
+  input: AisleLabelInput,
+): input is AisleLabelInput & { aisleStart: number; aisleEnd: number; shelfEnd: string } => {
+  return hasValue(input.aisleStart) && hasValue(input.aisleEnd) && input.shelfEnd !== null
+}
+
+const hasCompleteShortGenerationInput = (
+  input: ShortLabelInput,
+): input is ShortLabelInput & { bayStart: number; bayEnd: number; shelfEnd: string } => {
+  return hasValue(input.bayStart) && hasValue(input.bayEnd) && input.shelfEnd !== null
+}
+
 export const getShelfRangeCount = (shelfStart: string | null, shelfEnd: string | null): number => {
   if (!shelfEnd) {
     return 0
@@ -95,7 +108,7 @@ export const parseNumericInput = (value: string): number | null => {
 
 const getAisleRequiredError = (input: AisleLabelInput): LabelValidationErrorCode | null => {
   if (!hasValue(input.aisleStart) || !hasValue(input.aisleEnd) || !input.shelfEnd) {
-    return { code: 'AISLE_REQUIRED' }
+    return createError('AISLE_REQUIRED')
   }
 
   return null
@@ -124,24 +137,11 @@ const getAisleRangeError = (
   return null
 }
 
-const getAisleOrderError = (input: AisleLabelInput): LabelValidationErrorCode | null => {
-  if (hasValue(input.aisleStart) && hasValue(input.aisleEnd) && input.aisleStart > input.aisleEnd) {
-    return { code: 'AISLE_ORDER' }
-  }
-
-  return null
-}
-
-const getShelfOrderError = (input: AisleLabelInput): LabelValidationErrorCode | null => {
-  if (input.shelfStart && input.shelfEnd && input.shelfStart > input.shelfEnd) {
-    return { code: 'SHELF_ORDER' }
-  }
-
-  return null
-}
-
-const getSideRangeTuples = (input: AisleLabelInput): AisleSideRangeTuple[] => {
-  return getAisleSideRanges(input).map((range) => [range.start, range.end] as const)
+const selectCompleteSideRanges = (input: AisleLabelInput): { side: AisleSide; start: number; end: number }[] => {
+  const sideCandidates = getAisleSideRanges(input)
+  return sideCandidates.filter((range): range is { side: AisleSide; start: number; end: number } => {
+    return hasValue(range.start) && hasValue(range.end)
+  })
 }
 
 const isCompleteSideRange = (range: AisleSideRangeTuple): range is readonly [number, number] => {
@@ -151,12 +151,12 @@ const isCompleteSideRange = (range: AisleSideRangeTuple): range is readonly [num
 const getSideRangePresenceError = (sideRanges: readonly AisleSideRangeTuple[]): LabelValidationErrorCode | null => {
   const hasIncompleteRange = sideRanges.some(([start, end]) => hasValue(start) !== hasValue(end))
   if (hasIncompleteRange) {
-    return { code: 'SIDE_RANGE_INCOMPLETE' }
+    return createError('SIDE_RANGE_INCOMPLETE')
   }
 
   const hasCompleteRange = sideRanges.some((range) => isCompleteSideRange(range))
   if (!hasCompleteRange) {
-    return { code: 'SIDE_RANGE_REQUIRED' }
+    return createError('SIDE_RANGE_REQUIRED')
   }
 
   return null
@@ -172,12 +172,63 @@ const getSideRangeValueError = (
     }
 
     if (start > end) {
-      return { code: 'SIDE_RANGE_ORDER' }
+      return createError('SIDE_RANGE_ORDER')
     }
 
     if (start < 1 || end < 1 || end > maxBayValue) {
-      return { code: 'SIDE_BAY_RANGE', minBayValue: 1, maxBayValue }
+      return createSideBayRangeError(maxBayValue)
     }
+  }
+
+  return null
+}
+
+const hasDescendingShelfRange = (shelfStart: string | null, shelfEnd: string | null): boolean => {
+  return Boolean(shelfStart && shelfEnd && shelfStart > shelfEnd)
+}
+
+const getShelfOrderValidationError = (
+  shelfStart: string | null,
+  shelfEnd: string | null,
+): LabelValidationErrorCode | null => {
+  if (hasDescendingShelfRange(shelfStart, shelfEnd)) {
+    return createError('SHELF_ORDER')
+  }
+
+  return null
+}
+
+const getShortRequiredError = (input: ShortLabelInput): LabelValidationErrorCode | null => {
+  if (!hasValue(input.bayStart) || !hasValue(input.bayEnd) || !input.shelfEnd) {
+    return createError('SHORT_REQUIRED')
+  }
+
+  return null
+}
+
+const getNumericRangeOrderError = (
+  start: number | null,
+  end: number | null,
+  code: 'AISLE_ORDER' | 'SHORT_ORDER',
+): LabelValidationErrorCode | null => {
+  if (hasValue(start) && hasValue(end) && start > end) {
+    return { code }
+  }
+
+  return null
+}
+
+const getShortRangeError = (
+  input: ShortLabelInput,
+  minBayValue: number,
+  maxBayValue: number,
+): LabelValidationErrorCode | null => {
+  if (!hasValue(input.bayStart) || !hasValue(input.bayEnd)) {
+    return null
+  }
+
+  if (input.bayStart < minBayValue || input.bayEnd < minBayValue || input.bayEnd > maxBayValue) {
+    return createShortBayRangeError(minBayValue, maxBayValue)
   }
 
   return null
@@ -187,40 +238,23 @@ export const validateAisleLabelInput = (
   input: AisleLabelInput,
   limits: AisleValidationLimits,
 ): LabelValidationErrorCode | null => {
-  const requiredError = getAisleRequiredError(input)
-  if (requiredError) {
-    return requiredError
-  }
+  const sideRanges = getAisleSideRanges(input).map((range) => [range.start, range.end] as const)
 
-  const rangeError = getAisleRangeError(input, limits)
-  if (rangeError) {
-    return rangeError
-  }
-
-  const orderError = getAisleOrderError(input)
-  if (orderError) {
-    return orderError
-  }
-
-  const shelfOrderError = getShelfOrderError(input)
-  if (shelfOrderError) {
-    return shelfOrderError
-  }
-
-  const sideRanges = getSideRangeTuples(input)
-  const sideRangePresenceError = getSideRangePresenceError(sideRanges)
-  if (sideRangePresenceError) {
-    return sideRangePresenceError
-  }
-
-  return getSideRangeValueError(sideRanges, limits.maxBayValue)
+  return (
+    getAisleRequiredError(input) ??
+    getAisleRangeError(input, limits) ??
+    getNumericRangeOrderError(input.aisleStart, input.aisleEnd, 'AISLE_ORDER') ??
+    getShelfOrderValidationError(input.shelfStart, input.shelfEnd) ??
+    getSideRangePresenceError(sideRanges) ??
+    getSideRangeValueError(sideRanges, limits.maxBayValue)
+  )
 }
 
 export const generateAisleLabelCodes = (
   input: AisleLabelInput,
   formatTwoDigitValue: (value: number) => string,
 ): string[] => {
-  if (!hasValue(input.aisleStart) || !hasValue(input.aisleEnd) || !input.shelfEnd) {
+  if (!hasCompleteAisleGenerationInput(input)) {
     return []
   }
 
@@ -229,12 +263,7 @@ export const generateAisleLabelCodes = (
     AisleSide,
     string[]
   >
-  const selectedSideCandidates = getAisleSideRanges(input)
-  const selectedSides: { side: AisleSide; start: number; end: number }[] = selectedSideCandidates.filter(
-    (range): range is { side: AisleSide; start: number; end: number } => {
-      return hasValue(range.start) && hasValue(range.end)
-    },
-  )
+  const selectedSides = selectCompleteSideRanges(input)
 
   for (let aisle = input.aisleStart; aisle <= input.aisleEnd; aisle += 1) {
     for (const sideRange of selectedSides) {
@@ -247,35 +276,48 @@ export const generateAisleLabelCodes = (
   return AISLE_SIDES.flatMap((side) => labelsBySide[side])
 }
 
+const toNormalizedCodeToken = (value: string): string => value.trim().toUpperCase()
+
+const createError = (
+  code:
+    | 'AISLE_REQUIRED'
+    | 'SIDE_RANGE_INCOMPLETE'
+    | 'SIDE_RANGE_REQUIRED'
+    | 'SIDE_RANGE_ORDER'
+    | 'SHELF_ORDER'
+    | 'SHORT_REQUIRED',
+): LabelValidationErrorCode => ({ code })
+
+const createSideBayRangeError = (maxBayValue: number): LabelValidationErrorCode => ({
+  code: 'SIDE_BAY_RANGE',
+  minBayValue: 1,
+  maxBayValue,
+})
+
+const createShortBayRangeError = (minBayValue: number, maxBayValue: number): LabelValidationErrorCode => ({
+  code: 'SHORT_BAY_RANGE',
+  minBayValue,
+  maxBayValue,
+})
+
 export const validateShortLabelInput = (
   input: ShortLabelInput,
   minBayValue: number,
   maxBayValue: number,
 ): LabelValidationErrorCode | null => {
-  if (!hasValue(input.bayStart) || !hasValue(input.bayEnd) || !input.shelfEnd) {
-    return { code: 'SHORT_REQUIRED' }
-  }
-
-  if (input.bayStart > input.bayEnd) {
-    return { code: 'SHORT_ORDER' }
-  }
-
-  if (input.shelfStart && input.shelfStart > input.shelfEnd) {
-    return { code: 'SHELF_ORDER' }
-  }
-
-  if (input.bayStart < minBayValue || input.bayEnd < minBayValue || input.bayEnd > maxBayValue) {
-    return { code: 'SHORT_BAY_RANGE', minBayValue, maxBayValue }
-  }
-
-  return null
+  return (
+    getShortRequiredError(input) ??
+    getNumericRangeOrderError(input.bayStart, input.bayEnd, 'SHORT_ORDER') ??
+    getShelfOrderValidationError(input.shelfStart, input.shelfEnd) ??
+    getShortRangeError(input, minBayValue, maxBayValue)
+  )
 }
 
 export const generateShortLabelCodes = (
   input: ShortLabelInput,
   formatTwoDigitValue: (value: number) => string,
 ): string[] => {
-  if (!hasValue(input.bayStart) || !hasValue(input.bayEnd) || !input.shelfEnd) {
+  if (!hasCompleteShortGenerationInput(input)) {
     return []
   }
 
@@ -295,6 +337,6 @@ export const generateShortLabelCodes = (
 export const normalizeSpecificInputCodes = (rawInput: string): string[] => {
   return rawInput
     .split(',')
-    .map((text) => text.trim().toUpperCase())
+    .map((text) => toNormalizedCodeToken(text))
     .filter((text) => text.length > 0)
 }

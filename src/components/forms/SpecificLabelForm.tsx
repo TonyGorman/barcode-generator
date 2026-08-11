@@ -19,7 +19,7 @@ import {
   AISLE_PREFIXES,
 } from '../../config/labelConfig'
 import { RadioGroup, TextField, type RadioOption } from '../formUi/FormControls'
-import { validateSpecificLabelCode } from '../../domain/labelCodeDomain'
+import { validateSpecificLabelCode } from '../../domain'
 import { type LabelPrintMode } from '../../config/labelLayoutStrategies'
 import { validateSpecificLabels } from '../../services/specificLabelValidationService'
 import { useFormValidationUi } from '../../hooks/useFormValidationUi'

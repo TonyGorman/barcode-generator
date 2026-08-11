@@ -1,4 +1,4 @@
 import * as React from 'react'
-import { MiniCompositionVariantId, DEFAULT_MINI_COMPOSITION_VARIANT_ID } from '../../domain/miniCompositionVariants'
+import { MiniCompositionVariantId, DEFAULT_MINI_COMPOSITION_VARIANT_ID } from '../../domain'
 
 export const MiniVariantContext = React.createContext<MiniCompositionVariantId>(DEFAULT_MINI_COMPOSITION_VARIANT_ID)

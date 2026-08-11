@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
-import { fitLineByWidth, getSecondaryCenterFromBarcodeTopMm } from './miniCompositionVariantMath'
+import { fitLineByWidth, getSecondaryCenterFromBarcodeTopMm } from './compositionDomain'
 
-describe('miniCompositionVariantMath', () => {
+describe('compositionDomain math', () => {
   it('fitLineByWidth always clamps within min and max bounds', () => {
     const minSizeMm = 4
     const maxSizeMm = 10

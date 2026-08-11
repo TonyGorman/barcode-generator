@@ -1,8 +1,4 @@
-import {
-  MiniCompositionVariantId,
-  DEFAULT_MINI_COMPOSITION_VARIANT_ID,
-  isMiniCompositionVariantId,
-} from '../domain/miniCompositionVariants'
+import { MiniCompositionVariantId, DEFAULT_MINI_COMPOSITION_VARIANT_ID, isMiniCompositionVariantId } from '../domain'
 
 export const MINI_VARIANT_STORAGE_KEY = 'miniVariant'
 

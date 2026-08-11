@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import LabelTile, { getMiniPrimaryFontSizeMm } from './LabelTile'
-import { normalizeLabelCode, getEncodedLabelCode, getLargeSelDisplayParts } from '../../domain/labelCodeDomain'
+import { normalizeLabelCode, getEncodedLabelCode, getLargeSelDisplayParts } from '../../domain'
 import { SHORT_CODE_PREFIXES } from '../../config/labelConfig'
 import { getLabelLayoutStrategy } from '../../config/labelLayoutStrategies'
 import { LabelLayoutContext } from '../print/LabelLayoutContext'

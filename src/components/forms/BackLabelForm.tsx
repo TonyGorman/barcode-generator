@@ -20,7 +20,7 @@ import { RadioGroup, TextField } from '../formUi/FormControls'
 import { generateShortLabels } from '../../services/labelGenerationService'
 import { updateOptionalLetterField, updateParsedNumericField } from './formHelpers'
 import { getValidationErrorMessage, type LabelValidationErrorCode } from '../../config/validationMessages'
-import { type ShortLabelInput, validateShortLabelInput } from '../../domain/labelGeneration'
+import { type ShortLabelInput, validateShortLabelInput } from '../../domain'
 import { useFormValidationUi } from '../../hooks/useFormValidationUi'
 import {
   getFirstInvalidShortFieldId,

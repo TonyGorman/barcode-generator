@@ -54,49 +54,65 @@ flowchart TD
   A --> AF[AisleLabelForm]
   A --> BF[BackLabelForm]
 
-  SF --> SH[Hook: useSpecificLabelForm]
-  AF --> AH[Hook: useAisleLabelForm]
-  BF --> BH[Hook: useShortLabelForm]
+  A --> MPS[Service: miniVariantPreferenceStore]
+  MPS --> ST[localStorage miniVariant key]
+  A --> MVC[MiniVariantContext Provider]
+  MVU --> MPS
 
-  SH --> SVS[Service: specificLabelValidationService]
-  AH --> LGS[Service: labelGenerationService]
-  BH --> LGS
+  SF --> HUI[Hook: useFormValidationUi]
+  AF --> HUI
+  BF --> HUI
 
-  SH --> DG[Domain: labelCodeDomain + labelGeneration]
-  AH --> DG
-  BH --> DG
+  SF --> SVS[Service: specificLabelValidationService]
+  AF --> LGS[Service: labelGenerationService]
+  BF --> LGS
+
+  SF --> DI[Domain entry: src/domain/index]
+  AF --> DI
+  BF --> DI
+  SVS --> DI
+  LGS --> DI
+
+  DI --> CD[Domain: codesDomain]
+  DI --> GD[Domain: generationDomain]
+  DI --> CMP[Domain: compositionDomain]
 
   SF --> LG[LabelGenerator]
   AF --> LG
   BF --> LG
 
+  LG --> UP[Hook: usePaginatedLabels]
+  LG --> UPP[Hook: usePrintPortal]
   LG --> PL[Preview Path]
   LG --> PR[Print Portal Path]
 
   PL --> LT[LabelTile]
   PR --> LT
-  LT --> MLC[MiniLabelTileContent]
-  LT --> LLC[LargeLabelTileContent]
-  LT --> BBC[BarcodeBlock]
-  LT --> MCH[Hook: useMiniLabelTileComposition]
-  MCH --> MR[Mini variant registry]
-  LG --> MP[Mini variant preference resolver]
-  MP --> ST[Mini variant storage]
-  MP --> MR
-  MVU --> MP
-  MR --> M3[mini-three-row compose/geometry/fit]
-  MR --> MS[mini-shelf-emphasis compose/geometry/fit]
-  LLC --> DH[Display helpers: getLargeSelDisplayParts]
-  BBC --> D2[Parser / encoding: getEncodedLabelCode]
+
+  LT --> MLT[MiniLabelTile]
+  LT --> LLT[LargeLabelTile]
+
+  MVC --> MLT
+  MLT --> CMP
+  CMP --> M3[mini-three-row compose/geometry/fit]
+  CMP --> MS[mini-shelf-emphasis compose/geometry/fit]
+
+  LLT --> LLC[LargeLabelTileContent]
+  LLT --> BBC[BarcodeBlock]
+  LLC --> DH[Display helper: getLargeSelDisplayParts]
+  LLT --> EB[Encoding helper: getEncodedLabelCode]
+  MLT --> BBC
 ```
 
 ## Domain Model
 
-The domain layer for sel codes is split across three files:
+The domain layer is intentionally consolidated into three modules:
 
-- **`labelCodeParser.ts`**: Parses compact input into a `ParsedLabelCode` domain object.
-- **`labelCodeDisplay.ts`**: Converts parsed codes to display and encoding formats.
-- **`labelCodeValidator.ts`**: Validates label codes.
+- **`src/domain/codesDomain.ts`**: Compact code parsing, display-part conversion, barcode encoding helpers, and specific-label validation.
+- **`src/domain/generationDomain.ts`**: Aisle/short generation rules, numeric parsing, and form-input validation for generated label workflows.
+- **`src/domain/compositionDomain.ts`**: Mini composition variants, geometry derivation, and typography fit logic used by tile rendering.
+
+Use **`src/domain/index.ts`** as the public domain entrypoint for imports.
 
 ## Layer Intent
 
@@ -119,7 +135,7 @@ Label layout is controlled by objects implementing `ILabelLayoutStrategy`. Each 
 - **`mode`** (`LabelPrintMode`): `'mini-sel'` or `'large-sel'` - the physical paper format.
 - **`renderVariant`** (`RenderVariant`): `'small'` or `'large'` - controls large-vs-mini render.
 
-Mini text arrangement is handled in `src/domain/miniCompositionVariants.ts`.
+Mini text arrangement is handled in `src/domain/compositionDomain.ts`.
 
 Mini variant selection order:
 

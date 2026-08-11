@@ -9,7 +9,7 @@ import {
   validateShortLabelInput,
   type AisleLabelInput,
   type ShortLabelInput,
-} from './labelGeneration'
+} from './generationDomain'
 import { AISLE_SIDES } from '../config/labelConfig'
 
 const formatTwoDigitValue = (value: number): string => value.toString().padStart(2, '0')
@@ -27,7 +27,7 @@ const baseAisleInput: AisleLabelInput = {
   shelfEnd: 'B',
 }
 
-describe('labelGeneration', () => {
+describe('generationDomain', () => {
   it('parses numeric input and rejects non-numeric values', () => {
     expect(parseNumericInput(' 12 ')).toBe(12)
     expect(parseNumericInput('')).toBeNull()

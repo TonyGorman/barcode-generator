@@ -4,7 +4,7 @@ import {
   fitMiniPrimaryFontSizeMm,
   getMiniAisleThreeRowGeometry,
   getMiniBarcodeTopFromTileTopMm,
-} from './labelLayoutGeometry'
+} from './compositionDomain'
 import { LabelLayoutStrategy } from '../config/labelLayoutStrategies'
 
 const createMiniStrategy = (): LabelLayoutStrategy => ({
@@ -50,7 +50,7 @@ const createMiniStrategy = (): LabelLayoutStrategy => ({
   },
 })
 
-describe('labelLayoutGeometry', () => {
+describe('compositionDomain geometry', () => {
   it('estimates primary text width and returns 0 for empty text', () => {
     expect(estimatePrimaryTextWidthMm('', 9, 0.2)).toBe(0)
 

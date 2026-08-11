@@ -1,5 +1,5 @@
-import { generateAisleLabelCodes, generateShortLabelCodes } from '../domain/labelGeneration'
-import type { AisleLabelInput, ShortLabelInput } from '../domain/labelGeneration'
+import { generateAisleLabelCodes, generateShortLabelCodes } from '../domain'
+import type { AisleLabelInput, ShortLabelInput } from '../domain'
 
 export type LabelGenerationResult = {
   errorMessage: string | null

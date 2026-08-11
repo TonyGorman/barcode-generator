@@ -1,5 +1,5 @@
 import type { LabelValidationErrorCode } from '../../config/validationMessages'
-import { ShortLabelInput } from '../../domain/labelGeneration'
+import { ShortLabelInput } from '../../domain'
 import { isFieldInvalidByCodes, isRequiredFieldMissing } from './formFieldValidation'
 
 type ShortValidationError = LabelValidationErrorCode | null

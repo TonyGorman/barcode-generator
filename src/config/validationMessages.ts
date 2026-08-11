@@ -13,7 +13,7 @@ export const VALIDATION_MESSAGES = {
 } as const
 
 /**
- * Typed error codes returned by domain validation functions in `labelGeneration.ts`.
+ * Typed error codes returned by domain validation functions in `generationDomain.ts`.
  * Keeping these as codes (rather than message strings) at the domain boundary lets the
  * UI layer own text mapping/formatting (and future i18n) via `getValidationErrorMessage`.
  */
@@ -86,7 +86,7 @@ type SpecificInvalidLabelMessageArgs = {
 }
 
 /**
- * Typed error reasons returned by `validateSpecificLabelCode` in `labelCodeValidator.ts`.
+ * Typed error reasons returned by `validateSpecificLabelCode` in `codesDomain.ts`.
  * Mirrors the `LabelValidationErrorCode` pattern above: the domain layer returns a typed
  * reason, and this config layer owns mapping it to display text (and future i18n).
  */

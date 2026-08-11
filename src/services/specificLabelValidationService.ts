@@ -1,7 +1,7 @@
 import { SHORT_CODE_PREFIXES, SPECIAL_AISLE_VALUES } from '../config/labelConfig'
 import { VALIDATION_MESSAGES, getSpecificInvalidLabelMessage } from '../config/validationMessages'
-import { normalizeSpecificInputCodes } from '../domain/labelGeneration'
-import type { SpecificLabelValidationResult } from '../domain/labelCodeDomain'
+import { normalizeSpecificInputCodes } from '../domain'
+import type { SpecificLabelValidationResult } from '../domain'
 import { LabelPrintMode } from '../config/labelLayoutStrategies'
 import { LabelGenerationResult } from './labelGenerationService'
 

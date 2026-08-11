@@ -1,6 +1,6 @@
 import * as React from 'react'
 import styles from './LabelTile.module.css'
-import { getLargeSelDisplayParts } from '../../domain/labelCodeDomain'
+import { getLargeSelDisplayParts } from '../../domain'
 
 type LargeLabelTileContentProps = {
   code: string

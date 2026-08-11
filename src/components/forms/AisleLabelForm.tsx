@@ -21,15 +21,15 @@ import { RadioGroup, TextField, type RadioOption } from '../formUi/FormControls'
 import { type LabelPrintMode } from '../../config/labelLayoutStrategies'
 import { generateAisleLabels } from '../../services/labelGenerationService'
 import { setParsedNumericField, updateParsedNumericField, updateOptionalLetterField } from './formHelpers'
-import { hasValue } from '../../domain/numericGuard'
+import { hasValue } from '../../domain'
 import { getValidationErrorMessage, type LabelValidationErrorCode } from '../../config/validationMessages'
-import { type AisleSide } from '../../domain/labelCodeParser'
+import { type AisleSide } from '../../domain'
 import {
   createEmptyAisleSideRanges,
   getShelfRangeCount,
   type AisleLabelInput,
   validateAisleLabelInput,
-} from '../../domain/labelGeneration'
+} from '../../domain'
 import { MiniVariantContext } from '../labelTile/MiniVariantContext'
 import GenerateLabelsButton from '../formUi/GenerateLabelsButton'
 import LabelGenerator from '../print/LabelGenerator'
@@ -193,7 +193,7 @@ const AisleLabelForm = (): React.ReactElement => {
     }
 
     setSuccess(generationResult.labels, generationResult.warningMessage)
-  }, [formInput, setFailure, setSuccess, totalLabels, validationError])
+  }, [formInput, setFailure, setSuccess, validationError])
 
   const isInitialMountRef = React.useRef(true)
   React.useEffect(() => {

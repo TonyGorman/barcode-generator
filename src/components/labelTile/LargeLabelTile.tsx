@@ -1,6 +1,6 @@
 import * as React from 'react'
 import styles from './LabelTile.module.css'
-import { getEncodedLabelCode } from '../../domain/labelCodeDomain'
+import { getEncodedLabelCode } from '../../domain'
 import LargeLabelTileContent from './LargeLabelTileContent'
 import BarcodeBlock from './BarcodeBlock'
 import { LabelLayoutContext } from '../print/LabelLayoutContext'
