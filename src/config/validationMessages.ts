@@ -74,14 +74,6 @@ const getSideBayRangeValidationMessage = (minBayValue: number, maxBayValue: numb
   return `Bay values must be between ${minBayValue} and ${maxBayValue}.`
 }
 
-export const getLabelHardLimitMessage = (hardLimit: number): string => {
-  return `Too many labels requested. Reduce the total to ${hardLimit} or fewer.`
-}
-
-export const getLabelSoftLimitMessage = (softLimit: number): string => {
-  return `Large batch warning: more than ${softLimit} labels may slow preview or print.`
-}
-
 type SpecificInvalidLabelMessageArgs = {
   invalidCode: string
   reason: SpecificLabelValidationErrorReason

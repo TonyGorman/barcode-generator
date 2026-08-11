@@ -20,10 +20,10 @@ describe('FormFeedback', () => {
   })
 
   it('renders polite status when a warning message exists', () => {
-    render(<FormFeedback errorMessage={null} warningMessage="Large batch warning" />)
+    render(<FormFeedback errorMessage={null} warningMessage="Preview may take longer than usual" />)
 
     const status = screen.getByRole('status')
-    expect(status).toHaveTextContent('Large batch warning')
+    expect(status).toHaveTextContent('Preview may take longer than usual')
     expect(status).toHaveAttribute('aria-live', 'polite')
     expect(status).toHaveAttribute('aria-atomic', 'true')
   })

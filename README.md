@@ -14,18 +14,6 @@ The app provides three workflows for generating shelf edge labels:
 - **Aisle Labels**: Generate sequential labels for store aisles, with configurable layout (mini or large SEL format) and optional shelf range selection (e.g., shelves B through D instead of always A through chosen value).
 - **Short Code Labels**: Generate labels for back wall or front of store items, with custom prefix support.
 
-### Generation Safety Limits
-
-To prevent oversized jobs from degrading browser preview/export performance, generation uses a soft/hard cap:
-
-- **Soft limit:** `1800` labels — generation still succeeds and shows a warning.
-- **Hard limit:** `2000` labels — generation is blocked with an error.
-
-These are centrally configured in `src/config/labelConfig.ts` under:
-
-- `LABEL_CONSTRAINTS.labelGeneration.softLimit`
-- `LABEL_CONSTRAINTS.labelGeneration.hardLimit`
-
 All labels display:
 
 - Aisle, side, bay, shelf values in several different variations as discussed next.
@@ -113,14 +101,14 @@ The domain layer for sel codes is split across three files:
 ## Layer Intent
 
 - **`src/domain/*`**: Pure parsing, validation, generation, and formatting rules.
-- **`src/services/*Service.ts`**: Application orchestration for label workflows (validation + limits + generation).
+- **`src/services/*Service.ts`**: Application orchestration for label workflows (validation + generation).
 - **`src/hooks/*`**: UI state and event orchestration for forms and preview/print behavior.
 - **`src/components/*` (render components)**: Presentation and layout rendering only.
 
 Naming convention:
 
 - Use noun-oriented module names for orchestration modules (`*Service.ts`).
-- Use verb-oriented exports (`generateAisleLabels`, `generateShortLabels`, `validateSpecificLabels`, `evaluateLabelBatchLimits`).
+- Use verb-oriented exports (`generateAisleLabels`, `generateShortLabels`, `validateSpecificLabels`).
 - `npm run lint:naming` enforces hook export/file naming as errors and reports boolean-prefix drift as warnings.
 - Naming lint runs as part of `npm run validate:ci`.
 

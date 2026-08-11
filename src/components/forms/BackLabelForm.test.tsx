@@ -89,17 +89,6 @@ describe('BackLabelForm', () => {
     expect(screen.queryByDisplayValue('NaN')).not.toBeInTheDocument()
   })
 
-  it('blocks generation when total labels exceed hard limit', () => {
-    render(<BackLabelForm />)
-
-    setTextboxValues({ 0: '1', 1: '99' })
-    setComboboxValue('End Shelf', 'Z')
-    clickGenerateLabels()
-
-    expect(screen.getByRole('alert')).toHaveTextContent('Too many labels requested.')
-    expect(screen.queryByTestId('generated-labels')).not.toBeInTheDocument()
-  })
-
   it('supports shelf start to shelf end range generation', () => {
     render(<BackLabelForm />)
 

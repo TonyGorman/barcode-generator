@@ -20,6 +20,30 @@ export default tseslint.config(
   ...tseslint.configs.strictTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
 
+  // Disable type-aware TS rules for plain JS/MJS files (including this config file)
+  {
+    files: ['**/*.{js,mjs,cjs}'],
+    extends: [tseslint.configs.disableTypeChecked],
+  },
+
+  // Disable type-aware TS rules outside src so repo-wide lint does not require type projects for tool configs
+  {
+    files: ['**/*.{ts,tsx,mts,cts}'],
+    ignores: ['src/**/*.{ts,tsx}'],
+    extends: [tseslint.configs.disableTypeChecked],
+  },
+
+  // Node globals for local scripts and config files
+  {
+    files: ['scripts/**/*.{js,mjs,cjs}', '*.config.{js,mjs,cjs}'],
+    languageOptions: {
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+      },
+    },
+  },
+
   // SonarJS plugin
   {
     plugins: {

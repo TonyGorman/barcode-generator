@@ -19,10 +19,6 @@ export const LABEL_CONSTRAINTS = {
   shortCode: {
     prefixes: ['BAK', 'FOS', 'FNT'] as const,
   },
-  labelGeneration: {
-    softLimit: 1800,
-    hardLimit: 2000,
-  },
 } as const
 
 export const MIN_AISLE_VALUE = LABEL_CONSTRAINTS.aisle.min
@@ -35,8 +31,6 @@ export const AISLE_SIDES = LABEL_CONSTRAINTS.side.values
 export const AISLE_PREFIXES = LABEL_CONSTRAINTS.aisle.prefixes
 export const SHORT_CODE_PREFIXES = LABEL_CONSTRAINTS.shortCode.prefixes
 export const SPECIAL_AISLE_VALUES = LABEL_CONSTRAINTS.aisle.specialValues
-export const LABEL_SOFT_LIMIT = LABEL_CONSTRAINTS.labelGeneration.softLimit
-export const LABEL_HARD_LIMIT = LABEL_CONSTRAINTS.labelGeneration.hardLimit
 
 export const formatTwoDigitValue = (value: number): string => {
   return value.toString().padStart(2, '0')

@@ -1,10 +1,5 @@
-import { LABEL_HARD_LIMIT, LABEL_SOFT_LIMIT, SHORT_CODE_PREFIXES, SPECIAL_AISLE_VALUES } from '../config/labelConfig'
-import {
-  getLabelHardLimitMessage,
-  getLabelSoftLimitMessage,
-  VALIDATION_MESSAGES,
-  getSpecificInvalidLabelMessage,
-} from '../config/validationMessages'
+import { SHORT_CODE_PREFIXES, SPECIAL_AISLE_VALUES } from '../config/labelConfig'
+import { VALIDATION_MESSAGES, getSpecificInvalidLabelMessage } from '../config/validationMessages'
 import { normalizeSpecificInputCodes } from '../domain/labelGeneration'
 import type { SpecificLabelValidationResult } from '../domain/labelCodeDomain'
 import { LabelPrintMode } from '../config/labelLayoutStrategies'
@@ -39,16 +34,6 @@ export const validateSpecificLabels = ({
       warningMessage: null,
     }
   }
-
-  if (labels.length > LABEL_HARD_LIMIT) {
-    return {
-      labels: [],
-      errorMessage: getLabelHardLimitMessage(LABEL_HARD_LIMIT),
-      warningMessage: null,
-    }
-  }
-
-  const warningMessage = labels.length > LABEL_SOFT_LIMIT ? getLabelSoftLimitMessage(LABEL_SOFT_LIMIT) : null
 
   const firstInvalidLabel = labels
     .map((code) => ({ code, result: validateSpecificCode(code) }))
@@ -88,6 +73,6 @@ export const validateSpecificLabels = ({
   return {
     labels,
     errorMessage: null,
-    warningMessage,
+    warningMessage: null,
   }
 }

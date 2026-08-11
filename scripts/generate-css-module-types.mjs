@@ -4,7 +4,33 @@ import prettier from 'prettier'
 
 const isCheckMode = process.argv.includes('--check')
 const componentsDir = path.resolve('src/components')
-const cssModuleFiles = fs.readdirSync(componentsDir).filter((file) => file.endsWith('.module.css'))
+
+const collectFilesRecursive = (rootDir, matcher) => {
+  const matches = []
+  const stack = [rootDir]
+
+  while (stack.length > 0) {
+    const currentDir = stack.pop()
+    const entries = fs.readdirSync(currentDir, { withFileTypes: true })
+
+    for (const entry of entries) {
+      const fullPath = path.join(currentDir, entry.name)
+
+      if (entry.isDirectory()) {
+        stack.push(fullPath)
+        continue
+      }
+
+      if (entry.isFile() && matcher(entry.name)) {
+        matches.push(fullPath)
+      }
+    }
+  }
+
+  return matches
+}
+
+const cssModuleFiles = collectFilesRecursive(componentsDir, (fileName) => fileName.endsWith('.module.css'))
 
 const escapeClassName = (className) => className.replace(/'/g, "\\'")
 
@@ -40,7 +66,7 @@ const mismatches = []
 
 const main = async () => {
   for (const cssModuleFile of cssModuleFiles) {
-    const cssPath = path.join(componentsDir, cssModuleFile)
+    const cssPath = cssModuleFile
     const cssSource = fs.readFileSync(cssPath, 'utf8')
     const classNames = [
       ...new Set([...cssSource.matchAll(/\.([A-Za-z_][A-Za-z0-9_-]*)\s*(?=[,{])/g)].map((match) => match[1])),

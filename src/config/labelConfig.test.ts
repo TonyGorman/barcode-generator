@@ -12,8 +12,6 @@ import {
   AISLE_RANGE_TEXT,
   BAY_RANGE_TEXT,
   SHELF_RANGE_TEXT,
-  LABEL_SOFT_LIMIT,
-  LABEL_HARD_LIMIT,
   LABEL_CONSTRAINTS,
   formatTwoDigitValue,
   isAislePrefix,
@@ -43,14 +41,6 @@ describe('labelConfig', () => {
     expect(AISLE_PREFIXES).toEqual(LABEL_CONSTRAINTS.aisle.prefixes)
     expect(SHORT_CODE_PREFIXES).toEqual(LABEL_CONSTRAINTS.shortCode.prefixes)
     expect(SPECIAL_AISLE_VALUES).toEqual(LABEL_CONSTRAINTS.aisle.specialValues)
-    expect(LABEL_SOFT_LIMIT).toBe(LABEL_CONSTRAINTS.labelGeneration.softLimit)
-    expect(LABEL_HARD_LIMIT).toBe(LABEL_CONSTRAINTS.labelGeneration.hardLimit)
-  })
-
-  it('keeps generation safety limits stable', () => {
-    expect(LABEL_SOFT_LIMIT).toBe(1800)
-    expect(LABEL_HARD_LIMIT).toBe(2000)
-    expect(LABEL_SOFT_LIMIT).toBeLessThan(LABEL_HARD_LIMIT)
   })
 
   it('exports centralized range display text', () => {

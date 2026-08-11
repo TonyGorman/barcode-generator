@@ -13,8 +13,6 @@ import {
   AISLE_RANGE_TEXT,
   BAY_RANGE_TEXT,
   SHELF_RANGE_TEXT,
-  LABEL_SOFT_LIMIT,
-  LABEL_HARD_LIMIT,
   MIN_SHELF_LETTER,
   formatTwoDigitValue,
 } from '../../config/labelConfig'
@@ -187,9 +185,6 @@ const AisleLabelForm = (): React.ReactElement => {
 
     const generationResult = generateAisleLabels({
       formInput,
-      softLimit: LABEL_SOFT_LIMIT,
-      hardLimit: LABEL_HARD_LIMIT,
-      totalLabels,
       formatTwoDigitValue,
     })
     if (generationResult.errorMessage) {

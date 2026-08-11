@@ -14,15 +14,13 @@ import {
   MIN_BAY_VALUE,
   MAX_BAY_VALUE,
   BAY_RANGE_TEXT,
-  LABEL_SOFT_LIMIT,
-  LABEL_HARD_LIMIT,
   formatTwoDigitValue,
 } from '../../config/labelConfig'
 import { RadioGroup, TextField } from '../formUi/FormControls'
 import { generateShortLabels } from '../../services/labelGenerationService'
 import { updateOptionalLetterField, updateParsedNumericField } from './formHelpers'
 import { getValidationErrorMessage, type LabelValidationErrorCode } from '../../config/validationMessages'
-import { getShelfRangeCount, type ShortLabelInput, validateShortLabelInput } from '../../domain/labelGeneration'
+import { type ShortLabelInput, validateShortLabelInput } from '../../domain/labelGeneration'
 import { useFormValidationUi } from '../../hooks/useFormValidationUi'
 import {
   getFirstInvalidShortFieldId,
@@ -89,15 +87,6 @@ const BackLabelForm = (): React.ReactElement => {
     [formInput, selectedShortCodePrefix],
   )
 
-  const shelfCount = getShelfRangeCount(formInput.shelfStart, formInput.shelfEnd)
-  const bayCount = React.useMemo(() => {
-    if (formInput.bayStart === null || formInput.bayEnd === null) {
-      return 0
-    }
-    return formInput.bayEnd - formInput.bayStart + 1
-  }, [formInput.bayEnd, formInput.bayStart])
-  const totalLabels = bayCount * shelfCount
-
   const validationError = React.useMemo<LabelValidationErrorCode | null>(
     () => validateShortLabelInput(shortFormInput, MIN_BAY_VALUE, MAX_BAY_VALUE),
     [shortFormInput],
@@ -111,9 +100,6 @@ const BackLabelForm = (): React.ReactElement => {
 
     const generationResult = generateShortLabels({
       formInput: shortFormInput,
-      softLimit: LABEL_SOFT_LIMIT,
-      hardLimit: LABEL_HARD_LIMIT,
-      totalLabels,
       formatTwoDigitValue,
     })
     if (generationResult.errorMessage) {
@@ -122,7 +108,7 @@ const BackLabelForm = (): React.ReactElement => {
     }
 
     setSuccess(generationResult.labels, generationResult.warningMessage)
-  }, [setFailure, setSuccess, shortFormInput, totalLabels, validationError])
+  }, [setFailure, setSuccess, shortFormInput, validationError])
   const isInitialMountRef = React.useRef(true)
   React.useEffect(() => {
     if (isInitialMountRef.current) {

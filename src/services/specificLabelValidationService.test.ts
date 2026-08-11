@@ -64,7 +64,7 @@ describe('specificLabelValidationService', () => {
     expect(result.warningMessage).toBeNull()
   })
 
-  it('returns normalized labels and no warning for valid small batches', () => {
+  it('returns normalized labels for valid input', () => {
     const result = validateSpecificLabels({
       labelText: '01l01a, bak01a',
       labelPrintMode: 'mini-sel',
@@ -73,20 +73,6 @@ describe('specificLabelValidationService', () => {
     })
 
     expect(result.errorMessage).toBeNull()
-    expect(result.warningMessage).toBeNull()
     expect(result.labels).toEqual(['01L01A', 'BAK01A'])
-  })
-
-  it('returns soft-limit warning for valid large batches', () => {
-    const result = validateSpecificLabels({
-      labelText: Array.from({ length: 1801 }, () => '01L01A').join(','),
-      labelPrintMode: 'mini-sel',
-      validateSpecificCode: alwaysValid,
-      contentTokens,
-    })
-
-    expect(result.errorMessage).toBeNull()
-    expect(result.warningMessage).toContain('Large batch warning: more than 1800 labels')
-    expect(result.labels).toHaveLength(1801)
   })
 })

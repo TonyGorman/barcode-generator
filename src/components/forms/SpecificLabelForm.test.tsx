@@ -229,17 +229,6 @@ describe('SpecificLabelForm', () => {
     expect(screen.queryByTestId('generated-labels')).not.toBeInTheDocument()
   })
 
-  it('blocks generation when specific labels exceed hard limit', () => {
-    render(<SpecificLabelForm />)
-
-    const labels = Array.from({ length: 2001 }, (_, index) => `01L${String((index % 99) + 1).padStart(2, '0')}A`).join(
-      ',',
-    )
-    submitLabels(labels)
-
-    expect(screen.getByRole('alert')).toHaveTextContent('Too many labels requested.')
-    expect(screen.queryByTestId('generated-labels')).not.toBeInTheDocument()
-  })
 
   it('clears generated output when mini variant changes', () => {
     const { rerender } = render(

@@ -216,29 +216,6 @@ describe('AisleLabelForm', () => {
     expect(screen.queryByTestId('generated-count')).not.toBeInTheDocument()
   })
 
-  it('shows soft warning for large but allowed label totals', () => {
-    render(<AisleLabelForm />)
-
-    setTextboxValues({ 0: '1', 1: '1', 2: '1', 3: '99' })
-    setComboboxValue('End Shelf', 'S')
-    clickGenerateLabels()
-
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
-    expect(screen.getByRole('status')).toHaveTextContent('Large batch warning')
-    expect(screen.getByTestId('generated-count')).toHaveTextContent('1881')
-  })
-
-  it('blocks generation when total labels exceed hard limit', () => {
-    render(<AisleLabelForm />)
-
-    setTextboxValues({ 0: '0', 1: '99', 2: '1', 3: '99' })
-    setComboboxValue('End Shelf', 'L')
-    clickGenerateLabels()
-
-    expect(screen.getByRole('alert')).toHaveTextContent('Too many labels requested.')
-    expect(screen.queryByTestId('generated-count')).not.toBeInTheDocument()
-  })
-
   it('generates only shelves within the selected start-to-end range', () => {
     render(<AisleLabelForm />)
 
