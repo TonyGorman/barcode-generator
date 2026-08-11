@@ -229,7 +229,6 @@ describe('SpecificLabelForm', () => {
     expect(screen.queryByTestId('generated-labels')).not.toBeInTheDocument()
   })
 
-
   it('clears generated output when mini variant changes', () => {
     const { rerender } = render(
       <MiniVariantContext.Provider value="mini-three-row">
