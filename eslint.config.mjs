@@ -69,6 +69,9 @@ export default tseslint.config(
       // ! assertions are idiomatic in tests; conflicts with non-nullable-type-assertion-style auto-fix
       '@typescript-eslint/no-non-null-assertion': 'off',
 
+      // Enforce type aliases for object shape declarations.
+      '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
+
       // DOM/testing-library query patterns are safe but sonarjs can't see that
       'sonarjs/null-dereference': 'off',
       // ReactNode functions returning null/undefined is idiomatic React

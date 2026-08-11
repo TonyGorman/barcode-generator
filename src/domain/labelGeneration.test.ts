@@ -7,14 +7,14 @@ import {
   parseNumericInput,
   validateAisleLabelInput,
   validateShortLabelInput,
-  type IAisleLabelInput,
-  type IShortLabelInput,
+  type AisleLabelInput,
+  type ShortLabelInput,
 } from './labelGeneration'
 import { AISLE_SIDES } from '../config/labelConfig'
 
 const formatTwoDigitValue = (value: number): string => value.toString().padStart(2, '0')
 
-const baseAisleInput: IAisleLabelInput = {
+const baseAisleInput: AisleLabelInput = {
   aisleStart: 1,
   aisleEnd: 1,
   sideRanges: {
@@ -92,7 +92,7 @@ describe('labelGeneration', () => {
   })
 
   it('validates short label bounds and generates compact output', () => {
-    const shortInput: IShortLabelInput = {
+    const shortInput: ShortLabelInput = {
       bayStart: 1,
       bayEnd: 2,
       shelfStart: null,
@@ -105,7 +105,7 @@ describe('labelGeneration', () => {
   })
 
   it('validates short shelf ordering and supports shelf ranges from custom starts', () => {
-    const invalidShelfOrderInput: IShortLabelInput = {
+    const invalidShelfOrderInput: ShortLabelInput = {
       bayStart: 1,
       bayEnd: 1,
       shelfStart: 'C',
@@ -115,7 +115,7 @@ describe('labelGeneration', () => {
 
     expect(validateShortLabelInput(invalidShelfOrderInput, 1, 99)).toEqual({ code: 'SHELF_ORDER' })
 
-    const validRangeInput: IShortLabelInput = {
+    const validRangeInput: ShortLabelInput = {
       bayStart: 1,
       bayEnd: 1,
       shelfStart: 'B',

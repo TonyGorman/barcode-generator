@@ -10,14 +10,14 @@ import type { SpecificLabelValidationResult } from '../domain/labelCodeDomain'
 import { LabelPrintMode } from '../config/labelLayoutStrategies'
 import { LabelGenerationResult } from './labelGenerationService'
 
-interface SpecificLabelValidationContent {
+type SpecificLabelValidationContent = {
   bayRangeText: string
   shelfRangeText: string
   namedAisleExamples: string
   aislePrefixedExamples: string
 }
 
-interface SpecificLabelValidationArgs {
+type SpecificLabelValidationArgs = {
   labelText: string
   labelPrintMode: LabelPrintMode
   validateSpecificCode: (code: string) => SpecificLabelValidationResult

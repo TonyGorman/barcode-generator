@@ -18,7 +18,7 @@ import {
   MIN_SHELF_LETTER,
   formatTwoDigitValue,
 } from '../../config/labelConfig'
-import { AISLE_SIDE_METADATA } from '../../config/aisleSideMetadata'
+import { AISLE_SIDE_PRESENTATION } from '../../config/aisleSidePresentationConfig'
 import { RadioGroup, TextField, type RadioOption } from '../formUi/FormControls'
 import { type LabelPrintMode } from '../../config/labelLayoutStrategies'
 import { generateAisleLabels } from '../../services/labelGenerationService'
@@ -29,7 +29,7 @@ import { type AisleSide } from '../../domain/labelCodeParser'
 import {
   createEmptyAisleSideRanges,
   getShelfRangeCount,
-  type IAisleLabelInput,
+  type AisleLabelInput,
   validateAisleLabelInput,
 } from '../../domain/labelGeneration'
 import { MiniVariantContext } from '../labelTile/MiniVariantContext'
@@ -52,7 +52,7 @@ import {
 } from './aisleFormAccessibilityService'
 
 const AisleLabelForm = (): React.ReactElement => {
-  const sideNamesText = AISLE_SIDE_METADATA.map((side) => side.label).join(', ')
+  const sideNamesText = AISLE_SIDE_PRESENTATION.map((side) => side.label).join(', ')
   const miniVariantId = React.useContext(MiniVariantContext)
 
   const idPrefix = React.useId()
@@ -77,7 +77,7 @@ const AisleLabelForm = (): React.ReactElement => {
     setGeneratedLabels(nextGeneratedLabels)
   }, [])
 
-  const [formInput, setFormInput] = React.useState<IAisleLabelInput>({
+  const [formInput, setFormInput] = React.useState<AisleLabelInput>({
     aisleStart: null,
     aisleEnd: null,
     sideRanges: createEmptyAisleSideRanges(),
@@ -136,7 +136,7 @@ const AisleLabelForm = (): React.ReactElement => {
 
   const activeSideRanges = React.useMemo(
     () =>
-      AISLE_SIDE_METADATA.map((side) => ({
+      AISLE_SIDE_PRESENTATION.map((side) => ({
         ...side,
         start: formInput.sideRanges[side.side].start,
         end: formInput.sideRanges[side.side].end,
@@ -239,7 +239,7 @@ const AisleLabelForm = (): React.ReactElement => {
           validationError,
           formInput,
           idPrefix,
-          sideRows: AISLE_SIDE_METADATA,
+          sideRows: AISLE_SIDE_PRESENTATION,
         }),
       [validationError, formInput, idPrefix],
     ),
@@ -296,7 +296,7 @@ const AisleLabelForm = (): React.ReactElement => {
 
         <FormSection title={`Bay Configuration (${BAY_RANGE_TEXT})`}>
           <div className={styles.sideGrid}>
-            {AISLE_SIDE_METADATA.map((side) => {
+            {AISLE_SIDE_PRESENTATION.map((side) => {
               const sideInvalid = isAisleSideFieldInvalid(validationError, getAisleSideRange(formInput, side.side))
               return (
                 <div key={side.side} className={styles.sideRow}>
@@ -336,7 +336,7 @@ const AisleLabelForm = (): React.ReactElement => {
           <InlineFieldError
             id={validationUi.getInlineErrorId('side')}
             message={validationUi.getInlineErrorMessage(
-              AISLE_SIDE_METADATA.some((side) =>
+              AISLE_SIDE_PRESENTATION.some((side) =>
                 isAisleSideFieldInvalid(validationError, getAisleSideRange(formInput, side.side)),
               ),
             )}

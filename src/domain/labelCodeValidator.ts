@@ -13,7 +13,7 @@ export type SpecificLabelValidationResult =
       reason: SpecificLabelValidationErrorReason
     }
 
-export interface ISpecificLabelValidationOptions {
+export type SpecificLabelValidationOptions = {
   aislePrefixes?: readonly string[]
   shortCodePrefixes?: readonly string[]
   minAisleValue: number
@@ -62,7 +62,7 @@ const getPrefixedAisleNumberToken = (aisleToken: string, configuredPrefixes: rea
 
 const getAisleValidationError = (
   aisleToken: string,
-  options: Pick<ISpecificLabelValidationOptions, 'aislePrefixes' | 'minAisleValue' | 'maxAisleValue'>,
+  options: Pick<SpecificLabelValidationOptions, 'aislePrefixes' | 'minAisleValue' | 'maxAisleValue'>,
 ): Extract<SpecificLabelValidationErrorReason, 'invalid-aisle-prefix' | 'invalid-aisle-range'> | null => {
   if (isNumericAisleToken(aisleToken)) {
     return isBoundedNumericToken(aisleToken, options.maxAisleValue, options.minAisleValue)
@@ -86,7 +86,7 @@ type SupportedParsedLabelCode = Extract<ParsedLabelCode, { kind: 'special' | 'ai
 const getBayOrShelfValidationError = (
   bay: string,
   shelf: string,
-  options: Pick<ISpecificLabelValidationOptions, 'maxBayValue' | 'maxShelfLetter'>,
+  options: Pick<SpecificLabelValidationOptions, 'maxBayValue' | 'maxShelfLetter'>,
 ): Extract<SpecificLabelValidationErrorReason, 'invalid-bay-range' | 'invalid-shelf-range'> | null => {
   if (!isBoundedNumericToken(bay, options.maxBayValue)) {
     return 'invalid-bay-range'
@@ -101,7 +101,7 @@ const getBayOrShelfValidationError = (
 
 const validateAisleParsedLabel = (
   parsed: Extract<SupportedParsedLabelCode, { kind: 'aisle' }>,
-  options: ISpecificLabelValidationOptions,
+  options: SpecificLabelValidationOptions,
 ): SpecificLabelValidationResult => {
   const { aisle, bay, shelf } = parsed.parts
   const aisleValidationError = getAisleValidationError(aisle, options)
@@ -120,7 +120,7 @@ const validateAisleParsedLabel = (
 
 const validateShortParsedLabel = (
   parsed: Extract<SupportedParsedLabelCode, { kind: 'short' }>,
-  options: Pick<ISpecificLabelValidationOptions, 'maxBayValue' | 'maxShelfLetter'>,
+  options: Pick<SpecificLabelValidationOptions, 'maxBayValue' | 'maxShelfLetter'>,
 ): SpecificLabelValidationResult => {
   const { bay, shelf } = parsed.parts
   const bayOrShelfValidationError = getBayOrShelfValidationError(bay, shelf, options)
@@ -134,7 +134,7 @@ const validateShortParsedLabel = (
 
 const validateParsedLabel = (
   parsed: SupportedParsedLabelCode,
-  options: ISpecificLabelValidationOptions,
+  options: SpecificLabelValidationOptions,
 ): SpecificLabelValidationResult => {
   switch (parsed.kind) {
     case 'special':
@@ -150,7 +150,7 @@ const validateParsedLabel = (
 
 export const validateSpecificLabelCode = (
   code: string,
-  options: ISpecificLabelValidationOptions,
+  options: SpecificLabelValidationOptions,
 ): SpecificLabelValidationResult => {
   const normalizedCode = code.trim().toUpperCase()
   if (normalizedCode.includes('-') || normalizedCode.includes(' ')) {

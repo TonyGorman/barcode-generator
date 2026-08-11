@@ -50,7 +50,7 @@ export const getMiniBarcodeTopFromTileTopMm = (layoutStrategy: LabelLayoutStrate
   return page.labelHeightMm - typography.tilePaddingBottomMm - barcodeGeometry.marginBottomMm - barcodeGeometry.heightMm
 }
 
-export interface MiniAisleThreeRowGeometry {
+export type MiniAisleThreeRowGeometry = {
   topCenterFromContentTopMm: number
   mainCenterFromContentTopMm: number
   bottomCenterFromContentTopMm: number

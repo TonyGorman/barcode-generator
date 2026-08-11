@@ -1,7 +1,7 @@
 import * as React from 'react'
 import alertStyles from './Alert.module.css'
 
-interface FormFeedbackProps {
+type FormFeedbackProps = {
   errorMessage: string | null
   warningMessage: string | null
   errorId?: string

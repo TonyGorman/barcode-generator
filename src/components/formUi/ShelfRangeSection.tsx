@@ -6,12 +6,12 @@ import InlineFieldError from './InlineFieldError'
 import { ShelfSelect } from './FormControls'
 import { SHELF_RANGE_TEXT } from '../../config/labelConfig'
 
-interface ValidationFieldA11yProps {
+type ValidationFieldA11yProps = {
   'aria-invalid'?: true
   'aria-describedby'?: string
 }
 
-interface ShelfRangeSectionProps {
+type ShelfRangeSectionProps = {
   idPrefix: string
   shelfStart: string | null
   shelfEnd: string | null

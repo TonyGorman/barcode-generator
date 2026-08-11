@@ -1,7 +1,7 @@
 import * as React from 'react'
 import shellStyles from './FormShell.module.css'
 
-interface FormSectionProps {
+type FormSectionProps = {
   title: string
   children: React.ReactNode
 }

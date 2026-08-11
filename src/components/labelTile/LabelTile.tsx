@@ -4,11 +4,11 @@ import LargeLabelTile from './LargeLabelTile'
 import { LabelLayoutContext } from '../print/LabelLayoutContext'
 export { getMiniPrimaryFontSizeMm } from './miniPrimaryTextMeasurement'
 
-interface ILabelTileProps {
+type LabelTileProps = {
   code: string
 }
 
-const LabelTile: React.FC<ILabelTileProps> = ({ code }) => {
+const LabelTile: React.FC<LabelTileProps> = ({ code }) => {
   const layoutStrategy = React.useContext(LabelLayoutContext)
   const isLargeVariant = layoutStrategy.renderVariant === 'large'
 

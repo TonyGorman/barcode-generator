@@ -16,18 +16,18 @@ import {
 
 export type AisleSide = (typeof AISLE_SIDES)[number]
 
-interface AisleCodeParts {
+type AisleCodeParts = {
   aisle: string
   side: AisleSide
   bay: string
   shelf: string
 }
 
-interface SpecialCodeParts {
+type SpecialCodeParts = {
   value: string
 }
 
-interface ShortCodeParts {
+type ShortCodeParts = {
   prefix: string
   bay: string
   shelf: string

@@ -22,7 +22,7 @@ import { RadioGroup, TextField } from '../formUi/FormControls'
 import { generateShortLabels } from '../../services/labelGenerationService'
 import { updateOptionalLetterField, updateParsedNumericField } from './formHelpers'
 import { getValidationErrorMessage, type LabelValidationErrorCode } from '../../config/validationMessages'
-import { getShelfRangeCount, type IShortLabelInput, validateShortLabelInput } from '../../domain/labelGeneration'
+import { getShelfRangeCount, type ShortLabelInput, validateShortLabelInput } from '../../domain/labelGeneration'
 import { useFormValidationUi } from '../../hooks/useFormValidationUi'
 import {
   getFirstInvalidShortFieldId,
@@ -62,7 +62,7 @@ const BackLabelForm = (): React.ReactElement => {
   }, [])
 
   const [selectedShortCodePrefix, setSelectedShortCodePrefix] = React.useState<string>(SHORT_CODE_PREFIXES[0])
-  const [formInput, setFormInput] = React.useState<Omit<IShortLabelInput, 'prefix'>>({
+  const [formInput, setFormInput] = React.useState<Omit<ShortLabelInput, 'prefix'>>({
     bayStart: null,
     bayEnd: null,
     shelfStart: null,
@@ -84,7 +84,7 @@ const BackLabelForm = (): React.ReactElement => {
     updateOptionalLetterField(setFormInput, 'shelfEnd', letter)
   }, [])
 
-  const shortFormInput = React.useMemo<IShortLabelInput>(
+  const shortFormInput = React.useMemo<ShortLabelInput>(
     () => ({ ...formInput, prefix: selectedShortCodePrefix }),
     [formInput, selectedShortCodePrefix],
   )

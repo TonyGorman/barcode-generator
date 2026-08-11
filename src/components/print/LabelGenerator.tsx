@@ -18,7 +18,7 @@ const getItemsPerPage = (layoutStrategy: LabelLayoutStrategy): number => {
   return layoutStrategy.page.columns * layoutStrategy.page.rows
 }
 
-interface Props {
+type Props = {
   labelCodes: string[]
   layoutMode?: LabelPrintMode
 }

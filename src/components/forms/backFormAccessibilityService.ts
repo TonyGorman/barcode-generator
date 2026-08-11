@@ -1,5 +1,5 @@
 import type { LabelValidationErrorCode } from '../../config/validationMessages'
-import { IShortLabelInput } from '../../domain/labelGeneration'
+import { ShortLabelInput } from '../../domain/labelGeneration'
 import { isFieldInvalidByCodes, isRequiredFieldMissing } from './formFieldValidation'
 
 type ShortValidationError = LabelValidationErrorCode | null
@@ -12,18 +12,18 @@ export const isShortShelfFieldInvalid = (validationError: ShortValidationError):
 
 export const isShortRequiredBayFieldMissing = (
   validationError: ShortValidationError,
-  formInput: IShortLabelInput,
+  formInput: ShortLabelInput,
 ): boolean =>
   isRequiredFieldMissing(validationError, 'SHORT_REQUIRED', formInput.bayStart === null || formInput.bayEnd === null)
 
 export const isShortRequiredShelfFieldMissing = (
   validationError: ShortValidationError,
-  formInput: IShortLabelInput,
+  formInput: ShortLabelInput,
 ): boolean => isRequiredFieldMissing(validationError, 'SHORT_REQUIRED', formInput.shelfEnd === null)
 
-interface FirstInvalidShortFieldArgs {
+type FirstInvalidShortFieldArgs = {
   validationError: ShortValidationError
-  formInput: IShortLabelInput
+  formInput: ShortLabelInput
   idPrefix: string
 }
 

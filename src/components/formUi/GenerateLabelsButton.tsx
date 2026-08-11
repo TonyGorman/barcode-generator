@@ -2,7 +2,7 @@ import * as React from 'react'
 import controlStyles from './FormControls.module.css'
 import { Button } from './FormControls'
 
-interface GenerateLabelsButtonProps {
+type GenerateLabelsButtonProps = {
   className?: string
   onClick: () => void
 }

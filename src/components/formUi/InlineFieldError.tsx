@@ -1,7 +1,7 @@
 import * as React from 'react'
 import shellStyles from './FormShell.module.css'
 
-interface InlineFieldErrorProps {
+type InlineFieldErrorProps = {
   id: string
   message: string | null
 }

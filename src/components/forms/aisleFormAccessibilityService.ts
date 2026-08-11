@@ -1,7 +1,7 @@
-import { IAisleSideMetadata } from '../../config/aisleSideMetadata'
+import { AisleSidePresentation } from '../../config/aisleSidePresentationConfig'
 import { MAX_BAY_VALUE } from '../../config/labelConfig'
 import type { LabelValidationErrorCode } from '../../config/validationMessages'
-import { IAisleLabelInput } from '../../domain/labelGeneration'
+import { AisleLabelInput } from '../../domain/labelGeneration'
 import { hasValue } from '../../domain/numericGuard'
 import { AisleSide } from '../../domain/labelCodeParser'
 import { isFieldInvalidByCodes, isRequiredFieldMissing } from './formFieldValidation'
@@ -14,7 +14,7 @@ export const isAisleRangeFieldInvalid = (validationError: AisleValidationError):
 export const isAisleShelfFieldInvalid = (validationError: AisleValidationError): boolean =>
   isFieldInvalidByCodes(validationError, ['SHELF_ORDER'])
 
-interface SideRange {
+type SideRange = {
   start: number | null
   end: number | null
 }
@@ -56,7 +56,7 @@ export const isAisleSideFieldInvalid = (validationError: AisleValidationError, s
 
 export const isAisleRequiredAisleFieldMissing = (
   validationError: AisleValidationError,
-  formInput: IAisleLabelInput,
+  formInput: AisleLabelInput,
 ): boolean =>
   isRequiredFieldMissing(
     validationError,
@@ -66,17 +66,17 @@ export const isAisleRequiredAisleFieldMissing = (
 
 export const isAisleRequiredShelfFieldMissing = (
   validationError: AisleValidationError,
-  formInput: IAisleLabelInput,
+  formInput: AisleLabelInput,
 ): boolean => isRequiredFieldMissing(validationError, 'AISLE_REQUIRED', !formInput.shelfEnd)
 
-interface FirstInvalidAisleFieldArgs {
+type FirstInvalidAisleFieldArgs = {
   validationError: AisleValidationError
-  formInput: IAisleLabelInput
+  formInput: AisleLabelInput
   idPrefix: string
-  sideRows: readonly IAisleSideMetadata[]
+  sideRows: readonly AisleSidePresentation[]
 }
 
-const getAisleRequiredFieldId = (formInput: IAisleLabelInput, idPrefix: string): string => {
+const getAisleRequiredFieldId = (formInput: AisleLabelInput, idPrefix: string): string => {
   if (!hasValue(formInput.aisleStart)) {
     return `${idPrefix}-aisle-start`
   }
@@ -88,16 +88,16 @@ const getAisleRequiredFieldId = (formInput: IAisleLabelInput, idPrefix: string):
   return `${idPrefix}-shelf-end`
 }
 
-const getSideRangeRequiredFieldId = (sideRows: readonly IAisleSideMetadata[], idPrefix: string): string | null => {
+const getSideRangeRequiredFieldId = (sideRows: readonly AisleSidePresentation[], idPrefix: string): string | null => {
   const firstSide = sideRows[0]
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- defensive guard for empty sideRows
   return firstSide ? `${idPrefix}-${firstSide.side}-start` : null
 }
 
 const getSideRangeIncompleteFieldId = (
-  formInput: IAisleLabelInput,
+  formInput: AisleLabelInput,
   idPrefix: string,
-  sideRows: readonly IAisleSideMetadata[],
+  sideRows: readonly AisleSidePresentation[],
 ): string | null => {
   const incompleteSide = sideRows.find((side) => {
     const range = formInput.sideRanges[side.side]
@@ -113,9 +113,9 @@ const getSideRangeIncompleteFieldId = (
 }
 
 const getSideRangeInvalidFieldId = (
-  formInput: IAisleLabelInput,
+  formInput: AisleLabelInput,
   idPrefix: string,
-  sideRows: readonly IAisleSideMetadata[],
+  sideRows: readonly AisleSidePresentation[],
   code: 'SIDE_RANGE_ORDER' | 'SIDE_BAY_RANGE',
 ): string | null => {
   const invalidSide = sideRows.find((side) => {
@@ -162,7 +162,7 @@ export const getFirstInvalidAisleFieldId = ({
 }
 
 export const getAisleSideRange = (
-  formInput: IAisleLabelInput,
+  formInput: AisleLabelInput,
   side: AisleSide,
 ): { start: number | null; end: number | null } => {
   return formInput.sideRanges[side]

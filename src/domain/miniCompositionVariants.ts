@@ -4,7 +4,7 @@ import { miniThreeRowVariant } from './variants/miniThreeRowVariant'
 
 export type MiniCompositionVariantId = 'mini-three-row' | 'mini-shelf-emphasis'
 
-export interface ComposedMiniLabel {
+export type ComposedMiniLabel = {
   variantId: MiniCompositionVariantId
   primaryLineText: string
   secondaryLineText: string
@@ -13,7 +13,7 @@ export interface ComposedMiniLabel {
   encodedBarcodeValue: string
 }
 
-export interface MiniVariantGeometry {
+export type MiniVariantGeometry = {
   primaryCenterFromContentTopMm: number
   secondaryCenterFromContentTopMm: number
   tertiaryCenterFromContentTopMm?: number
@@ -23,7 +23,7 @@ export interface MiniVariantGeometry {
   barcodeTopFromTileTopMm: number
 }
 
-export interface MiniTypographyFitResult {
+export type MiniTypographyFitResult = {
   primaryTextSizeMm: number
   secondaryTextSizeMm: number
   secondaryCenterFromContentTopMm?: number
@@ -34,7 +34,7 @@ export interface MiniTypographyFitResult {
 
 export type MiniTextMeasureFn = (text: string, fontSizeMm: number, letterSpacingMm: number) => number
 
-export interface MiniCompositionVariant {
+export type MiniCompositionVariant = {
   id: MiniCompositionVariantId
   displayLabel: string
   composeLabel: (code: string, shortCodePrefix?: string) => ComposedMiniLabel

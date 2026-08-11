@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-interface UseFormValidationUiArgs {
+type UseFormValidationUiArgs = {
   idPrefix: string
   errorScope: string
   errorMessage: string | null
@@ -10,12 +10,12 @@ interface UseFormValidationUiArgs {
   getFirstInvalidFieldId: () => string | null
 }
 
-interface ValidationFieldA11yProps {
+type ValidationFieldA11yProps = {
   'aria-invalid'?: true
   'aria-describedby'?: string
 }
 
-interface UseFormValidationUiResult {
+type UseFormValidationUiResult = {
   showFieldErrors: boolean
   summaryErrorId: string
   handleGenerate: () => void

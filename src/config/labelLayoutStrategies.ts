@@ -2,7 +2,7 @@ export type LabelPrintMode = 'mini-sel' | 'large-sel'
 type RenderVariant = 'small' | 'large'
 type PageOrientation = 'landscape' | 'portrait'
 
-interface LabelPageGeometry {
+type LabelPageGeometry = {
   sheetWidthMm: number
   sheetHeightMm: number
   orientation: PageOrientation
@@ -16,7 +16,7 @@ interface LabelPageGeometry {
   rows: number
 }
 
-interface LabelTypographyGeometry {
+type LabelTypographyGeometry = {
   primaryTextSizeMm: number
   primaryTextMinSizeMm: number
   primaryTextMaxSizeMm: number
@@ -36,13 +36,13 @@ interface LabelTypographyGeometry {
   largeSuffixTextSizeMm: number
 }
 
-interface BarcodeDimensioning {
+type BarcodeDimensioning = {
   widthMm: number
   heightMm: number
   marginBottomMm: number
 }
 
-export interface LabelLayoutStrategy {
+export type LabelLayoutStrategy = {
   mode: LabelPrintMode
   renderVariant: RenderVariant
   displayName: string

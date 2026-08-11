@@ -3,7 +3,7 @@ import { TabItem } from './TabItem'
 import styles from './Tabs.module.css'
 import { TabPanelVisibilityContext } from './TabPanelVisibilityContext'
 
-interface Props {
+type Props = {
   tabs: TabItem[]
   selectedKey?: string
   onTabClick?: (key: string) => void

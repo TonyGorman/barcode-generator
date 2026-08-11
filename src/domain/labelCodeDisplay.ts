@@ -6,19 +6,19 @@ export type CompactLabelCode = string & { readonly __brand: 'compact' }
 
 const asCompactLabelCode = (value: string): CompactLabelCode => value as CompactLabelCode
 
-export interface ILargeLabelDisplayParts {
+export type LargeLabelDisplayParts = {
   prefix: string
   main: string
   suffix: string
 }
 
-export interface IMiniThreeRowDisplayParts {
+export type MiniThreeRowDisplayParts = {
   top: string
   main: string
   bottom: string
 }
 
-const toDisplayParts = (parsed: ParsedLabelCode): IMiniThreeRowDisplayParts => {
+const toDisplayParts = (parsed: ParsedLabelCode): MiniThreeRowDisplayParts => {
   switch (parsed.kind) {
     case 'aisle':
       return {
@@ -63,7 +63,7 @@ export const getEncodedLabelCode = (
 export const getLargeSelDisplayParts = (
   code: string,
   shortCodePrefix: string = SHORT_CODE_PREFIXES[0],
-): ILargeLabelDisplayParts | null => {
+): LargeLabelDisplayParts | null => {
   const normalizedCode = code.toUpperCase()
   const parsed = parseLabelCode(normalizedCode, shortCodePrefix)
   if (parsed?.kind !== 'aisle' && parsed?.kind !== 'short') {
@@ -76,7 +76,7 @@ export const getLargeSelDisplayParts = (
 export const getMiniThreeRowDisplayParts = (
   code: string,
   shortCodePrefix: string = SHORT_CODE_PREFIXES[0],
-): IMiniThreeRowDisplayParts => {
+): MiniThreeRowDisplayParts => {
   const normalizedCode = code.toUpperCase()
   const parsed = parseLabelCode(normalizedCode, shortCodePrefix)
   if (!parsed) {

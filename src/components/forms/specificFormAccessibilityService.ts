@@ -1,6 +1,6 @@
 export const getSpecificLabelInputId = (idPrefix: string): string => `${idPrefix}-specific-input`
 
-interface FirstInvalidSpecificFieldArgs {
+type FirstInvalidSpecificFieldArgs = {
   idPrefix: string
 }
 

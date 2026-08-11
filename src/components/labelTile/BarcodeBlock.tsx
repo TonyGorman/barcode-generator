@@ -3,14 +3,14 @@ import Barcode from 'react-barcode'
 import styles from './LabelTile.module.css'
 import { convertMmToPx } from './miniPrimaryTextMeasurement'
 
-interface IBarcodeBlockProps {
+type BarcodeBlockProps = {
   labelValue: string
   isLargeVariant: boolean
   barcodeModuleThicknessMm: number
   barcodeHeightMm: number
 }
 
-const BarcodeBlock: React.FC<IBarcodeBlockProps> = ({
+const BarcodeBlock: React.FC<BarcodeBlockProps> = ({
   labelValue,
   isLargeVariant,
   barcodeModuleThicknessMm,

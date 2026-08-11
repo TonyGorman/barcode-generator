@@ -15,9 +15,9 @@ const setForwardedRef = <T,>(ref: React.ForwardedRef<T>, value: T | null): void 
   }
 }
 
-export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export type ButtonProps = {
   children: React.ReactNode
-}
+} & React.ButtonHTMLAttributes<HTMLButtonElement>
 
 export const Button: React.FC<ButtonProps> = ({ className, type = 'button', children, ...props }) => {
   return (
@@ -27,7 +27,7 @@ export const Button: React.FC<ButtonProps> = ({ className, type = 'button', chil
   )
 }
 
-interface SharedTextFieldProps {
+type SharedTextFieldProps = {
   className?: string
   multiline?: boolean
   autoGrow?: boolean
@@ -90,12 +90,12 @@ export const TextField = React.forwardRef<HTMLInputElement | HTMLTextAreaElement
   )
 })
 
-export interface RadioOption<K extends string = string> {
+export type RadioOption<K extends string = string> = {
   key: K
   text: string
 }
 
-interface RadioGroupProps<K extends string = string> {
+type RadioGroupProps<K extends string = string> = {
   name: string
   options: RadioOption<K>[]
   selectedKey: K
@@ -142,7 +142,7 @@ const SHELF_LETTERS: readonly string[] = (() => {
   return letters
 })()
 
-export interface ShelfSelectProps {
+export type ShelfSelectProps = {
   id?: string
   value: string
   onChange: (letter: string) => void

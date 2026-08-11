@@ -1,7 +1,7 @@
 import * as React from 'react'
 import styles from './Pagination.module.css'
 
-interface Props {
+type Props = {
   data: string[]
   onPageChange: (pageNumber: number) => void
   itemsPerPage?: number

@@ -3,26 +3,26 @@ import { AISLE_SIDES, MIN_SHELF_LETTER } from '../config/labelConfig'
 import { AisleSide } from './labelCodeParser'
 import { hasValue } from './numericGuard'
 
-interface IAisleSideRange {
+type AisleSideRange = {
   start: number | null
   end: number | null
 }
 
-export type IAisleSideRanges = Record<AisleSide, IAisleSideRange>
+export type AisleSideRanges = Record<AisleSide, AisleSideRange>
 
-export const createEmptyAisleSideRanges = (): IAisleSideRanges => {
-  return Object.fromEntries(AISLE_SIDES.map((side) => [side, { start: null, end: null }])) as IAisleSideRanges
+export const createEmptyAisleSideRanges = (): AisleSideRanges => {
+  return Object.fromEntries(AISLE_SIDES.map((side) => [side, { start: null, end: null }])) as AisleSideRanges
 }
 
-export interface IAisleLabelInput {
+export type AisleLabelInput = {
   aisleStart: number | null
   aisleEnd: number | null
-  sideRanges: IAisleSideRanges
+  sideRanges: AisleSideRanges
   shelfStart: string | null
   shelfEnd: string | null
 }
 
-export interface IShortLabelInput {
+export type ShortLabelInput = {
   bayStart: number | null
   bayEnd: number | null
   shelfStart: string | null
@@ -30,7 +30,7 @@ export interface IShortLabelInput {
   prefix: string
 }
 
-interface IAisleValidationLimits {
+type AisleValidationLimits = {
   minAisleValue: number
   maxAisleValue: number
   maxBayValue: number
@@ -39,7 +39,7 @@ interface IAisleValidationLimits {
 type AisleSideRangeTuple = readonly [number | null, number | null]
 
 const getAisleSideRanges = (
-  input: IAisleLabelInput,
+  input: AisleLabelInput,
 ): { side: AisleSide; start: number | null; end: number | null }[] => {
   return AISLE_SIDES.map((side) => ({
     side,
@@ -93,7 +93,7 @@ export const parseNumericInput = (value: string): number | null => {
   return Number(trimmed)
 }
 
-const getAisleRequiredError = (input: IAisleLabelInput): LabelValidationErrorCode | null => {
+const getAisleRequiredError = (input: AisleLabelInput): LabelValidationErrorCode | null => {
   if (!hasValue(input.aisleStart) || !hasValue(input.aisleEnd) || !input.shelfEnd) {
     return { code: 'AISLE_REQUIRED' }
   }
@@ -102,8 +102,8 @@ const getAisleRequiredError = (input: IAisleLabelInput): LabelValidationErrorCod
 }
 
 const getAisleRangeError = (
-  input: IAisleLabelInput,
-  limits: Pick<IAisleValidationLimits, 'minAisleValue' | 'maxAisleValue'>,
+  input: AisleLabelInput,
+  limits: Pick<AisleValidationLimits, 'minAisleValue' | 'maxAisleValue'>,
 ): LabelValidationErrorCode | null => {
   if (!hasValue(input.aisleStart) || !hasValue(input.aisleEnd)) {
     return null
@@ -124,7 +124,7 @@ const getAisleRangeError = (
   return null
 }
 
-const getAisleOrderError = (input: IAisleLabelInput): LabelValidationErrorCode | null => {
+const getAisleOrderError = (input: AisleLabelInput): LabelValidationErrorCode | null => {
   if (hasValue(input.aisleStart) && hasValue(input.aisleEnd) && input.aisleStart > input.aisleEnd) {
     return { code: 'AISLE_ORDER' }
   }
@@ -132,7 +132,7 @@ const getAisleOrderError = (input: IAisleLabelInput): LabelValidationErrorCode |
   return null
 }
 
-const getShelfOrderError = (input: IAisleLabelInput): LabelValidationErrorCode | null => {
+const getShelfOrderError = (input: AisleLabelInput): LabelValidationErrorCode | null => {
   if (input.shelfStart && input.shelfEnd && input.shelfStart > input.shelfEnd) {
     return { code: 'SHELF_ORDER' }
   }
@@ -140,7 +140,7 @@ const getShelfOrderError = (input: IAisleLabelInput): LabelValidationErrorCode |
   return null
 }
 
-const getSideRangeTuples = (input: IAisleLabelInput): AisleSideRangeTuple[] => {
+const getSideRangeTuples = (input: AisleLabelInput): AisleSideRangeTuple[] => {
   return getAisleSideRanges(input).map((range) => [range.start, range.end] as const)
 }
 
@@ -184,8 +184,8 @@ const getSideRangeValueError = (
 }
 
 export const validateAisleLabelInput = (
-  input: IAisleLabelInput,
-  limits: IAisleValidationLimits,
+  input: AisleLabelInput,
+  limits: AisleValidationLimits,
 ): LabelValidationErrorCode | null => {
   const requiredError = getAisleRequiredError(input)
   if (requiredError) {
@@ -217,7 +217,7 @@ export const validateAisleLabelInput = (
 }
 
 export const generateAisleLabelCodes = (
-  input: IAisleLabelInput,
+  input: AisleLabelInput,
   formatTwoDigitValue: (value: number) => string,
 ): string[] => {
   if (!hasValue(input.aisleStart) || !hasValue(input.aisleEnd) || !input.shelfEnd) {
@@ -248,7 +248,7 @@ export const generateAisleLabelCodes = (
 }
 
 export const validateShortLabelInput = (
-  input: IShortLabelInput,
+  input: ShortLabelInput,
   minBayValue: number,
   maxBayValue: number,
 ): LabelValidationErrorCode | null => {
@@ -272,7 +272,7 @@ export const validateShortLabelInput = (
 }
 
 export const generateShortLabelCodes = (
-  input: IShortLabelInput,
+  input: ShortLabelInput,
   formatTwoDigitValue: (value: number) => string,
 ): string[] => {
   if (!hasValue(input.bayStart) || !hasValue(input.bayEnd) || !input.shelfEnd) {

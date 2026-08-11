@@ -1,18 +1,18 @@
 import {
   generateAisleLabelCodes,
   generateShortLabelCodes,
-  IAisleLabelInput,
-  IShortLabelInput,
+  AisleLabelInput,
+  ShortLabelInput,
 } from '../domain/labelGeneration'
 import { getLabelHardLimitMessage, getLabelSoftLimitMessage } from '../config/validationMessages'
 
-export interface LabelGenerationResult {
+export type LabelGenerationResult = {
   errorMessage: string | null
   warningMessage: string | null
   labels: string[]
 }
 
-interface LabelBatchConfig {
+type LabelBatchConfig = {
   softLimit: number
   hardLimit: number
   totalLabels: number
@@ -32,13 +32,13 @@ const evaluateLabelBatchLimits = (
   }
 }
 
-interface AisleLabelGenerationArgs extends LabelBatchConfig {
-  formInput: IAisleLabelInput
+type AisleLabelGenerationArgs = LabelBatchConfig & {
+  formInput: AisleLabelInput
   formatTwoDigitValue: (value: number) => string
 }
 
-interface ShortLabelGenerationArgs extends LabelBatchConfig {
-  formInput: IShortLabelInput
+type ShortLabelGenerationArgs = LabelBatchConfig & {
+  formInput: ShortLabelInput
   formatTwoDigitValue: (value: number) => string
 }
 

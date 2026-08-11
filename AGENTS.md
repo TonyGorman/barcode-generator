@@ -83,6 +83,16 @@ Protect physical label accuracy and scan reliability before making UI/UX changes
 - Naming lint (`npm run lint:naming`) enforces hook export names (`use*`) and file naming rules as errors; violations must be fixed before merge.
 - Boolean-prefix checks are included in `lint:naming` as warnings to surface drift without forcing broad legacy churn.
 
+## Naming Refactor Protocol
+
+- For naming-focused changes, provide a before/after rename table before making edits.
+- Keep naming aligned with existing repo conventions in this file, especially:
+  - Boolean identifiers use `is*`, `has*`, `can*`, or `should*` prefixes.
+  - Service module naming and verb-oriented exports.
+  - Established domain terms (avoid introducing new synonyms for existing concepts).
+- Run naming checks before and after naming changes, and report delta results.
+- If a proposed rename changes domain terminology, confirm intent before applying.
+
 ## Complexity-First Rule
 
 - Before implementing non-trivial changes, run `npm run lint:complexity` to establish a baseline in files likely to be touched.

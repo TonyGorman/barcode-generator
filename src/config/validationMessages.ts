@@ -82,7 +82,7 @@ export const getLabelSoftLimitMessage = (softLimit: number): string => {
   return `Large batch warning: more than ${softLimit} labels may slow preview or print.`
 }
 
-interface ISpecificInvalidLabelMessageArgs {
+type SpecificInvalidLabelMessageArgs = {
   invalidCode: string
   reason: SpecificLabelValidationErrorReason
   aislePrefixedExamples: string
@@ -126,6 +126,6 @@ export const getSpecificInvalidLabelMessage = ({
   namedAisleExamples,
   bayRangeText,
   shelfRangeText,
-}: ISpecificInvalidLabelMessageArgs): string => {
+}: SpecificInvalidLabelMessageArgs): string => {
   return `Label '${invalidCode}' ${SPECIFIC_LABEL_REASON_MESSAGES[reason]}. Supported formats: 01L01A, ${aislePrefixedExamples}, ${backPrefix}01A, ${frontPrefix}01A, or named aisle values (${namedAisleExamples}) with no bay or shelf. Bay must be ${bayRangeText} and shelf must be ${shelfRangeText}`
 }
