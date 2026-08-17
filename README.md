@@ -385,6 +385,69 @@ Configured compact prefixed aisle inputs are validated against the configured ai
 
 Scanner reliability requires consistent, separator-free barcode payloads. The compact format ensures all scans decode to the same canonical form regardless of user input style.
 
+
+## Compact Code Validation Rules
+
+Validation of compact codes follows a two-phase process: **shape recognition** (what kind of code is it?) followed by **token range checks** (are the tokens within bounds?). This section documents the complete rule set.
+
+### Phase 1: Shape Recognition
+
+Input is trimmed and uppercased first. Patterns are matched in order; the first match determines the code kind. Patterns with alternations (like aisle prefixes) are sorted longest-first to prevent shadowing.
+
+| # | Kind | Pattern | Example | Failure |
+|---|---|---|---|---|
+| 0 | — | Reject if code contains `-` or space | `01-L-01A` | `not-compact` |
+| 1 | `special` | Exact match: `FLORAL` \| `KIOSK` | `KIOSK` | — |
+| 2 | `aisle` (prefixed) | `^(BR\|BL\|FL\|FR\|PD)(\d{1,2})(L\|R\|E\|F)(\d{2})([A-Z])$` | `BR7L01A`, `PD12R05C` | `unparseable` |
+| 3 | `aisle` (numeric) | `^(\d{2})(L\|R\|E\|F)(\d{2})([A-Z])$` | `01L01A` | `unparseable` |
+| 4 | `short` | `^(BAK\|FOS\|FNT)(\d{2})([A-Z])$` | `BAK01A` | `unparseable` |
+| 5 | — | No match | `ZZZ` | `unparseable` |
+
+**Note:** Numeric aisle form requires **exactly two** digits (`01L01A`), but prefixed form allows **one or two** (`BR7L01A` or `BR07L01A` both parse).
+
+### Phase 2: Token Validation
+
+Once a shape is recognized, tokens are validated in order (first failure is reported). Range checks apply only to matched shapes.
+
+#### By Token
+
+| Token | Applies to | Rule | Bounds | Source | Failure |
+|---|---|---|---|---|---|
+| aisle number | `aisle` only | integer, no leading zeros | `0–99` | `minAisleValue` / `maxAisleValue` | `invalid-aisle-range` |
+| aisle prefix | `aisle` (non-numeric token) | must be in configured aisle prefixes | `BR`, `BL`, `FL`, `FR`, `PD` (default) | `aislePrefixes` option | `invalid-aisle-prefix` |
+| bay | `aisle`, `short` | integer, leading zeros allowed | `01–99` (note: `00` fails) | `maxBayValue`, min hardcoded 1 | `invalid-bay-range` |
+| shelf | `aisle`, `short` | single uppercase letter, `≤ maxShelfLetter` | `A–Z` (default) | `maxShelfLetter` | `invalid-shelf-range` |
+| — | `special` | no range checks | — | — | — |
+
+#### By Code Kind (Check Order)
+
+| Kind | Checks (in order) | Notes |
+|---|---|---|
+| `special` | (none) | Always valid if it matches the shape |
+| `aisle` | prefix/range → bay → shelf | Prefix checked first if token is non-numeric |
+| `short` | bay → shelf | No prefix validation (already matched) |
+
+### Validation Error Reasons
+
+Typed error codes returned by `validateSpecificLabelCode` in `src/domain/codesDomain.ts`:
+
+| Error Reason | Meaning | Example |
+|---|---|---|
+| `not-compact` | Input contains spaces or dashes | `01-L-01A`, `01 L 01 A` |
+| `unparseable` | No pattern matched the input | `xyz`, `1L01A` (too short) |
+| `invalid-aisle-prefix` | Aisle prefix not in configured allow-list | `XX1L01A` (if only BR/BL configured) |
+| `invalid-aisle-range` | Aisle number outside bounds | `BR100L01A` (if max is 99) |
+| `invalid-bay-range` | Bay number outside bounds or zero | `01L00A`, `01L100A` |
+| `invalid-shelf-range` | Shelf letter beyond configured max or invalid | `01L01Z` (if max is X) |
+
+### Maintenance Note
+
+Validation rules are defined data-driven in `VALIDATION_SPECS` in `src/domain/codesDomain.ts`. To modify:
+
+1. **Add a new check**: Add a `ValidationStep` to the appropriate kind in `VALIDATION_SPECS`.
+2. **Change bounds**: Update constants in `src/config/labelConfig.ts` and rerun tests.
+3. **Change error message**: Update the message in `SPECIFIC_LABEL_REASON_MESSAGES` in `src/config/validationMessages.ts`.
+
 ## Label Sizes
 
 The app supports two label sizes, selectable per print run.
@@ -466,3 +529,4 @@ Treat scan validation as a release gate for barcode-related changes. A change is
 
 - automated tests pass
 - print-and-scan matrix pass is recorded by the validating owner
+

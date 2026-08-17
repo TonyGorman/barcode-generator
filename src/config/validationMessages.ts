@@ -93,7 +93,6 @@ type SpecificInvalidLabelMessageArgs = {
 export type SpecificLabelValidationErrorReason =
   | 'not-compact'
   | 'unparseable'
-  | 'unsupported-kind'
   | 'invalid-aisle-prefix'
   | 'invalid-aisle-range'
   | 'invalid-bay-range'
@@ -102,7 +101,6 @@ export type SpecificLabelValidationErrorReason =
 const SPECIFIC_LABEL_REASON_MESSAGES: Record<SpecificLabelValidationErrorReason, string> = {
   'not-compact': 'must not contain spaces or dashes',
   unparseable: 'is not a recognized label format',
-  'unsupported-kind': 'is not a supported label type',
   'invalid-aisle-prefix': 'has an unrecognized aisle prefix',
   'invalid-aisle-range': 'has an aisle number out of range',
   'invalid-bay-range': 'has a bay number out of range',
