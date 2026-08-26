@@ -41,6 +41,14 @@
   border-color: #2f7df4;
 }
 
+.buildInfo {
+  margin-top: 16px;
+  color: #6b7280;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+  text-align: right;
+}
+
 @media (max-width: 1024px) {
   .labelAppRoot {
     width: calc(100% - 48px);

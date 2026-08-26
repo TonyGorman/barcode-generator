@@ -73,6 +73,9 @@ const LabelApp = (): React.ReactElement => {
           </select>
         </div>
         <Tabs tabs={tabItems} selectedKey={selectedTabKey} onTabClick={handleTabClick} />
+        <footer className={styles.buildInfo} title={`Full commit: ${__BUILD_COMMIT__}`}>
+          Build {__BUILD_COMMIT__.slice(0, 7)}
+        </footer>
       </section>
     </MiniVariantContext.Provider>
   )

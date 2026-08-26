@@ -1,4 +1,5 @@
 export type Styles = {
+  buildInfo: string
   labelAppRoot: string
   variantControlLabel: string
   variantControlRow: string

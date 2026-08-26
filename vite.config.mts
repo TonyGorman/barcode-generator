@@ -1,5 +1,19 @@
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
+import { execFileSync } from 'node:child_process'
+
+const resolveBuildCommit = (): string => {
+  const githubSha = process.env.GITHUB_SHA?.trim()
+  if (githubSha) {
+    return githubSha
+  }
+
+  try {
+    return execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
+  } catch {
+    return 'local'
+  }
+}
 
 const resolveBasePath = (): string => {
   if (process.env.GITHUB_ACTIONS !== 'true') {
@@ -30,17 +44,20 @@ const getVitestExecArgv = (): string[] => {
 // https://vitejs.dev/config/
 export default defineConfig({
   base: resolveBasePath(),
+  define: {
+    __BUILD_COMMIT__: JSON.stringify(resolveBuildCommit()),
+  },
   plugins: [react()],
   server: {
     port: 5173,
-    open: false
+    open: false,
   },
   build: {
     rollupOptions: {
       output: {
         manualChunks: (id: string) => {
           if (id.includes('jsbarcode') || id.includes('react-barcode')) {
-            return 'barcode-renderer';
+            return 'barcode-renderer'
           }
         },
       },
@@ -65,10 +82,7 @@ export default defineConfig({
         'src/config/**/*.ts',
         'src/domain/**/*.ts',
       ],
-      exclude: [
-        'src/**/*.module.css.d.ts',
-        'src/domain/labelCodeDomain.ts',
-      ],
-    }
-  }
+      exclude: ['src/**/*.module.css.d.ts', 'src/domain/labelCodeDomain.ts'],
+    },
+  },
 })
