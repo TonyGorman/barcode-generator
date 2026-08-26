@@ -2,7 +2,13 @@
 
 Generate Shelf Edge Labels for printing mini labels (39mm × 39mm) and large labels (105mm × 73mm) onto special perforated paper. Each size has its own particular paper to space the labels correctly.
 
-There are 2 supported "variants" of mini labels reflecting differing use case: stacked and shelf-emphasis. More details below.
+There are 2 supported variations of mini labels reflecting differing use cases: "three-row" and "shelf emphasis".
+
+### Label Examples
+
+| Mini three-row                                                                      | Mini shelf-emphasis                                                                       | Large SEL                                                             |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| ![Mini three-row label example](public/label-examples/mini-sel-three-row-label.png) | ![Mini shelf-emphasis label example](public/label-examples/mini-shelf-emphasis-label.png) | ![Large SEL label example](public/label-examples/large-sel-label.png) |
 
 ## Features
 
@@ -10,7 +16,7 @@ There are 2 supported "variants" of mini labels reflecting differing use case: s
 
 The app provides three workflows for generating shelf edge labels:
 
-- **Specific Labels**: Enter custom barcode values (one per line, comma-separated) in compact format (for example `01L01A`, `BR10L01A`, `BAK01A`). Spaces and dashes are not accepted. Supports both mini large labels.
+- **Specific Labels**: Manually enter label values, comma-separated, in compact format (for example `01L01A`, `BR10L01A`, `BAK01A`). Spaces and dashes are not accepted. Supports both mini & large labels.
 - **Aisle Labels**: Generate sequential labels for store aisles, with configurable layout (mini or large SEL format) and optional shelf range selection (e.g., shelves B through D instead of always A through chosen value).
 - **Short Code Labels**: Generate labels for back wall or front of store items, with custom prefix support.
 
@@ -20,10 +26,10 @@ All labels display:
 - A CODE128B barcode (always encoded compactly, without spaces or dashes, for reliable scanning)
 - Encoded barcode value as readable text below the barcode for visual verification
 
-Shelf values are always alphabetical (`A`-`Z`) across generated aisle and short code labels.
-`Special aisle` values are defined in code via a config entry for values such as `KIOSK` or `FLORAL`. These only display that special aisle value, without side, bay or shelf.
+Shelf values are always alphabetical (`A`-`Z`) across all label types.
+`Special aisle` values are defined in code via a config entry for values such as `KIOSK` or `FLORAL`. These only display that special aisle value, without side, bay or shelf and as such are "special".
 
-### Mini SEL Composition Variants
+### Mini SEL Variations
 
 Mini SEL supports two variations that share the same 39mm x 39mm geometry and barcode placement:
 
@@ -42,7 +48,117 @@ Barcode payload encoding always uses compact values.
 
 ### Print
 
-- **Print**: Render labels directly to your printer using browser print functionality, optimized for A4 SEL paper. You can 'print to PDF' if you want to download first.
+- **Print**: Render labels directly to your printer using browser print functionality, optimized for A4 SEL paper. You can 'print to PDF' if you want to download and print later.
+
+## Barcode Format
+
+The barcode payload is always stored and encoded in **compact format (no dashes or spaces)**, regardless of how users input or display the label code.
+
+### Input Format Normalization
+
+Specific Labels accepts compact input only (no spaces/dashes). Parsed valid inputs are encoded/scanned in compact form. The readable display is laid out differently depending on the label type chosen:
+
+| Input format           | Barcode payload (all layouts)             | Readable display  |
+| ---------------------- | ----------------------------------------- | ------------------------------------ |
+| Compact numeric aisle  | `01L01A` (always compact, no separators)  | `01 L01 A`                           |
+| Compact prefixed aisle | `BR10L01A` (always compact, no separators) | `BR10 L01 A`                         |
+| Compact short code     | `BAK01A` (always compact, no separators)  | `BAK 01 A`                           |
+
+For Mini SEL, the three-row variant places those parts on separate rows, while the shelf-emphasis variant enlarges the shelf part and shows the full spaced value beneath it. Large SEL uses the same parts in a mixed-size heading.
+
+### Display Impact
+
+- **Specific Labels** accepts compact input only; its readable display uses the selected layout's formatting.
+- **Aisle Labels** and **Short Code Labels** generate the same compact payloads programmatically; their readable display uses the selected layout's formatting.
+- Barcode in every case is always `01L01A`-style compact payload.
+
+Named aisle values are validated against the configured explicit allow-list (default: `KIOSK`, `FLORAL`) rather than inferred.
+Configured compact prefixed aisle inputs are validated against the configured aisle-prefix allow-list (default: `BR`, `BL`, `FL`, `FR`, `PD`) and aisle numeric min/max bounds. These default prefixes represent store sections: `BR` = Back Right, `BL` = Back Left, `FL` = Front Left, `FR` = Front Right, `PD` = Produce.
+
+### Why Compact Encoding
+
+Scanner reliability requires consistent, separator-free barcode payloads. The compact format ensures all scans decode to the same canonical form regardless of user input style.
+
+## Compact Code Validation Rules
+
+Validation of compact codes follows a two-phase process: **shape recognition** (what kind of code is it?) followed by **token range checks** (are the tokens within bounds?). This section documents the complete rule set.
+
+### Phase 1: Shape Recognition
+
+Input is trimmed and uppercased first. Patterns are matched in order; the first match determines the code kind. Patterns with alternations (like aisle prefixes) are sorted longest-first to prevent shadowing.
+
+| #   | Kind               | Pattern                                                     | Example               | Failure       |
+| --- | ------------------ | ----------------------------------------------------------- | --------------------- | ------------- |
+| 0   | —                  | Reject if code contains `-` or space                        | `01-L-01A`            | `not-compact` |
+| 1   | `special`          | Exact match: `FLORAL` \| `KIOSK`                            | `KIOSK`               | —             |
+| 2   | `aisle` (prefixed) | `^(BR\|BL\|FL\|FR\|PD)(\d{1,2})(L\|R\|E\|F)(\d{2})([A-Z])$` | `BR7L01A`, `PD12R05C` | `unparseable` |
+| 3   | `aisle` (numeric)  | `^(\d{2})(L\|R\|E\|F)(\d{2})([A-Z])$`                       | `01L01A`              | `unparseable` |
+| 4   | `short`            | `^(BAK\|FOS\|FNT)(\d{2})([A-Z])$`                           | `BAK01A`              | `unparseable` |
+| 5   | —                  | No match                                                    | `ZZZ`                 | `unparseable` |
+
+**Note:** Numeric aisle form requires **exactly two** digits (`01L01A`), but prefixed form allows **one or two** (`BR7L01A` or `BR07L01A` both parse).
+
+### Phase 2: Token Validation
+
+Once a shape is recognized, tokens are validated in order (first failure is reported). Range checks apply only to matched shapes.
+
+#### By Token
+
+| Token        | Applies to                  | Rule                                        | Bounds                                 | Source                            | Failure                |
+| ------------ | --------------------------- | ------------------------------------------- | -------------------------------------- | --------------------------------- | ---------------------- |
+| aisle number | `aisle` only                | integer, no leading zeros                   | `0–99`                                 | `minAisleValue` / `maxAisleValue` | `invalid-aisle-range`  |
+| aisle prefix | `aisle` (non-numeric token) | must be in configured aisle prefixes        | `BR`, `BL`, `FL`, `FR`, `PD` (default) | `aislePrefixes` option            | `invalid-aisle-prefix` |
+| bay          | `aisle`, `short`            | integer, leading zeros allowed              | `01–99` (note: `00` fails)             | `maxBayValue`, min hardcoded 1    | `invalid-bay-range`    |
+| shelf        | `aisle`, `short`            | single uppercase letter, `≤ maxShelfLetter` | `A–Z` (default)                        | `maxShelfLetter`                  | `invalid-shelf-range`  |
+| —            | `special`                   | no range checks                             | —                                      | —                                 | —                      |
+
+#### By Code Kind (Check Order)
+
+| Kind      | Checks (in order)          | Notes                                        |
+| --------- | -------------------------- | -------------------------------------------- |
+| `special` | (none)                     | Always valid if it matches the shape         |
+| `aisle`   | prefix/range → bay → shelf | Prefix checked first if token is non-numeric |
+| `short`   | bay → shelf                | No prefix validation (already matched)       |
+
+### Validation Error Reasons
+
+Typed error codes returned by `validateSpecificLabelCode` in `src/domain/codesDomain.ts`:
+
+| Error Reason           | Meaning                                       | Example                              |
+| ---------------------- | --------------------------------------------- | ------------------------------------ |
+| `not-compact`          | Input contains spaces or dashes               | `01-L-01A`, `01 L 01 A`              |
+| `unparseable`          | No pattern matched the input                  | `xyz`, `1L01A` (too short)           |
+| `invalid-aisle-prefix` | Aisle prefix not in configured allow-list     | `XX1L01A` (if only BR/BL configured) |
+| `invalid-aisle-range`  | Aisle number outside bounds                   | `BR100L01A` (if max is 99)           |
+| `invalid-bay-range`    | Bay number outside bounds or zero             | `01L00A`, `01L100A`                  |
+| `invalid-shelf-range`  | Shelf letter beyond configured max or invalid | `01L01Z` (if max is X)               |
+
+### Maintenance Note
+
+Validation rules are defined data-driven in `VALIDATION_SPECS` in `src/domain/codesDomain.ts`. To modify:
+
+1. **Add a new check**: Add a `ValidationStep` to the appropriate kind in `VALIDATION_SPECS`.
+2. **Change bounds**: Update constants in `src/config/labelConfig.ts` and rerun tests.
+3. **Change error message**: Update the message in `SPECIFIC_LABEL_REASON_MESSAGES` in `src/config/validationMessages.ts`.
+
+## Label Sizes
+
+The app supports two label sizes, selectable per print run.
+
+### Mini SEL (default)
+
+- Paper: A4 landscape, 39mm × 39mm labels
+- Layout: 7 columns × 5 rows (35 labels per page)
+- Available on: Aisle Labels, Short code Labels, and Specific Labels tabs
+
+### Large SEL
+
+- Paper: A4 portrait, 105mm × 73mm labels
+- Layout: 2 columns × 4 rows (8 labels per page)
+- Available on: Aisle Labels and Specific Labels tabs
+- Select using the **Mini SEL / Large SEL** radio buttons
+- Label content: mixed-size heading (aisle-side+bay-shelf) above a centred barcode
+- **Limitation**: Special aisle values (e.g. `KIOSK`, `FLORAL`) are not supported on large labels; use mini labels for special values. This is intentional to avoid complexity in large labels, in the absence of any actual user requirement.
 
 ## Architecture Overview
 
@@ -356,117 +472,6 @@ Snapshot files are stored under:
 
 `tests/e2e/visual-baselines.spec.ts-snapshots`
 
-## Barcode Format
-
-The barcode payload is always stored and encoded in **compact format (no dashes or spaces)**, regardless of how users input or display the label code.
-
-### Input Format Normalization
-
-Specific Labels accepts compact input only (no spaces/dashes). Parsed valid inputs are encoded/scanned in compact form:
-
-| Input Format           | Barcode Payload | Barcode Output (Encoded/Scanned Value)     | Display (Specific Labels) | Display (Aisle / Short code Labels) |
-| ---------------------- | --------------- | ------------------------------------------ | ------------------------- | ----------------------------------- |
-| Compact numeric aisle  | `01L01A`        | `01L01A` (always compact, no separators)   | `01L01A`                  | `01 L01 A`                          |
-| Compact prefixed aisle | `BR10L01A`      | `BR10L01A` (always compact, no separators) | `BR10L01A`                | `BR10 L01 A`                        |
-| Compact short code     | `BAK01A`        | `BAK01A` (always compact, no separators)   | `BAK01A`                  | `BAK 01 A`                          |
-
-### Display Impact
-
-Display separators are presentational and do not affect barcode payload:
-
-- **Specific Labels** accepts compact input only; secondary display stays compact.
-- **Aisle Labels** and **Short Code Labels** generate codes programmatically; secondary display always uses spaces.
-- Barcode in every case is always `01L01A`-style compact payload.
-
-Named aisle values are validated against the configured explicit allow-list (default: `KIOSK`, `FLORAL`, `SEASONAL`) rather than inferred from generic alphabetic input.
-Configured compact prefixed aisle inputs are validated against the configured aisle-prefix allow-list (default: `BR`, `BL`, `FL`, `FR`, `PD`) and aisle numeric min/max bounds. These default prefixes represent store sections: `BR` = Back Right, `BL` = Back Left, `FL` = Front Left, `FR` = Front Right, `PD` = Produce.
-
-### Why Compact Encoding
-
-Scanner reliability requires consistent, separator-free barcode payloads. The compact format ensures all scans decode to the same canonical form regardless of user input style.
-
-
-## Compact Code Validation Rules
-
-Validation of compact codes follows a two-phase process: **shape recognition** (what kind of code is it?) followed by **token range checks** (are the tokens within bounds?). This section documents the complete rule set.
-
-### Phase 1: Shape Recognition
-
-Input is trimmed and uppercased first. Patterns are matched in order; the first match determines the code kind. Patterns with alternations (like aisle prefixes) are sorted longest-first to prevent shadowing.
-
-| # | Kind | Pattern | Example | Failure |
-|---|---|---|---|---|
-| 0 | — | Reject if code contains `-` or space | `01-L-01A` | `not-compact` |
-| 1 | `special` | Exact match: `FLORAL` \| `KIOSK` | `KIOSK` | — |
-| 2 | `aisle` (prefixed) | `^(BR\|BL\|FL\|FR\|PD)(\d{1,2})(L\|R\|E\|F)(\d{2})([A-Z])$` | `BR7L01A`, `PD12R05C` | `unparseable` |
-| 3 | `aisle` (numeric) | `^(\d{2})(L\|R\|E\|F)(\d{2})([A-Z])$` | `01L01A` | `unparseable` |
-| 4 | `short` | `^(BAK\|FOS\|FNT)(\d{2})([A-Z])$` | `BAK01A` | `unparseable` |
-| 5 | — | No match | `ZZZ` | `unparseable` |
-
-**Note:** Numeric aisle form requires **exactly two** digits (`01L01A`), but prefixed form allows **one or two** (`BR7L01A` or `BR07L01A` both parse).
-
-### Phase 2: Token Validation
-
-Once a shape is recognized, tokens are validated in order (first failure is reported). Range checks apply only to matched shapes.
-
-#### By Token
-
-| Token | Applies to | Rule | Bounds | Source | Failure |
-|---|---|---|---|---|---|
-| aisle number | `aisle` only | integer, no leading zeros | `0–99` | `minAisleValue` / `maxAisleValue` | `invalid-aisle-range` |
-| aisle prefix | `aisle` (non-numeric token) | must be in configured aisle prefixes | `BR`, `BL`, `FL`, `FR`, `PD` (default) | `aislePrefixes` option | `invalid-aisle-prefix` |
-| bay | `aisle`, `short` | integer, leading zeros allowed | `01–99` (note: `00` fails) | `maxBayValue`, min hardcoded 1 | `invalid-bay-range` |
-| shelf | `aisle`, `short` | single uppercase letter, `≤ maxShelfLetter` | `A–Z` (default) | `maxShelfLetter` | `invalid-shelf-range` |
-| — | `special` | no range checks | — | — | — |
-
-#### By Code Kind (Check Order)
-
-| Kind | Checks (in order) | Notes |
-|---|---|---|
-| `special` | (none) | Always valid if it matches the shape |
-| `aisle` | prefix/range → bay → shelf | Prefix checked first if token is non-numeric |
-| `short` | bay → shelf | No prefix validation (already matched) |
-
-### Validation Error Reasons
-
-Typed error codes returned by `validateSpecificLabelCode` in `src/domain/codesDomain.ts`:
-
-| Error Reason | Meaning | Example |
-|---|---|---|
-| `not-compact` | Input contains spaces or dashes | `01-L-01A`, `01 L 01 A` |
-| `unparseable` | No pattern matched the input | `xyz`, `1L01A` (too short) |
-| `invalid-aisle-prefix` | Aisle prefix not in configured allow-list | `XX1L01A` (if only BR/BL configured) |
-| `invalid-aisle-range` | Aisle number outside bounds | `BR100L01A` (if max is 99) |
-| `invalid-bay-range` | Bay number outside bounds or zero | `01L00A`, `01L100A` |
-| `invalid-shelf-range` | Shelf letter beyond configured max or invalid | `01L01Z` (if max is X) |
-
-### Maintenance Note
-
-Validation rules are defined data-driven in `VALIDATION_SPECS` in `src/domain/codesDomain.ts`. To modify:
-
-1. **Add a new check**: Add a `ValidationStep` to the appropriate kind in `VALIDATION_SPECS`.
-2. **Change bounds**: Update constants in `src/config/labelConfig.ts` and rerun tests.
-3. **Change error message**: Update the message in `SPECIFIC_LABEL_REASON_MESSAGES` in `src/config/validationMessages.ts`.
-
-## Label Sizes
-
-The app supports two label sizes, selectable per print run.
-
-### Mini SEL (default)
-
-- Paper: A4 landscape, 39mm × 39mm labels
-- Layout: 7 columns × 5 rows (35 labels per page)
-- Available on: Aisle Labels, Short code Labels, and Specific Labels tabs
-
-### Large SEL
-
-- Paper: A4 portrait, 105mm × 73mm labels
-- Layout: 2 columns × 4 rows (8 labels per page)
-- Available on: Aisle Labels and Specific Labels tabs
-- Select using the **Mini SEL / Large SEL** radio buttons
-- Label content: mixed-size heading (aisle-side+bay-shelf) above a centred barcode
-- **Limitation**: Special aisle values (e.g. `KIOSK`, `FLORAL`) are not supported on large labels; use mini labels for special values. This is intentional to avoid complexity in large labels, in the absence of any actual user requirement.
-
 ## Print and Scan Validation Protocol
 
 Use this protocol whenever barcode sizing, typography, or print styles are changed.
@@ -529,4 +534,3 @@ Treat scan validation as a release gate for barcode-related changes. A change is
 
 - automated tests pass
 - print-and-scan matrix pass is recorded by the validating owner
-

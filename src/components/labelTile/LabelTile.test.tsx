@@ -120,7 +120,7 @@ describe('LabelTile helpers', () => {
 })
 
 describe('LabelTile', () => {
-  it('renders stacked mini rows for aisle label value', () => {
+  it('renders three-row mini layout for aisle label value', () => {
     render(<LabelTile code="01L01A" />)
     const miniTypography = getLabelLayoutStrategy('mini-sel').typography
 
@@ -135,7 +135,7 @@ describe('LabelTile', () => {
     expect(screen.getAllByText('01L01A')).toHaveLength(2)
   })
 
-  it('anchors stacked mini top and bottom rows using explicit style variables', () => {
+  it('anchors three-row mini top and bottom rows using explicit style variables', () => {
     render(<LabelTile code="BAK" />)
 
     const topRow = document.querySelector('[class*="miniAisleTopCode"]')
@@ -179,7 +179,7 @@ describe('LabelTile', () => {
     expect(screen.queryByText('BR1 L01 A', { exact: true })).toBeNull()
   })
 
-  it('Specific label with compact input uses stacked row formatting', () => {
+  it('Specific label with compact input uses three-row formatting', () => {
     render(<LabelTile code="01L01A" />)
 
     expect(screen.getByTestId('label-value')).toHaveTextContent('01L01A')
@@ -200,7 +200,7 @@ describe('LabelTile', () => {
     expect(screen.queryByText(`${SHORT_CODE_PREFIXES[0]} 01 A`, { exact: true })).toBeNull()
   })
 
-  it('Specific named aisle value renders in stacked main row for mini-sel', () => {
+  it('Specific named aisle value renders in three-row main row for mini-sel', () => {
     const { container } = render(<LabelTile code="FLORAL" />)
 
     expect(screen.getAllByText('FLORAL').length).toBeGreaterThan(1)

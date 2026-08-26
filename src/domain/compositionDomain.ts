@@ -218,7 +218,7 @@ const fitMiniThreeRowTypography = (
 
 const miniThreeRowVariant: MiniCompositionVariant = {
   id: 'mini-three-row',
-  displayLabel: 'Stacked ABS',
+  displayLabel: 'Three-row',
   composeLabel: composeMiniThreeRow,
   resolveGeometry: resolveMiniThreeRowGeometry,
   fitTypography: fitMiniThreeRowTypography,
@@ -323,7 +323,7 @@ const fitMiniShelfEmphasisTypography = (
 
 const miniShelfEmphasisVariant: MiniCompositionVariant = {
   id: 'mini-shelf-emphasis',
-  displayLabel: 'Big Shelf',
+  displayLabel: 'Shelf emphasis',
   composeLabel: composeMiniShelfEmphasis,
   resolveGeometry: resolveMiniShelfEmphasisGeometry,
   fitTypography: fitMiniShelfEmphasisTypography,

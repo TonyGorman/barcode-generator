@@ -113,7 +113,7 @@ describe('compositionDomain geometry', () => {
     expect(result).toBeLessThanOrEqual(mini.typography.primaryTextMaxSizeMm)
   })
 
-  it('computes stacked mini geometry offsets', () => {
+  it('computes three-row mini geometry offsets', () => {
     const mini = createMiniStrategy()
     const geometry = getMiniAisleThreeRowGeometry(mini)
 
