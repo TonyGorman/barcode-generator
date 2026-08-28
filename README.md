@@ -193,10 +193,17 @@ flowchart TD
   DI --> GD[Domain: generationDomain]
   DI --> CMP[Domain: compositionDomain]
 
+  MVC --> SF
+  MVC --> AF
+  MVC --> BF
+
   SF --> LG[LabelGenerator]
   AF --> LG
   BF --> LG
 
+  LG --> LS[Config: getLabelLayoutStrategy]
+  LS --> LLX[LabelLayoutContext Provider]
+  LS --> CSSV[buildLayoutCssVars: mm custom properties]
   LG --> UP[Hook: usePaginatedLabels]
   LG --> UPP[Hook: usePrintPortal]
   LG --> PL[Preview Path]
@@ -204,23 +211,37 @@ flowchart TD
 
   PL --> LT[LabelTile]
   PR --> LT
+  LLX --> LT
 
   LT --> MLT[MiniLabelTile]
   LT --> LLT[LargeLabelTile]
+  LLX --> MLT
+  LLX --> LLT
 
   MVC --> MLT
-  MLT --> TLC[toLabelCode: single parse per code]
+  CD --> TLC[toLabelCode: single parse per code]
+  MLT --> TLC
+  LLT --> TLC
   TLC --> CMP
   MLT --> CMP
   CMP --> M3[buildMiniThreeRowTile]
   CMP --> MS[buildMiniShelfEmphasisTile]
 
-  LLT --> TLC
   LLT --> LLC[LargeLabelTileContent]
   LLT --> BBC[BarcodeBlock]
-  LLC --> DH[Display helper: getLargeDisplayParts]
+  CD --> DH[getLargeDisplayParts]
+  LLC --> DH
   MLT --> BBC
 ```
+
+Two paths in that diagram are easy to miss:
+
+- **Geometry reaches tiles via context, not the domain.** `LabelGenerator` resolves the
+  layout strategy for the active mode, provides it through `LabelLayoutContext`, and emits
+  the mm values as CSS custom properties. Every tile reads its millimetre spec from that
+  context.
+- **Mini variant reaches the forms too, not just the tile.** All three forms consume
+  `MiniVariantContext` so they can clear generated output when the variant changes.
 
 ## Domain Model
 
