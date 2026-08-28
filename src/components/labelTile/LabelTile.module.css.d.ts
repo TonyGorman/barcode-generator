@@ -11,9 +11,9 @@ export type Styles = {
   largeSelHeadingPrefix: string
   largeSelHeadingSuffix: string
   largeSelLabelTextArea: string
-  miniAisleBottomCode: string
-  miniAisleTopCode: string
   miniShelfFullValue: string
+  miniThreeRowBottomCode: string
+  miniThreeRowTopCode: string
   primaryCode: string
 }
 

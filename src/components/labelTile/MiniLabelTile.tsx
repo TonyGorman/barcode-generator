@@ -3,46 +3,25 @@ import styles from './LabelTile.module.css'
 import BarcodeBlock from './BarcodeBlock'
 import { LabelLayoutContext } from '../print/LabelLayoutContext'
 import { MiniVariantContext } from './MiniVariantContext'
-import { getMiniCompositionVariant } from '../../domain'
+import { buildMiniTile, toLabelCode } from '../../domain'
 import { measurePrimaryTextWidthMm } from './miniPrimaryTextMeasurement'
-import { type LabelLayoutStrategy } from '../../config/labelLayoutStrategies'
-import { type MiniCompositionVariantId } from '../../domain'
+import { type MiniShelfEmphasisTile, type MiniThreeRowTile } from '../../domain'
 
 // --- private sub-components ---
 
-const MiniSelPrimaryText: React.FC<{
-  primary: string
-  primaryFontSizeMm: number
-  primaryFontWeight?: number
-  primaryCenterFromContentTopMm: number
-}> = ({ primary, primaryFontSizeMm, primaryFontWeight, primaryCenterFromContentTopMm }) => (
+const MiniPrimaryText: React.FC<{
+  text: string
+  textSizeMm: number
+  fontWeight: number
+  centerFromContentTopMm: number
+}> = ({ text, textSizeMm, fontWeight, centerFromContentTopMm }) => (
   <div
     className={styles.primaryCode}
     style={
       {
-        '--current-mini-primary-text-size-mm': `${primaryFontSizeMm}mm`,
-        '--current-mini-primary-font-weight': String(primaryFontWeight ?? 800),
-        '--current-mini-primary-center-from-content-top-mm': `${primaryCenterFromContentTopMm}mm`,
-      } as React.CSSProperties
-    }
-  >
-    {primary}
-  </div>
-)
-
-const MiniSecondaryLine: React.FC<{
-  text: string
-  centerFromContentTopMm: number
-  textSizeMm: number
-  fontWeight?: number
-}> = ({ text, centerFromContentTopMm, textSizeMm, fontWeight }) => (
-  <div
-    className={styles.miniShelfFullValue}
-    style={
-      {
-        '--current-mini-secondary-center-from-content-top-mm': `${centerFromContentTopMm}mm`,
-        '--current-mini-secondary-text-size-mm': `${textSizeMm}mm`,
-        '--current-mini-secondary-font-weight': String(fontWeight ?? 700),
+        '--current-mini-primary-text-size-mm': `${textSizeMm}mm`,
+        '--current-mini-primary-font-weight': String(fontWeight),
+        '--current-mini-primary-center-from-content-top-mm': `${centerFromContentTopMm}mm`,
       } as React.CSSProperties
     }
   >
@@ -50,104 +29,110 @@ const MiniSecondaryLine: React.FC<{
   </div>
 )
 
-// --- composition ---
+const MiniFullCodeLine: React.FC<{
+  text: string
+  centerFromContentTopMm: number
+  textSizeMm: number
+  fontWeight: number
+}> = ({ text, centerFromContentTopMm, textSizeMm, fontWeight }) => (
+  <div
+    className={styles.miniShelfFullValue}
+    style={
+      {
+        '--current-mini-full-code-center-from-content-top-mm': `${centerFromContentTopMm}mm`,
+        '--current-mini-full-code-text-size-mm': `${textSizeMm}mm`,
+        '--current-mini-full-code-font-weight': String(fontWeight),
+      } as React.CSSProperties
+    }
+  >
+    {text}
+  </div>
+)
 
-const composeMiniTile = (
-  code: string,
-  miniVariantId: MiniCompositionVariantId,
-  layoutStrategy: LabelLayoutStrategy,
-) => {
-  const selectedMiniVariant = getMiniCompositionVariant(miniVariantId)
-  const initialComposedMiniLabel = selectedMiniVariant.composeLabel(code)
-  // If the variant falls back (e.g. shelf-emphasis blocked for special codes), re-compose with the resolved variant
-  const effectiveMiniVariant =
-    initialComposedMiniLabel.variantId === selectedMiniVariant.id
-      ? selectedMiniVariant
-      : getMiniCompositionVariant(initialComposedMiniLabel.variantId)
-  const composedMiniLabel =
-    effectiveMiniVariant === selectedMiniVariant ? initialComposedMiniLabel : effectiveMiniVariant.composeLabel(code)
-  const miniGeometry = effectiveMiniVariant.resolveGeometry(layoutStrategy)
-  const fittedMiniTypography = effectiveMiniVariant.fitTypography(
-    composedMiniLabel,
-    layoutStrategy,
-    miniGeometry,
-    measurePrimaryTextWidthMm,
-  )
+const MiniAuxLine: React.FC<{
+  className: string
+  centerVariableName: string
+  text: string
+  centerFromContentTopMm: number
+  textSizeMm: number
+}> = ({ className, centerVariableName, text, centerFromContentTopMm, textSizeMm }) => (
+  <div
+    className={className}
+    style={
+      {
+        [centerVariableName]: `${centerFromContentTopMm}mm`,
+        '--current-mini-three-row-aux-text-size-mm': `${textSizeMm}mm`,
+      } as React.CSSProperties
+    }
+  >
+    {text}
+  </div>
+)
 
-  return {
-    composedMiniLabel,
-    miniGeometry,
-    fittedMiniTypography,
-    primaryFontSizeMm: Math.min(fittedMiniTypography.primaryTextSizeMm, miniGeometry.primaryMaxTextSizeMm),
-    primaryCenterFromContentTopMm: miniGeometry.primaryCenterFromContentTopMm,
-    labelValue: composedMiniLabel.encodedBarcodeValue,
-    isThreeRowMini: composedMiniLabel.variantId === 'mini-three-row',
-  }
-}
+const MiniThreeRowContent: React.FC<{ tile: MiniThreeRowTile }> = ({ tile }) => (
+  <>
+    <MiniPrimaryText
+      text={tile.mainLineText}
+      textSizeMm={tile.mainTextSizeMm}
+      fontWeight={tile.mainFontWeight}
+      centerFromContentTopMm={tile.mainCenterFromContentTopMm}
+    />
+    <MiniAuxLine
+      className={styles.miniThreeRowTopCode}
+      centerVariableName="--current-mini-three-row-top-center-from-content-top-mm"
+      text={tile.topLineText}
+      centerFromContentTopMm={tile.topCenterFromContentTopMm}
+      textSizeMm={tile.auxTextSizeMm}
+    />
+    <MiniAuxLine
+      className={styles.miniThreeRowBottomCode}
+      centerVariableName="--current-mini-three-row-bottom-center-from-content-top-mm"
+      text={tile.bottomLineText}
+      centerFromContentTopMm={tile.bottomCenterFromContentTopMm}
+      textSizeMm={tile.auxTextSizeMm}
+    />
+  </>
+)
+
+const MiniShelfEmphasisContent: React.FC<{ tile: MiniShelfEmphasisTile }> = ({ tile }) => (
+  <>
+    <MiniPrimaryText
+      text={tile.shelfLineText}
+      textSizeMm={tile.shelfTextSizeMm}
+      fontWeight={tile.shelfFontWeight}
+      centerFromContentTopMm={tile.shelfCenterFromContentTopMm}
+    />
+    <MiniFullCodeLine
+      text={tile.fullCodeLineText}
+      centerFromContentTopMm={tile.fullCodeCenterFromContentTopMm}
+      textSizeMm={tile.fullCodeTextSizeMm}
+      fontWeight={tile.fullCodeFontWeight}
+    />
+  </>
+)
 
 // --- component ---
 
 const MiniLabelTile: React.FC<{ code: string }> = ({ code }) => {
   const layoutStrategy = React.useContext(LabelLayoutContext)
   const miniVariantId = React.useContext(MiniVariantContext)
-  const {
-    composedMiniLabel,
-    miniGeometry,
-    fittedMiniTypography,
-    primaryFontSizeMm,
-    primaryCenterFromContentTopMm,
-    labelValue,
-    isThreeRowMini,
-  } = React.useMemo(() => composeMiniTile(code, miniVariantId, layoutStrategy), [code, miniVariantId, layoutStrategy])
+  const tile = React.useMemo(
+    () => buildMiniTile(toLabelCode(code), miniVariantId, layoutStrategy, measurePrimaryTextWidthMm),
+    [code, miniVariantId, layoutStrategy],
+  )
 
   return (
     <div className={styles.labelBox}>
       <div className={styles.labelText}>
-        <MiniSelPrimaryText
-          primary={composedMiniLabel.primaryLineText}
-          primaryFontSizeMm={primaryFontSizeMm}
-          primaryFontWeight={fittedMiniTypography.primaryFontWeight}
-          primaryCenterFromContentTopMm={primaryCenterFromContentTopMm}
-        />
-        {isThreeRowMini ? (
-          <>
-            <div
-              className={styles.miniAisleTopCode}
-              style={
-                {
-                  '--current-mini-aisle-top-center-from-content-top-mm': `${miniGeometry.secondaryCenterFromContentTopMm}mm`,
-                  '--current-mini-aisle-aux-text-size-mm': `${fittedMiniTypography.secondaryTextSizeMm}mm`,
-                } as React.CSSProperties
-              }
-            >
-              {composedMiniLabel.secondaryLineText}
-            </div>
-            <div
-              className={styles.miniAisleBottomCode}
-              style={
-                {
-                  '--current-mini-aisle-bottom-center-from-content-top-mm': `${miniGeometry.tertiaryCenterFromContentTopMm ?? miniGeometry.secondaryCenterFromContentTopMm}mm`,
-                  '--current-mini-aisle-aux-text-size-mm': `${fittedMiniTypography.tertiaryTextSizeMm ?? fittedMiniTypography.secondaryTextSizeMm}mm`,
-                } as React.CSSProperties
-              }
-            >
-              {composedMiniLabel.tertiaryLineText ?? ''}
-            </div>
-          </>
+        {tile.variantId === 'mini-three-row' ? (
+          <MiniThreeRowContent tile={tile} />
         ) : (
-          <MiniSecondaryLine
-            text={composedMiniLabel.secondaryLineText}
-            centerFromContentTopMm={
-              fittedMiniTypography.secondaryCenterFromContentTopMm ?? miniGeometry.secondaryCenterFromContentTopMm
-            }
-            textSizeMm={fittedMiniTypography.secondaryTextSizeMm}
-            fontWeight={fittedMiniTypography.secondaryFontWeight}
-          />
+          <MiniShelfEmphasisContent tile={tile} />
         )}
       </div>
       <BarcodeBlock
-        labelValue={labelValue}
-        isLargeVariant={false}
+        labelValue={tile.encodedBarcodeValue}
+        isLargeTile={false}
         barcodeModuleThicknessMm={layoutStrategy.typography.barcodeModuleThicknessMm}
         barcodeHeightMm={layoutStrategy.typography.barcodeHeightMm}
       />

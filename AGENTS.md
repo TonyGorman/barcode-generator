@@ -32,7 +32,7 @@ Protect physical label accuracy and scan reliability before making UI/UX changes
 ### Large Label Support (SpecificLabelForm)
 
 - Aisle and shortcode values render correctly with the three-part display (prefix / main / suffix).
-- Special aisle values (`KIOSK`, `FLORAL`, `SEASONAL`) are **blocked** on large-sel mode with `VALIDATION_MESSAGES.specificLargeSelSpecialCode`.
+- Special aisle values (`FLORAL`, `KIOSK`) are **blocked** on large-sel mode with `VALIDATION_MESSAGES.specificLargeSelSpecialCode`.
 - Reason: `getLargeSelDisplayParts()` returns `null` for special codes, resulting in empty heading text on a 105mm label.
 - Validation blocks generation immediately; mode switches clear stale output to prevent visual bypass.
   This blocking is intentional to avoid complexity in large labels, in the absence of any actual user requirement.
@@ -40,7 +40,77 @@ Protect physical label accuracy and scan reliability before making UI/UX changes
 ## Rendering Path Awareness
 
 - Screen preview and print portal use the same `LabelTile` render path.
-- `LabelTile` dispatches to layout-specific rendering based on `layoutStrategy.renderVariant` (`'small'` or `'large'`), not `layoutStrategy.mode`.
+- `LabelTile` dispatches to layout-specific rendering based on `layoutStrategy.tileSize` (`'small'` or `'large'`), not `layoutStrategy.mode`.
+
+## Domain Pipeline Map
+
+Read this before changing domain logic. It is the single description of how a form entry becomes a printed label.
+
+```mermaid
+flowchart TD
+    A["AisleLabelForm.tsx<br/>formInput: AisleLabelInput"] --> B{"validateAisleLabelInput<br/>(generationDomain)"}
+    B -- "LabelValidationErrorCode" --> B2["getValidationErrorMessage<br/>(config/validationMessages)"] --> B3["error text in FormFeedback"]
+    B -- "null" --> C["generateAisleLabels<br/>(services/labelGenerationService)"]
+    C --> D["generateAisleLabelCodes<br/>(generationDomain)"]
+    D --> E["string[] compact codes<br/>React state: generatedLabels"]
+    E --> F["LabelGenerator.tsx<br/>getLabelLayoutStrategy(mode)"]
+    F --> G["usePaginatedLabels<br/>-> preview grid + print portal pages"]
+    G --> H["LabelTile.tsx<br/>switch on layoutStrategy.tileSize"]
+    H -- "small" --> I["MiniLabelTile.tsx"]
+    H -- "large" --> J["LargeLabelTile.tsx"]
+    I --> K["buildMiniTile<br/>(compositionDomain) -> MiniTile"]
+    K --> K2["resolveEffectiveMiniVariantId"]
+    K2 --> K3["buildMiniThreeRowTile<br/>or buildMiniShelfEmphasisTile"]
+    K3 --> N["fitLineByWidth<br/>(compositionDomain)"]
+    N --> O["measurePrimaryTextWidthMm<br/>(canvas, UI layer)"]
+    J --> P["getLargeSelDisplayParts<br/>-> LargeLabelDisplayParts"]
+    K --> Q["BarcodeBlock.tsx<br/>CompactLabelCode payload"]
+    P --> Q
+```
+
+Data shape at each hop:
+
+| Stage               | Type                       | Example                                                            |
+| ------------------- | -------------------------- | ------------------------------------------------------------------ |
+| Form state          | `AisleLabelInput`          | `{ aisleStart: 1, aisleEnd: 2, sideRanges, shelfStart, shelfEnd }` |
+| Generated batch     | `string[]`                 | `['01L01A', '01L02A']`                                             |
+| Parsed code         | `ParsedLabelCode`          | `{ kind: 'aisle', parts: { aisle, side, bay, shelf } }`            |
+| Mini display parts  | `MiniThreeRowDisplayParts` | `{ top: '01', main: 'L01', bottom: 'A' }` (**vertical**)           |
+| Large display parts | `LargeLabelDisplayParts`   | `{ prefix: '01', main: 'L01', suffix: 'A' }` (**horizontal**)      |
+| Mini tile           | `MiniTile`                 | discriminated: `MiniThreeRowTile` \| `MiniShelfEmphasisTile`       |
+| Barcode payload     | `CompactLabelCode`         | `'01L01A'` (branded, separator-free)                               |
+
+Two behaviours in this pipeline are not visible from the call sites:
+
+- **Text measurement is inverted.** `fitLineByWidth` lives in the domain but calls back into the UI (`measurePrimaryTextWidthMm`, canvas-based) to measure glyph width, which in turn falls back to the domain's `estimatePrimaryTextWidthMm` when no canvas exists (SSR/tests). The domain owns the fitting algorithm; the UI owns only the measurement.
+- **Shelf-emphasis cannot render special codes.** `resolveEffectiveMiniVariantId` downgrades `mini-shelf-emphasis` to `mini-three-row` for `FLORAL`/`KIOSK` before composition, because those codes have no shelf token to enlarge. The downgrade is silent by design: there is no error and no user-visible signal.
+
+`buildMiniTile` returns a **discriminated union**, not a flattened shape. Each variant owns its own field names and every field is required:
+
+- `MiniThreeRowTile` — `topLineText` / `mainLineText` / `bottomLineText` plus matching mm centres, `auxTextSizeMm`, and font weights.
+- `MiniShelfEmphasisTile` — `shelfLineText` / `fullCodeLineText` plus their mm centres, sizes, and font weights.
+
+`MiniLabelTile.tsx` switches once on `tile.variantId`; the compiler guarantees each branch's fields, so no `??` fallbacks are needed. Do not reintroduce optional fields to "share" a type between the two variants.
+
+## Domain Glossary
+
+One term, one meaning, one owning module. Prefer these words over synonyms.
+
+| Term                | Meaning                                                                                                                                                       | Owned by                              |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| code                | Scannable label value, e.g. `01L01A`                                                                                                                          | `src/domain/codesDomain.ts`           |
+| compact             | Separator-free barcode payload (`getEncodedLabelCode`)                                                                                                        | `codesDomain.ts`                      |
+| spaced              | Human-readable display form `01 L01 A` (`getSpacedLabelCode`)                                                                                                 | `codesDomain.ts`                      |
+| parts               | Parsed code tokens (`AisleCodeParts`, `ShortCodeParts`, `SpecialCodeParts`)                                                                                   | `codesDomain.ts`                      |
+| display parts       | Parts reshaped for rendering. Mini is **vertical** (`top`/`main`/`bottom`); large is **horizontal** (`prefix`/`main`/`suffix`). Different axes, not synonyms. | `codesDomain.ts`                      |
+| composition variant | Which mini text arrangement is used (`mini-three-row`, `mini-shelf-emphasis`)                                                                                 | `src/domain/compositionDomain.ts`     |
+| layout strategy     | Discriminated union of the full mm spec per paper: `MiniLabelLayoutStrategy` \| `LargeLabelLayoutStrategy`                                                    | `src/config/labelLayoutStrategies.ts` |
+| tileSize            | Tile size `'small' \| 'large'` on the layout strategy. **Not** a composition variant.                                                                         | `labelLayoutStrategies.ts`            |
+| mode                | `LabelPrintMode` (`'mini-sel' \| 'large-sel'`), the user-facing paper choice                                                                                  | `labelLayoutStrategies.ts`            |
+| geometry            | Positions and maximum text sizes in mm, **before** fitting                                                                                                    | `compositionDomain.ts`                |
+| typography fit      | Resolved text sizes and weights in mm, **after** fitting                                                                                                      | `compositionDomain.ts`                |
+| bounds / limits     | Validation configuration (`minAisleValue`, `maxBayValue`)                                                                                                     | `src/config/labelConfig.ts`           |
+| range               | A user-supplied start-to-end span                                                                                                                             | `src/domain/generationDomain.ts`      |
 
 ## Label Safety Rules
 
@@ -56,13 +126,13 @@ Protect physical label accuracy and scan reliability before making UI/UX changes
 - Shelf tokens are **alphabetical only** (`A`-`Z`) for aisle and short label codes.
 - **Barcode payload is always compact**, identical to the input after uppercasing.
 - Display text uses font size and weight for visual treatment only — this is a rendering concern, not an input format.
-- Encoding logic lives in `src/domain/labelCodeDomain.ts`; `getEncodedLabelCode()` parses compact input and emits a `CompactLabelCode` branded payload (a `string` subtype that prevents accidental use of display-formatted codes as barcode values).
+- Encoding logic lives in `src/domain/codesDomain.ts`; `getEncodedLabelCode()` parses compact input and emits a `CompactLabelCode` branded payload (a `string` subtype that prevents accidental use of display-formatted codes as barcode values).
 - Scanner reliability depends on compact, separator-free payloads.
 
 ## Validation Gates
 
 - Fast local validation gate: `npm run validate:ci`
-- `validate:ci` runs style typing, style audit, `lint`, `lint:naming`, `lint:complexity`, `test:run`, and `build:bundle`
+- `validate:ci` runs style typing, style audit, `prettier:check`, `lint`, `lint:naming`, `lint:complexity`, `test:run`, and `build:bundle`
 - GitHub Pages deploy workflow quality gate: `validate:ci` checks plus `npm run audit:prod`
 - Full release validation gate: `npm run validate:release`
 - `validate:release` runs `validate:ci`, `npm run audit:prod`, `npm run test:a11y`, and `npm run test:e2e`
@@ -131,8 +201,8 @@ After feature implementation passes all validation gates (`npm run validate:ci` 
 
 ### Duplication Detection**
 
-- Identical constants, state patterns, or JSX blocks appearing in multiple files (e.g., `printModeOptions` in AisleLabelForm and SpecificLabelForm).
-- Extract to reusable hooks (e.g., `useLabelPrintMode`), components, or config constants.
+- Identical constants, state patterns, or JSX blocks appearing in multiple files (for example the `PRINT_MODE_OPTIONS` constant and `labelPrintMode` state duplicated across `AisleLabelForm.tsx` and `SpecificLabelForm.tsx`).
+- Extract to reusable hooks, components, or config constants.
 - Repeated state initialization patterns (e.g., `useState`, `useCallback`) that could be encapsulated in a custom hook.
 
 ### Pattern Recognition**
@@ -156,7 +226,7 @@ After feature implementation passes all validation gates (`npm run validate:ci` 
 ## Validation Architecture: Domain Error Code Boundary
 
 - Domain validation functions never return message strings directly. They return a typed value (a discriminated union `{ code: ... }` for aisle/short, or a `reason` string literal for specific labels), and `src/config/validationMessages.ts` owns mapping that typed value to display text (`getValidationErrorMessage`, `getSpecificInvalidLabelMessage`). This keeps domain logic pure/testable and centralizes UI copy (and future i18n) in one place.
-- `LabelValidationErrorCode` (aisle/short) and `SpecificLabelValidationErrorReason` (specific labels) are both **owned by `validationMessages.ts`**, not by the domain files that use them — `src/domain/labelGeneration.ts` and `src/domain/labelCodeValidator.ts` import the type back from config. This is intentionally symmetric across all three label forms.
+- `LabelValidationErrorCode` (aisle/short) and `SpecificLabelValidationErrorReason` (specific labels) are both **owned by `validationMessages.ts`**, not by the domain files that use them — `src/domain/generationDomain.ts` and `src/domain/codesDomain.ts` import the type back from config. This is intentionally symmetric across all three label forms.
 - The specific-label error message names the actual offending code (e.g. `Label 'F0S01A' is not a recognized label format...`) rather than a generic "invalid input" message, so a typo in a multi-code batch is identifiable. `src/services/specificLabelValidationService.ts` finds the first invalid `{code, reason}` pair and passes both to `getSpecificInvalidLabelMessage`.
 - Do not add a _new_ parallel error-code type when extending validation elsewhere — reuse this existing boundary (typed value from domain, text mapping in `validationMessages.ts`) rather than introducing message strings composed ad hoc in components/hooks.
 
@@ -189,31 +259,31 @@ After feature implementation passes all validation gates (`npm run validate:ci` 
 - **Rationale**: When `currentPage` is in the deps, the effect runs on every page click (inefficient and redundant). It should only run when data length changes and `totalPages` shrinks, requiring a clamp. Functional setState avoids the need to include `currentPage` as a dependency.
 - **History**: This pattern was corrected to fix redundant effect runs caused by previous iterations that included both `currentPage` and `totalPages` in deps.
 
-### Domain Barrel: `labelCodeDomain.ts`
+### Domain Modules (`src/domain/`)
 
-- **Purpose**: Public API barrel aggregating exports from `labelCodeParser.ts`, `labelCodeValidator.ts`, `labelCodeDisplay.ts`, and composition variant models.
-- **Pattern**: Centralizes domain imports; allows components to `import { parseLabelCode, getMiniThreeRowDisplayParts, ... } from '../domain/labelCodeDomain'`.
-- **Non-refactorable**: Renaming to `index.ts` requires updating 5 import statements. Kept as-is due to low churn benefit.
-- **Consistency note**: `LabelTile.tsx` also re-exports a subset for convenience (`normalizeLabelCode`, `getEncodedLabelCode`, `getLargeSelDisplayParts`). This is acceptable to avoid bloating test imports in `LabelTile.test.tsx`.
+- The domain is three modules plus a barrel: `codesDomain.ts` (parsing, display parts, per-code validation), `compositionDomain.ts` (mini composition variants, geometry, typography fitting), `generationDomain.ts` (batch generation, range expansion, form input validation).
+- `index.ts` is a full `export *` barrel. Consumers import from `'../../domain'`, not from individual modules.
+- `LabelTile.tsx` re-exports `getMiniPrimaryFontSizeMm` from `miniPrimaryTextMeasurement.ts` to avoid bloating test imports in `LabelTile.test.tsx`. This is the only such re-export.
 
 ### LabelTile Responsibility Split
 
-- Keep `LabelTile.tsx` as an orchestrator only (layout strategy selection + composing child render blocks).
-- Mini text/layout rendering lives in `MiniLabelTileContent.tsx`.
-- Large heading rendering lives in `LargeLabelTileContent.tsx`.
+- Keep `LabelTile.tsx` as an orchestrator only: it reads `LabelLayoutContext` and dispatches on `tileSize`.
+- Mini text/layout rendering lives in `MiniLabelTile.tsx`, which calls `buildMiniTile` once and switches on `tile.variantId` to render `MiniThreeRowContent` or `MiniShelfEmphasisContent`.
+- Large heading rendering lives in `LargeLabelTile.tsx` and `LargeLabelTileContent.tsx`.
 - Barcode block rendering lives in `BarcodeBlock.tsx`.
-- Composition and typography fitting logic stays in `useMiniLabelTileComposition` and measurement helpers (`miniPrimaryTextMeasurement.ts`), not inline in `LabelTile.tsx`.
+- Composition, geometry, and typography fitting stay in `compositionDomain.ts` and the measurement helper `miniPrimaryTextMeasurement.ts`, not inline in tile components.
 
 ### Label Print Mode Selector Presence
 
-- `BackLabelForm.tsx` hardcodes `layoutMode="mini-sel"` on its `<LabelGenerator>` call and has no size selector, unlike `AisleLabelForm`/`SpecificLabelForm` (which use `useLabelPrintMode`). This is intentional, not an oversight — do not flag as a bug in reviews.
+- `BackLabelForm.tsx` hardcodes `layoutMode="mini-sel"` on its `<LabelGenerator>` call and has no size selector, unlike `AisleLabelForm`/`SpecificLabelForm` (which hold their own `labelPrintMode` state and render a `PRINT_MODE_OPTIONS` radio group). This is intentional, not an oversight — do not flag as a bug in reviews.
 - `SpecificLabelForm` may similarly become hardcoded to a single layout mode (losing its size selector) once it has been user-reviewed/finalized. If seen without a size selector in the future, treat as likely intentional rather than a defect — confirm before "fixing" it.
 
 ### Hooks Location (`src/hooks/`)
 
-- Custom hooks (`useAisleLabelForm`, `useLabelGenerationFeedback`, `useLabelPrintMode`, `usePaginatedLabels`, `usePrintPortal`, `useResetOnVariantChange`, `useShortLabelForm`, `useSpecificLabelForm`) live in `src/hooks/`, a sibling of `src/config`, `src/domain`, and `src/models` (same depth as `src/components`).
-- Non-hook app orchestration helpers (`formStateService.ts`, `labelBatchLimitService.ts`, `labelGenerationService.ts`, `specificLabelValidationService.ts`) intentionally live in `src/services/`. Geometry/fitting helpers (`labelLayoutGeometry.ts`) live in `src/domain/` as pure domain logic.
-- New hooks importing `../config/*`, `../domain/*`, or `../models/*` need no path adjustment from `src/hooks/`; only imports reaching back into `src/components/` need the `../components/*` prefix.
+- Custom hooks (`useFormValidationUi`, `usePaginatedLabels`, `usePrintPortal`) live in `src/hooks/`, a sibling of `src/config` and `src/domain` (same depth as `src/components`).
+- Form-local state and print-mode state are held directly in the form components (`AisleLabelForm.tsx`, `BackLabelForm.tsx`, `SpecificLabelForm.tsx`) with `React.useState`/`useCallback`, not extracted into per-form hooks.
+- Non-hook app orchestration helpers (`labelGenerationService.ts`, `specificLabelValidationService.ts`, `miniVariantPreferenceStore.ts`) live in `src/services/`. Form-local accessibility and field helpers (`aisleFormAccessibilityService.ts`, `backFormAccessibilityService.ts`, `specificFormAccessibilityService.ts`, `formFieldValidation.ts`, `formHelpers.ts`) live alongside the forms in `src/components/forms/`.
+- New hooks importing `../config/*` or `../domain/*` need no path adjustment from `src/hooks/`; only imports reaching back into `src/components/` need the `../components/*` prefix.
 - Coverage config (`vite.config.mts` `test.coverage.include`) must include `src/hooks/**/*.ts` and `src/hooks/**/*.tsx`, or moved/added hooks silently drop out of coverage.
 
 ### Naming Convention: Application Services

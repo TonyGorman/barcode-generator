@@ -2,14 +2,14 @@ import { describe, expect, it } from 'vitest'
 import {
   estimatePrimaryTextWidthMm,
   fitMiniPrimaryFontSizeMm,
-  getMiniAisleThreeRowGeometry,
+  getMiniThreeRowGeometry,
   getMiniBarcodeTopFromTileTopMm,
 } from './compositionDomain'
-import { LabelLayoutStrategy } from '../config/labelLayoutStrategies'
+import { LargeLabelLayoutStrategy, MiniLabelLayoutStrategy } from '../config/labelLayoutStrategies'
 
-const createMiniStrategy = (): LabelLayoutStrategy => ({
+const createMiniStrategy = (): MiniLabelLayoutStrategy => ({
   mode: 'mini-sel',
-  renderVariant: 'small',
+  tileSize: 'small',
   displayName: 'Mini',
   page: {
     sheetWidthMm: 297,
@@ -25,23 +25,15 @@ const createMiniStrategy = (): LabelLayoutStrategy => ({
     rows: 5,
   },
   typography: {
-    primaryTextSizeMm: 9,
     primaryTextMinSizeMm: 4,
     primaryTextMaxSizeMm: 9,
     primaryAutoFitEnabled: true,
-    secondaryTextSizeMm: 3,
     primaryLetterSpacingMm: 0.2,
-    primaryCenterFromTileTopMm: 12,
-    secondaryBaselineFromTileTopMm: 20,
-    secondaryDomTopOffsetMm: 0.5,
     barcodeModuleThicknessMm: 0.35,
     barcodeHeightMm: 10,
     tilePaddingHorizontalMm: 1,
     tilePaddingTopMm: 1,
     tilePaddingBottomMm: 1,
-    largePrefixTextSizeMm: 8,
-    largeMainTextSizeMm: 26,
-    largeSuffixTextSizeMm: 8,
   },
   barcodeGeometry: {
     widthMm: 26,
@@ -49,6 +41,28 @@ const createMiniStrategy = (): LabelLayoutStrategy => ({
     marginBottomMm: 2,
   },
 })
+
+const createLargeStrategy = (): LargeLabelLayoutStrategy => {
+  const mini = createMiniStrategy()
+
+  return {
+    ...mini,
+    mode: 'large-sel',
+    tileSize: 'large',
+    displayName: 'Large',
+    typography: {
+      primaryTextMaxSizeMm: mini.typography.primaryTextMaxSizeMm,
+      primaryLetterSpacingMm: mini.typography.primaryLetterSpacingMm,
+      barcodeModuleThicknessMm: mini.typography.barcodeModuleThicknessMm,
+      barcodeHeightMm: mini.typography.barcodeHeightMm,
+      tilePaddingHorizontalMm: mini.typography.tilePaddingHorizontalMm,
+      tilePaddingTopMm: mini.typography.tilePaddingTopMm,
+      tilePaddingBottomMm: mini.typography.tilePaddingBottomMm,
+      largePrefixTextSizeMm: 8,
+      largeMainTextSizeMm: 26,
+    },
+  }
+}
 
 describe('compositionDomain geometry', () => {
   it('estimates primary text width and returns 0 for empty text', () => {
@@ -60,25 +74,19 @@ describe('compositionDomain geometry', () => {
 
   it('returns max font size when mode is not mini-sel or auto-fit is disabled', () => {
     const mini = createMiniStrategy()
-    const largeMode = { ...mini, mode: 'large-sel' as const, renderVariant: 'large' as const }
-    expect(fitMiniPrimaryFontSizeMm('LONGTEXT', largeMode)).toBe(mini.typography.primaryTextMaxSizeMm)
+    const largeMode = createLargeStrategy()
+    expect(fitMiniPrimaryFontSizeMm('LONGTEXT', largeMode)).toBe(largeMode.typography.primaryTextMaxSizeMm)
 
-    const noAutoFit = {
+    const noAutoFit: MiniLabelLayoutStrategy = {
       ...mini,
       typography: { ...mini.typography, primaryAutoFitEnabled: false },
     }
     expect(fitMiniPrimaryFontSizeMm('LONGTEXT', noAutoFit)).toBe(mini.typography.primaryTextMaxSizeMm)
   })
 
-  it('returns max size when renderVariant is large regardless of primaryAutoFitEnabled', () => {
-    const mini = createMiniStrategy()
-    const largeHeading = {
-      ...mini,
-      mode: 'large-sel' as const,
-      renderVariant: 'large' as const,
-      typography: { ...mini.typography, primaryAutoFitEnabled: true },
-    }
-    expect(fitMiniPrimaryFontSizeMm('LONGTEXT', largeHeading)).toBe(mini.typography.primaryTextMaxSizeMm)
+  it('returns max size when tileSize is large regardless of primaryAutoFitEnabled', () => {
+    const largeHeading = createLargeStrategy()
+    expect(fitMiniPrimaryFontSizeMm('LONGTEXT', largeHeading)).toBe(largeHeading.typography.primaryTextMaxSizeMm)
   })
 
   it('returns max for empty primary text and min when available width is non-positive', () => {
@@ -115,7 +123,7 @@ describe('compositionDomain geometry', () => {
 
   it('computes three-row mini geometry offsets', () => {
     const mini = createMiniStrategy()
-    const geometry = getMiniAisleThreeRowGeometry(mini)
+    const geometry = getMiniThreeRowGeometry(mini)
 
     expect(geometry.topCenterFromContentTopMm).toBeGreaterThan(0)
     expect(geometry.mainCenterFromContentTopMm).toBeGreaterThan(geometry.topCenterFromContentTopMm)

@@ -24,8 +24,8 @@ describe('LabelTile shelf-emphasis selection', () => {
     expect(screen.queryByText('L01', { exact: true })).toBeNull()
     expect(screen.getByTestId('label-value')).toHaveTextContent('01L01A')
 
-    const secondaryLine = document.querySelector('[class*="miniShelfFullValue"]')
-    expect(secondaryLine?.getAttribute('style')).toContain('--current-mini-secondary-center-from-content-top-mm')
+    const fullCodeLine = document.querySelector('[class*="miniShelfFullValue"]')
+    expect(fullCodeLine?.getAttribute('style')).toContain('--current-mini-full-code-center-from-content-top-mm')
   })
 
   it('blocks shelf-emphasis rendering for special named values', () => {

@@ -82,7 +82,7 @@ export default defineConfig({
         'src/config/**/*.ts',
         'src/domain/**/*.ts',
       ],
-      exclude: ['src/**/*.module.css.d.ts', 'src/domain/labelCodeDomain.ts'],
+      exclude: ['src/**/*.module.css.d.ts'],
     },
   },
 })

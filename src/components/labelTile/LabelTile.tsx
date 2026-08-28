@@ -10,9 +10,9 @@ type LabelTileProps = {
 
 const LabelTile: React.FC<LabelTileProps> = ({ code }) => {
   const layoutStrategy = React.useContext(LabelLayoutContext)
-  const isLargeVariant = layoutStrategy.renderVariant === 'large'
+  const isLargeTile = layoutStrategy.tileSize === 'large'
 
-  if (isLargeVariant) {
+  if (isLargeTile) {
     return <LargeLabelTile code={code} />
   }
 

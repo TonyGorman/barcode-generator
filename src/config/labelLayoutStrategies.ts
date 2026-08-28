@@ -1,5 +1,4 @@
 export type LabelPrintMode = 'mini-sel' | 'large-sel'
-type RenderVariant = 'small' | 'large'
 type PageOrientation = 'landscape' | 'portrait'
 
 type LabelPageGeometry = {
@@ -16,24 +15,24 @@ type LabelPageGeometry = {
   rows: number
 }
 
-type LabelTypographyGeometry = {
-  primaryTextSizeMm: number
-  primaryTextMinSizeMm: number
+type SharedLabelTypography = {
   primaryTextMaxSizeMm: number
-  primaryAutoFitEnabled: boolean
-  secondaryTextSizeMm: number
   primaryLetterSpacingMm: number
-  primaryCenterFromTileTopMm: number
-  secondaryBaselineFromTileTopMm: number
-  secondaryDomTopOffsetMm: number
   barcodeModuleThicknessMm: number
   barcodeHeightMm: number
   tilePaddingHorizontalMm: number
   tilePaddingTopMm: number
   tilePaddingBottomMm: number
+}
+
+type MiniLabelTypography = SharedLabelTypography & {
+  primaryTextMinSizeMm: number
+  primaryAutoFitEnabled: boolean
+}
+
+type LargeLabelTypography = SharedLabelTypography & {
   largePrefixTextSizeMm: number
   largeMainTextSizeMm: number
-  largeSuffixTextSizeMm: number
 }
 
 type BarcodeDimensioning = {
@@ -42,18 +41,28 @@ type BarcodeDimensioning = {
   marginBottomMm: number
 }
 
-export type LabelLayoutStrategy = {
+type LabelLayoutStrategyBase = {
   mode: LabelPrintMode
-  renderVariant: RenderVariant
   displayName: string
   page: LabelPageGeometry
-  typography: LabelTypographyGeometry
   barcodeGeometry: BarcodeDimensioning
 }
 
-class MiniSelLayoutStrategy implements LabelLayoutStrategy {
+export type MiniLabelLayoutStrategy = LabelLayoutStrategyBase & {
+  tileSize: 'small'
+  typography: MiniLabelTypography
+}
+
+export type LargeLabelLayoutStrategy = LabelLayoutStrategyBase & {
+  tileSize: 'large'
+  typography: LargeLabelTypography
+}
+
+export type LabelLayoutStrategy = MiniLabelLayoutStrategy | LargeLabelLayoutStrategy
+
+class MiniSelLayoutStrategy implements MiniLabelLayoutStrategy {
   mode: LabelPrintMode = 'mini-sel'
-  renderVariant: RenderVariant = 'small'
+  tileSize = 'small' as const
 
   displayName = 'Mini SEL'
 
@@ -72,23 +81,15 @@ class MiniSelLayoutStrategy implements LabelLayoutStrategy {
   }
 
   typography = {
-    primaryTextSizeMm: 12,
     primaryTextMinSizeMm: 6,
     primaryTextMaxSizeMm: 13,
     primaryAutoFitEnabled: true,
-    secondaryTextSizeMm: 5.8,
     primaryLetterSpacingMm: 0.07,
-    primaryCenterFromTileTopMm: 9.75,
-    secondaryBaselineFromTileTopMm: 21.5,
-    secondaryDomTopOffsetMm: 4.5,
     barcodeModuleThicknessMm: 0.23,
     barcodeHeightMm: 8,
     tilePaddingHorizontalMm: 1.2,
     tilePaddingTopMm: 1.5,
     tilePaddingBottomMm: 0.8,
-    largePrefixTextSizeMm: 8,
-    largeMainTextSizeMm: 12,
-    largeSuffixTextSizeMm: 8,
   }
 
   barcodeGeometry = {
@@ -98,9 +99,9 @@ class MiniSelLayoutStrategy implements LabelLayoutStrategy {
   }
 }
 
-class LargeSelLayoutStrategy implements LabelLayoutStrategy {
+class LargeSelLayoutStrategy implements LargeLabelLayoutStrategy {
   mode: LabelPrintMode = 'large-sel'
-  renderVariant: RenderVariant = 'large'
+  tileSize = 'large' as const
 
   displayName = 'Large SEL'
 
@@ -119,15 +120,8 @@ class LargeSelLayoutStrategy implements LabelLayoutStrategy {
   }
 
   typography = {
-    primaryTextSizeMm: 12,
-    primaryTextMinSizeMm: 12,
     primaryTextMaxSizeMm: 12,
-    primaryAutoFitEnabled: false,
-    secondaryTextSizeMm: 5.8,
     primaryLetterSpacingMm: 0.07,
-    primaryCenterFromTileTopMm: 11.42,
-    secondaryBaselineFromTileTopMm: 26.2,
-    secondaryDomTopOffsetMm: 4.5,
     barcodeModuleThicknessMm: 0.51,
     barcodeHeightMm: 8,
     tilePaddingHorizontalMm: 4,
@@ -135,7 +129,6 @@ class LargeSelLayoutStrategy implements LabelLayoutStrategy {
     tilePaddingBottomMm: 2,
     largePrefixTextSizeMm: 12,
     largeMainTextSizeMm: 24,
-    largeSuffixTextSizeMm: 12,
   }
 
   barcodeGeometry = {
@@ -153,7 +146,11 @@ const strategyByMode = new Map<LabelPrintMode, LabelLayoutStrategy>([
   ['large-sel', largeSelLayoutStrategy],
 ])
 
-export const getLabelLayoutStrategy = (mode: LabelPrintMode): LabelLayoutStrategy => {
+// Overloads let a literal mode resolve to the precise strategy, so callers keep mini/large-only typography.
+export function getLabelLayoutStrategy(mode: 'mini-sel'): MiniLabelLayoutStrategy
+export function getLabelLayoutStrategy(mode: 'large-sel'): LargeLabelLayoutStrategy
+export function getLabelLayoutStrategy(mode: LabelPrintMode): LabelLayoutStrategy
+export function getLabelLayoutStrategy(mode: LabelPrintMode): LabelLayoutStrategy {
   return strategyByMode.get(mode) ?? miniSelLayoutStrategy
 }
 

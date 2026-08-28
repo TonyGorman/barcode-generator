@@ -4,7 +4,7 @@ Generate Shelf Edge Labels for printing mini labels (39mm × 39mm) and large lab
 
 There are 2 supported variations of mini labels reflecting differing use cases: "three-row" and "shelf emphasis".
 
-### Label Examples
+## Label Examples
 
 | Mini three-row                                                                      | Mini shelf-emphasis                                                                       | Large SEL                                                             |
 | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
@@ -58,11 +58,11 @@ The barcode payload is always stored and encoded in **compact format (no dashes 
 
 Specific Labels accepts compact input only (no spaces/dashes). Parsed valid inputs are encoded/scanned in compact form. The readable display is laid out differently depending on the label type chosen:
 
-| Input format           | Barcode payload (all layouts)             | Readable display  |
-| ---------------------- | ----------------------------------------- | ------------------------------------ |
-| Compact numeric aisle  | `01L01A` (always compact, no separators)  | `01 L01 A`                           |
-| Compact prefixed aisle | `BR10L01A` (always compact, no separators) | `BR10 L01 A`                         |
-| Compact short code     | `BAK01A` (always compact, no separators)  | `BAK 01 A`                           |
+| Input format           | Barcode payload (all layouts)              | Readable display |
+| ---------------------- | ------------------------------------------ | ---------------- |
+| Compact numeric aisle  | `01L01A` (always compact, no separators)   | `01 L01 A`       |
+| Compact prefixed aisle | `BR10L01A` (always compact, no separators) | `BR10 L01 A`     |
+| Compact short code     | `BAK01A` (always compact, no separators)   | `BAK 01 A`       |
 
 For Mini SEL, the three-row variant places those parts on separate rows, while the shelf-emphasis variant enlarges the shelf part and shows the full spaced value beneath it. Large SEL uses the same parts in a mixed-size heading.
 
@@ -209,18 +209,25 @@ flowchart TD
   LT --> LLT[LargeLabelTile]
 
   MVC --> MLT
+  MLT --> TLC[toLabelCode: single parse per code]
+  TLC --> CMP
   MLT --> CMP
-  CMP --> M3[mini-three-row compose/geometry/fit]
-  CMP --> MS[mini-shelf-emphasis compose/geometry/fit]
+  CMP --> M3[buildMiniThreeRowTile]
+  CMP --> MS[buildMiniShelfEmphasisTile]
 
+  LLT --> TLC
   LLT --> LLC[LargeLabelTileContent]
   LLT --> BBC[BarcodeBlock]
-  LLC --> DH[Display helper: getLargeSelDisplayParts]
-  LLT --> EB[Encoding helper: getEncodedLabelCode]
+  LLC --> DH[Display helper: getLargeDisplayParts]
   MLT --> BBC
 ```
 
 ## Domain Model
+
+The diagram above shows module wiring. For the **data-shape pipeline** — what type a label
+is at each hop from form input to barcode, plus the two non-obvious behaviours in that path
+— see the `Domain Pipeline Map` and `Domain Glossary` sections in [AGENTS.md](AGENTS.md).
+That map is maintained in one place; this README does not duplicate it.
 
 The domain layer is intentionally consolidated into three modules:
 
@@ -229,6 +236,18 @@ The domain layer is intentionally consolidated into three modules:
 - **`src/domain/compositionDomain.ts`**: Mini composition variants, geometry derivation, and typography fit logic used by tile rendering.
 
 Use **`src/domain/index.ts`** as the public domain entrypoint for imports.
+
+### Parsing happens once per code
+
+`toLabelCode(code)` parses a raw code a single time and returns a `LabelCode` carrying the
+parsed tokens alongside every projection the render path needs (`miniDisplayParts`,
+`compact` barcode payload, `spaced` display form). Tile components call it once and pass
+the `LabelCode` down.
+
+The string-taking helpers (`getEncodedLabelCode`, `getSpacedLabelCode`,
+`getMiniThreeRowDisplayParts`, `getLargeSelDisplayParts`) remain as thin wrappers for
+callers that only have a raw string. Do not use them inside a tile render path — that
+reintroduces the redundant re-parsing they were extracted to remove.
 
 ## Layer Intent
 
@@ -246,10 +265,16 @@ Naming convention:
 
 ## Layout Strategies
 
-Label layout is controlled by objects implementing `ILabelLayoutStrategy`. Each strategy declares two discriminants:
+Label layout is controlled by a discriminated union of layout strategies in
+`src/config/labelLayoutStrategies.ts` (`MiniLabelLayoutStrategy | LargeLabelLayoutStrategy`).
+Each strategy declares two discriminants:
 
 - **`mode`** (`LabelPrintMode`): `'mini-sel'` or `'large-sel'` - the physical paper format.
-- **`renderVariant`** (`RenderVariant`): `'small'` or `'large'` - controls large-vs-mini render.
+- **`tileSize`**: `'small'` or `'large'` - controls large-vs-mini render.
+
+Typography is split so neither strategy declares fields it never reads: a shared core plus
+mini-only autofit fields (`primaryTextMinSizeMm`, `primaryAutoFitEnabled`) and large-only
+heading sizes (`largePrefixTextSizeMm`, `largeMainTextSizeMm`).
 
 Mini text arrangement is handled in `src/domain/compositionDomain.ts`.
 
@@ -260,10 +285,15 @@ Mini variant selection order:
 
 To add a new mini variant:
 
-1. Add a new `MiniCompositionVariantId` literal in `src/models/IMiniCompositionVariant.ts`.
-2. Implement `composeLabel`, `resolveGeometry`, and `fitTypography` in `src/domain/miniCompositionVariants.ts`.
-3. Register the variant in the registry map in `src/domain/miniCompositionVariants.ts`.
-4. Add/update tests for `LabelTile` and domain variant behavior.
+1. Add the new id to the `MiniCompositionVariantId` union in `src/domain/compositionDomain.ts`.
+2. Add a matching `{ id, label }` entry to `MINI_VARIANT_OPTIONS` (this drives both the
+   selector options and `localStorage` validation).
+3. Add a `Mini<Name>Tile` member to the `MiniTile` discriminated union with its own required
+   line/geometry/weight fields, and a `buildMini<Name>Tile` function that returns it.
+4. Dispatch to the new builder in `buildMiniTile`, and render its branch in
+   `MiniLabelTile.tsx`'s switch on `tile.variantId`.
+5. Add/update tests for `LabelTile` and domain variant behavior, then refresh visual
+   baselines only if the change is intentional.
 
 All geometry values _must_ remain in millimeters.
 

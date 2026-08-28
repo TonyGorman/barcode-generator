@@ -1,13 +1,13 @@
 import * as React from 'react'
 import styles from './LabelTile.module.css'
-import { getLargeSelDisplayParts } from '../../domain'
+import { getLargeDisplayParts, type LabelCode } from '../../domain'
 
 type LargeLabelTileContentProps = {
-  code: string
+  labelCode: LabelCode
 }
 
-const LargeLabelTileContent: React.FC<LargeLabelTileContentProps> = ({ code }) => {
-  const largeDisplayParts = getLargeSelDisplayParts(code)
+const LargeLabelTileContent: React.FC<LargeLabelTileContentProps> = ({ labelCode }) => {
+  const largeDisplayParts = getLargeDisplayParts(labelCode)
 
   return (
     <div className={styles.largeSelHeading}>

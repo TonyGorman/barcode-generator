@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import LabelTile, { getMiniPrimaryFontSizeMm } from './LabelTile'
-import { normalizeLabelCode, getEncodedLabelCode, getLargeSelDisplayParts } from '../../domain'
+import { getSpacedLabelCode, getEncodedLabelCode, getLargeSelDisplayParts } from '../../domain'
 import { SHORT_CODE_PREFIXES } from '../../config/labelConfig'
 import { getLabelLayoutStrategy } from '../../config/labelLayoutStrategies'
 import { LabelLayoutContext } from '../print/LabelLayoutContext'
@@ -19,20 +19,20 @@ vi.mock('react-barcode', () => ({
 
 describe('LabelTile helpers', () => {
   it('formats compact aisle code into spaced display output', () => {
-    expect(normalizeLabelCode('01L01A')).toBe('01 L01 A')
+    expect(getSpacedLabelCode('01L01A')).toBe('01 L01 A')
   })
 
   it('formats configured prefixed aisle code into spaced display output', () => {
-    expect(normalizeLabelCode('BR1L01A')).toBe('BR1 L01 A')
+    expect(getSpacedLabelCode('BR1L01A')).toBe('BR1 L01 A')
   })
 
   it('formats compact short code into spaced display output', () => {
-    expect(normalizeLabelCode(`${SHORT_CODE_PREFIXES[0]}01A`)).toBe(`${SHORT_CODE_PREFIXES[0]} 01 A`)
+    expect(getSpacedLabelCode(`${SHORT_CODE_PREFIXES[0]}01A`)).toBe(`${SHORT_CODE_PREFIXES[0]} 01 A`)
   })
 
   it('keeps named aisle values unchanged in normalized form', () => {
-    expect(normalizeLabelCode('FLORAL')).toBe('FLORAL')
-    expect(normalizeLabelCode('kiosk')).toBe('KIOSK')
+    expect(getSpacedLabelCode('FLORAL')).toBe('FLORAL')
+    expect(getSpacedLabelCode('kiosk')).toBe('KIOSK')
   })
 
   it('encodes compact aisle values without separators for scanners', () => {
@@ -49,15 +49,15 @@ describe('LabelTile helpers', () => {
   })
 
   it('formats compact front-of-store code into spaced display output', () => {
-    expect(normalizeLabelCode(`${SHORT_CODE_PREFIXES[1]}01A`)).toBe(`${SHORT_CODE_PREFIXES[1]} 01 A`)
+    expect(getSpacedLabelCode(`${SHORT_CODE_PREFIXES[1]}01A`)).toBe(`${SHORT_CODE_PREFIXES[1]} 01 A`)
   })
 
   it('returns unknown, non-valid values unchanged', () => {
-    expect(normalizeLabelCode('ABCDEF')).toBe('ABCDEF')
+    expect(getSpacedLabelCode('ABCDEF')).toBe('ABCDEF')
   })
 
   it('returns unchanged output for plain non-matching values', () => {
-    expect(normalizeLabelCode('XYZ')).toBe('XYZ')
+    expect(getSpacedLabelCode('XYZ')).toBe('XYZ')
   })
 
   it('parses large-sel display parts from aisle values', () => {
@@ -138,10 +138,10 @@ describe('LabelTile', () => {
   it('anchors three-row mini top and bottom rows using explicit style variables', () => {
     render(<LabelTile code="BAK" />)
 
-    const topRow = document.querySelector('[class*="miniAisleTopCode"]')
-    const bottomRow = document.querySelector('[class*="miniAisleBottomCode"]')
-    expect(topRow?.getAttribute('style')).toContain('--current-mini-aisle-top-center-from-content-top-mm')
-    expect(bottomRow?.getAttribute('style')).toContain('--current-mini-aisle-bottom-center-from-content-top-mm')
+    const topRow = document.querySelector('[class*="miniThreeRowTopCode"]')
+    const bottomRow = document.querySelector('[class*="miniThreeRowBottomCode"]')
+    expect(topRow?.getAttribute('style')).toContain('--current-mini-three-row-top-center-from-content-top-mm')
+    expect(bottomRow?.getAttribute('style')).toContain('--current-mini-three-row-bottom-center-from-content-top-mm')
   })
 
   it('uses layout strategy label sizing for large-sel mode', () => {

@@ -5,19 +5,19 @@ import { convertMmToPx } from './miniPrimaryTextMeasurement'
 
 type BarcodeBlockProps = {
   labelValue: string
-  isLargeVariant: boolean
+  isLargeTile: boolean
   barcodeModuleThicknessMm: number
   barcodeHeightMm: number
 }
 
 const BarcodeBlock: React.FC<BarcodeBlockProps> = ({
   labelValue,
-  isLargeVariant,
+  isLargeTile,
   barcodeModuleThicknessMm,
   barcodeHeightMm,
 }) => {
   return (
-    <div className={isLargeVariant ? styles.barcodeGraphicLargeSel : styles.barcodeGraphic}>
+    <div className={isLargeTile ? styles.barcodeGraphicLargeSel : styles.barcodeGraphic}>
       <Barcode
         value={labelValue}
         format="CODE128B"
@@ -26,7 +26,7 @@ const BarcodeBlock: React.FC<BarcodeBlockProps> = ({
         height={convertMmToPx(barcodeHeightMm)}
         margin={0}
       />
-      <div className={isLargeVariant ? styles.encodedValueLargeSel : styles.encodedValue}>{labelValue}</div>
+      <div className={isLargeTile ? styles.encodedValueLargeSel : styles.encodedValue}>{labelValue}</div>
     </div>
   )
 }

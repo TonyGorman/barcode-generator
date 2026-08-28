@@ -207,17 +207,6 @@ const toDisplayParts = (parsed: ParsedLabelCode): MiniThreeRowDisplayParts => {
   }
 }
 
-const parseForDisplay = (
-  code: string,
-  shortCodePrefix: string,
-): { normalizedCode: string; parsed: ParsedLabelCode | null } => {
-  const normalizedCode = code.toUpperCase()
-  return {
-    normalizedCode,
-    parsed: parseLabelCode(normalizedCode, shortCodePrefix),
-  }
-}
-
 const toDisplayPartsOrFallback = (parsed: ParsedLabelCode | null, normalizedCode: string): MiniThreeRowDisplayParts => {
   if (!parsed) {
     return { top: '', main: normalizedCode, bottom: '' }
@@ -226,39 +215,63 @@ const toDisplayPartsOrFallback = (parsed: ParsedLabelCode | null, normalizedCode
   return toDisplayParts(parsed)
 }
 
-export const normalizeLabelCode = (code: string, shortCodePrefix: string = SHORT_CODE_PREFIXES[0]): string => {
-  const { normalizedCode, parsed } = parseForDisplay(code, shortCodePrefix)
-  const { top, main, bottom } = toDisplayPartsOrFallback(parsed, normalizedCode)
-  return [top, main, bottom].filter(Boolean).join(' ')
+// Parsed once per code; every render-time projection below reads this instead of re-parsing.
+export type LabelCode = {
+  normalizedCode: string
+  parsed: ParsedLabelCode | null
+  miniDisplayParts: MiniThreeRowDisplayParts
+  compact: CompactLabelCode
+  spaced: string
+}
+
+export const toLabelCode = (code: string, shortCodePrefix: string = SHORT_CODE_PREFIXES[0]): LabelCode => {
+  const normalizedCode = code.toUpperCase()
+  const parsed = parseLabelCode(normalizedCode, shortCodePrefix)
+  const miniDisplayParts = toDisplayPartsOrFallback(parsed, normalizedCode)
+  const { top, main, bottom } = miniDisplayParts
+
+  return {
+    normalizedCode,
+    parsed,
+    miniDisplayParts,
+    compact: asCompactLabelCode(`${top}${main}${bottom}`),
+    spaced: [top, main, bottom].filter(Boolean).join(' '),
+  }
+}
+
+export const getLargeDisplayParts = (labelCode: LabelCode): LargeLabelDisplayParts | null => {
+  const kind = labelCode.parsed?.kind
+  if (kind !== 'aisle' && kind !== 'short') {
+    return null
+  }
+
+  const { top, main, bottom } = labelCode.miniDisplayParts
+  return { prefix: top, main, suffix: bottom }
+}
+
+export const getSpacedLabelCode = (code: string, shortCodePrefix: string = SHORT_CODE_PREFIXES[0]): string => {
+  return toLabelCode(code, shortCodePrefix).spaced
 }
 
 export const getEncodedLabelCode = (
   code: string,
   shortCodePrefix: string = SHORT_CODE_PREFIXES[0],
 ): CompactLabelCode => {
-  const { normalizedCode, parsed } = parseForDisplay(code, shortCodePrefix)
-  const { top, main, bottom } = toDisplayPartsOrFallback(parsed, normalizedCode)
-  return asCompactLabelCode(`${top}${main}${bottom}`)
+  return toLabelCode(code, shortCodePrefix).compact
 }
 
 export const getLargeSelDisplayParts = (
   code: string,
   shortCodePrefix: string = SHORT_CODE_PREFIXES[0],
 ): LargeLabelDisplayParts | null => {
-  const { parsed } = parseForDisplay(code, shortCodePrefix)
-  if (parsed?.kind !== 'aisle' && parsed?.kind !== 'short') {
-    return null
-  }
-  const { top, main, bottom } = toDisplayParts(parsed)
-  return { prefix: top, main, suffix: bottom }
+  return getLargeDisplayParts(toLabelCode(code, shortCodePrefix))
 }
 
 export const getMiniThreeRowDisplayParts = (
   code: string,
   shortCodePrefix: string = SHORT_CODE_PREFIXES[0],
 ): MiniThreeRowDisplayParts => {
-  const { normalizedCode, parsed } = parseForDisplay(code, shortCodePrefix)
-  return toDisplayPartsOrFallback(parsed, normalizedCode)
+  return toLabelCode(code, shortCodePrefix).miniDisplayParts
 }
 
 export type SpecificLabelValidationResult =

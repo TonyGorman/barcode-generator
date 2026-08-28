@@ -25,12 +25,12 @@
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-.miniAisleTopCode {
+.miniThreeRowTopCode {
   position: absolute;
-  top: var(--current-mini-aisle-top-center-from-content-top-mm, 2.2mm);
+  top: var(--current-mini-three-row-top-center-from-content-top-mm, 2.2mm);
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: var(--current-mini-aisle-aux-text-size-mm, 6.8mm);
+  font-size: var(--current-mini-three-row-aux-text-size-mm, 6.8mm);
   line-height: 1;
   font-weight: 600;
   color: #4a4a4a;
@@ -38,12 +38,12 @@
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-.miniAisleBottomCode {
+.miniThreeRowBottomCode {
   position: absolute;
-  top: var(--current-mini-aisle-bottom-center-from-content-top-mm, 15mm);
+  top: var(--current-mini-three-row-bottom-center-from-content-top-mm, 15mm);
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: var(--current-mini-aisle-aux-text-size-mm, 6.8mm);
+  font-size: var(--current-mini-three-row-aux-text-size-mm, 6.8mm);
   line-height: 1;
   font-weight: 600;
   color: #4a4a4a;
@@ -53,12 +53,12 @@
 
 .miniShelfFullValue {
   position: absolute;
-  top: var(--current-mini-secondary-center-from-content-top-mm, 20.7mm);
+  top: var(--current-mini-full-code-center-from-content-top-mm, 20.7mm);
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: var(--current-mini-secondary-text-size-mm, 5.6mm);
+  font-size: var(--current-mini-full-code-text-size-mm, 5.6mm);
   line-height: 1;
-  font-weight: var(--current-mini-secondary-font-weight, 700);
+  font-weight: var(--current-mini-full-code-font-weight, 700);
   letter-spacing: 0;
   color: #000;
   white-space: nowrap;

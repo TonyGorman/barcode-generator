@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { fitLineByWidth, getSecondaryCenterFromBarcodeTopMm } from './compositionDomain'
+import { fitLineByWidth, getLineCenterAboveBarcodeMm } from './compositionDomain'
 
 describe('compositionDomain math', () => {
   it('fitLineByWidth always clamps within min and max bounds', () => {
@@ -58,7 +58,7 @@ describe('compositionDomain math', () => {
     expect(fitLineByWidth('ABCDE', 4, 10, 30, 0, measure)).toBe(6)
   })
 
-  it('getSecondaryCenterFromBarcodeTopMm uses bottom padding and half text size', () => {
-    expect(getSecondaryCenterFromBarcodeTopMm(20, 6, 2)).toBe(15)
+  it('getLineCenterAboveBarcodeMm uses bottom padding and half text size', () => {
+    expect(getLineCenterAboveBarcodeMm(20, 6, 2)).toBe(15)
   })
 })

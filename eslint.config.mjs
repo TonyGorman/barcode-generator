@@ -54,6 +54,15 @@ export default tseslint.config(
     },
   },
 
+  // Build/tool configs resolve installed executables (for example git) from PATH by design;
+  // pinning absolute paths here would break Homebrew/nix/Windows setups.
+  {
+    files: ['*.config.{ts,mts,cts,js,mjs,cjs}'],
+    rules: {
+      'sonarjs/no-os-command-from-path': 'off',
+    },
+  },
+
   // TypeScript files configuration
   {
     files: ['src/**/*.{ts,tsx}'],
